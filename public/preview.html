@@ -4,1452 +4,1635 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>My KKR — Kurukshetra Local Marketplace</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,300;0,14..32,400;0,14..32,500;0,14..32,600;0,14..32,700;0,14..32,800;1,14..32,400&family=Noto+Sans+Devanagari:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Noto+Sans+Devanagari:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --tan:#e1b382;
-  --tan-d:#c89666;
-  --tan-l:#fdf4e7;
-  --night:#2d545e;
-  --night-d:#12343b;
-  --night-l:#eef3f4;
-  --white:#ffffff;
-  --bg:#f7f8fa;
-  --border:#e8eaed;
-  --border-d:#d1d5db;
-  --text:#111827;
-  --text-2:#374151;
-  --text-3:#6b7280;
-  --text-4:#9ca3af;
-  --shadow-xs:0 1px 2px rgba(0,0,0,0.05);
-  --shadow-sm:0 1px 3px rgba(0,0,0,0.08),0 1px 2px rgba(0,0,0,0.04);
-  --shadow:0 4px 6px rgba(0,0,0,0.07),0 2px 4px rgba(0,0,0,0.04);
-  --shadow-md:0 10px 15px rgba(0,0,0,0.08),0 4px 6px rgba(0,0,0,0.04);
-  --shadow-lg:0 20px 25px rgba(0,0,0,0.08),0 10px 10px rgba(0,0,0,0.03);
-  --r:8px;
-  --r-lg:12px;
-  --r-xl:16px;
-  --r-2xl:24px;
+  --tan:#e1b382;--tan-d:#c89666;--tan-l:#fdf4e7;--tan-ll:#fffaf3;
+  --night:#2d545e;--night-d:#12343b;--night-l:#eef3f4;--night-ll:#f5f9f9;
+  --white:#fff;--bg:#f7f8fa;--bg2:#f0f2f5;
+  --border:#e5e7eb;--border-d:#d1d5db;
+  --text:#111827;--text-2:#374151;--text-3:#6b7280;--text-4:#9ca3af;
+  --green:#16a34a;--green-l:#dcfce7;
+  --amber:#ca8a04;--amber-l:#fef9c3;
+  --red:#dc2626;--red-l:#fee2e2;
+  --shadow-xs:0 1px 2px rgba(0,0,0,.05);
+  --shadow-sm:0 1px 3px rgba(0,0,0,.08),0 1px 2px rgba(0,0,0,.04);
+  --shadow:0 4px 6px rgba(0,0,0,.06),0 2px 4px rgba(0,0,0,.04);
+  --shadow-md:0 10px 15px rgba(0,0,0,.07),0 4px 6px rgba(0,0,0,.04);
+  --shadow-lg:0 20px 25px rgba(0,0,0,.08),0 10px 10px rgba(0,0,0,.03);
+  --r:8px;--r-lg:12px;--r-xl:16px;--r-2xl:24px;
   --t:150ms ease;
+  --sidebar-w:260px;
 }
 html{scroll-behavior:smooth}
-body{font-family:'Inter',system-ui,-apple-system,sans-serif;background:var(--white);color:var(--text);line-height:1.5;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--text);line-height:1.5;overflow-x:hidden;-webkit-font-smoothing:antialiased}
 .hindi{font-family:'Noto Sans Devanagari',sans-serif}
 a{text-decoration:none;color:inherit}
 button{font-family:inherit;cursor:pointer;border:none;background:none;padding:0}
-input,select{font-family:inherit}
-
-/* ── SCROLLBAR ── */
+input,select,textarea{font-family:inherit}
 ::-webkit-scrollbar{width:4px;height:4px}
 ::-webkit-scrollbar-thumb{background:var(--border-d);border-radius:99px}
 
-/* ── LAYOUT ── */
-.container{max-width:1160px;margin:0 auto;padding:0 24px}
+/* ══════════════════════════════════════
+   APP SHELL
+══════════════════════════════════════ */
+.app{display:flex;min-height:100vh;flex-direction:column}
+.app-body{display:flex;flex:1}
 
-/* ─────────────────────────────────────
-   NAV
-───────────────────────────────────── */
-.nav{
-  position:sticky;top:0;z-index:100;
-  background:var(--white);
-  border-bottom:1px solid var(--border);
-  height:64px;
+/* ══════════════════════════════════════
+   TOP NAV
+══════════════════════════════════════ */
+.topnav{
+  position:sticky;top:0;z-index:200;height:58px;
+  background:var(--night-d);border-bottom:1px solid rgba(255,255,255,0.08);
+  display:flex;align-items:center;
 }
-.nav-inner{
-  max-width:1160px;margin:0 auto;padding:0 24px;
-  height:100%;display:flex;align-items:center;gap:32px;
+.topnav-inner{
+  width:100%;padding:0 20px;
+  display:flex;align-items:center;gap:16px;
 }
-.nav-logo{display:flex;align-items:center;gap:10px;flex-shrink:0}
-.nav-logo-mark{
-  width:32px;height:32px;border-radius:8px;
-  background:var(--night-d);
+.topnav-logo{display:flex;align-items:center;gap:10px;flex-shrink:0;margin-right:8px}
+.topnav-mark{
+  width:30px;height:30px;border-radius:7px;
+  background:var(--tan);
   display:flex;align-items:center;justify-content:center;
 }
-.nav-logo-mark svg{width:16px;height:16px}
-.nav-logo-name{font-size:17px;font-weight:700;color:var(--night-d);letter-spacing:-0.3px}
-.nav-search{
-  flex:1;max-width:480px;
-  display:flex;align-items:center;gap:0;
-  border:1.5px solid var(--border-d);border-radius:var(--r-lg);
-  background:var(--white);overflow:hidden;
-  transition:border-color var(--t),box-shadow var(--t);
+.topnav-mark svg{width:14px;height:14px}
+.topnav-name{font-size:16px;font-weight:700;color:var(--white);letter-spacing:-0.3px}
+.topnav-search{
+  flex:1;max-width:520px;
+  display:flex;align-items:center;
+  background:rgba(255,255,255,0.1);
+  border:1px solid rgba(255,255,255,0.15);
+  border-radius:var(--r-lg);overflow:hidden;
+  transition:all var(--t);
 }
-.nav-search:focus-within{border-color:var(--night);box-shadow:0 0 0 3px rgba(45,84,94,0.08)}
-.nav-search-input{
-  flex:1;padding:9px 12px;font-size:14px;color:var(--text);
-  border:none;outline:none;background:transparent;
+.topnav-search:focus-within{background:rgba(255,255,255,0.15);border-color:rgba(255,255,255,0.3)}
+.topnav-search-loc{
+  display:flex;align-items:center;gap:6px;
+  padding:0 12px;border-right:1px solid rgba(255,255,255,0.1);
+  cursor:pointer;flex-shrink:0;white-space:nowrap;
 }
-.nav-search-input::placeholder{color:var(--text-4)}
-.nav-search-btn{
-  padding:9px 16px;background:var(--night-d);color:var(--white);
-  font-size:13px;font-weight:600;white-space:nowrap;
-  transition:background var(--t);flex-shrink:0;
+.topnav-search-loc-txt{font-size:12px;font-weight:500;color:rgba(255,255,255,0.7)}
+.topnav-search-input{
+  flex:1;padding:10px 12px;font-size:13px;
+  color:var(--white);background:transparent;border:none;outline:none;
 }
-.nav-search-btn:hover{background:var(--night)}
-.nav-links{display:flex;align-items:center;gap:4px;margin-left:auto}
-.nav-link{
-  padding:8px 12px;border-radius:var(--r);font-size:14px;
-  font-weight:500;color:var(--text-2);transition:all var(--t);
-}
-.nav-link:hover{background:var(--bg);color:var(--text)}
-.nav-btn-outline{
-  padding:8px 16px;border-radius:var(--r);font-size:14px;
-  font-weight:600;color:var(--text);border:1.5px solid var(--border-d);
-  transition:all var(--t);background:var(--white);
-}
-.nav-btn-outline:hover{border-color:var(--text-3)}
-.nav-btn-primary{
-  padding:8px 16px;border-radius:var(--r);font-size:14px;
-  font-weight:600;color:var(--white);background:var(--night-d);
+.topnav-search-input::placeholder{color:rgba(255,255,255,0.4)}
+.topnav-search-btn{
+  padding:10px 14px;background:var(--tan);color:var(--night-d);
+  font-size:12px;font-weight:700;flex-shrink:0;
   transition:background var(--t);
 }
-.nav-btn-primary:hover{background:var(--night)}
-.nav-ham{display:none;flex-direction:column;gap:5px;padding:4px;cursor:pointer;margin-left:auto}
-.nav-ham span{display:block;width:20px;height:1.5px;background:var(--text-2);border-radius:99px}
-
-/* ─────────────────────────────────────
-   HERO
-───────────────────────────────────── */
-.hero{
-  padding:64px 0 72px;
-  background:linear-gradient(180deg,#f0f4f5 0%,var(--white) 100%);
-  border-bottom:1px solid var(--border);
-  text-align:center;
+.topnav-search-btn:hover{background:var(--tan-d)}
+.topnav-right{display:flex;align-items:center;gap:8px;margin-left:auto}
+.topnav-btn{
+  padding:7px 14px;border-radius:var(--r);font-size:13px;font-weight:600;
+  transition:all var(--t);
 }
-.hero-eyebrow{
-  display:inline-flex;align-items:center;gap:8px;
+.topnav-btn.ghost{
+  color:rgba(255,255,255,0.7);border:1px solid rgba(255,255,255,0.15);
+}
+.topnav-btn.ghost:hover{background:rgba(255,255,255,0.08);color:var(--white)}
+.topnav-btn.primary{
+  background:var(--tan);color:var(--night-d);
+}
+.topnav-btn.primary:hover{background:var(--tan-d)}
+.topnav-ham{
+  display:none;flex-direction:column;gap:4px;cursor:pointer;padding:4px;
+}
+.topnav-ham span{display:block;width:18px;height:1.5px;background:rgba(255,255,255,0.7);border-radius:99px}
+
+/* ══════════════════════════════════════
+   SIDEBAR
+══════════════════════════════════════ */
+.sidebar{
+  width:var(--sidebar-w);flex-shrink:0;
+  background:var(--white);border-right:1px solid var(--border);
+  position:sticky;top:58px;height:calc(100vh - 58px);
+  overflow-y:auto;display:flex;flex-direction:column;
+}
+.sidebar::-webkit-scrollbar{width:3px}
+.sidebar-section{padding:16px 12px 8px}
+.sidebar-section-label{
+  font-size:10px;font-weight:700;letter-spacing:1px;
+  text-transform:uppercase;color:var(--text-4);
+  padding:0 8px;margin-bottom:6px;
+}
+.sidebar-item{
+  display:flex;align-items:center;gap:10px;
+  padding:9px 10px;border-radius:var(--r);
+  font-size:13px;font-weight:500;color:var(--text-2);
+  cursor:pointer;transition:all var(--t);margin-bottom:2px;
+  border:1px solid transparent;
+}
+.sidebar-item:hover{background:var(--bg);color:var(--text)}
+.sidebar-item.active{
   background:var(--night-l);color:var(--night-d);
-  font-size:12px;font-weight:600;letter-spacing:0.3px;
-  padding:5px 12px;border-radius:99px;margin-bottom:20px;
-  border:1px solid rgba(45,84,94,0.15);
+  border-color:rgba(45,84,94,0.15);font-weight:600;
 }
-.hero-eyebrow-dot{width:6px;height:6px;border-radius:50%;background:var(--night);animation:pulse 2s infinite}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
-.hero h1{
-  font-size:clamp(36px,5.5vw,60px);
-  font-weight:800;letter-spacing:-2px;line-height:1.1;
-  color:var(--night-d);margin-bottom:16px;
+.sidebar-item-icon{font-size:16px;width:20px;text-align:center;flex-shrink:0}
+.sidebar-item-badge{
+  margin-left:auto;font-size:10px;font-weight:700;
+  padding:2px 7px;border-radius:99px;
+  background:var(--tan-l);color:var(--tan-d);
 }
-.hero h1 em{font-style:normal;color:var(--night)}
-.hero-sub{
-  font-size:clamp(16px,2vw,19px);color:var(--text-3);
-  max-width:540px;margin:0 auto 32px;line-height:1.65;font-weight:400;
+.sidebar-item-new{
+  margin-left:auto;font-size:9px;font-weight:700;
+  padding:2px 6px;border-radius:99px;
+  background:var(--night-d);color:var(--white);letter-spacing:0.3px;
 }
-.hero-sub .hindi{color:var(--text-2);font-weight:500}
+.sidebar-divider{height:1px;background:var(--border);margin:8px 12px}
+.sidebar-collapsible{}
+.sidebar-collapsible-header{
+  display:flex;align-items:center;gap:10px;
+  padding:9px 10px;border-radius:var(--r);
+  font-size:13px;font-weight:500;color:var(--text-2);
+  cursor:pointer;transition:all var(--t);margin-bottom:2px;
+}
+.sidebar-collapsible-header:hover{background:var(--bg)}
+.sidebar-collapsible-arrow{margin-left:auto;font-size:10px;transition:transform .2s}
+.sidebar-collapsible-arrow.open{transform:rotate(180deg)}
+.sidebar-children{display:none;padding-left:20px}
+.sidebar-children.open{display:block}
+.sidebar-child{
+  display:flex;align-items:center;gap:8px;
+  padding:7px 10px;border-radius:var(--r);
+  font-size:12px;font-weight:500;color:var(--text-3);
+  cursor:pointer;transition:all var(--t);margin-bottom:1px;
+}
+.sidebar-child:hover{background:var(--bg);color:var(--text-2)}
+.sidebar-child.active{color:var(--night);font-weight:600}
+.sidebar-child-dot{width:5px;height:5px;border-radius:50%;background:var(--border-d);flex-shrink:0}
+.sidebar-child.active .sidebar-child-dot{background:var(--night)}
+.sidebar-bottom{margin-top:auto;padding:12px;border-top:1px solid var(--border)}
+.sidebar-post-btn{
+  width:100%;padding:10px;border-radius:var(--r-lg);
+  background:var(--night-d);color:var(--white);
+  font-size:13px;font-weight:700;text-align:center;
+  transition:background var(--t);display:block;
+}
+.sidebar-post-btn:hover{background:var(--night)}
 
-/* Hero search */
+/* ══════════════════════════════════════
+   MAIN CONTENT
+══════════════════════════════════════ */
+.main{flex:1;min-width:0;overflow-x:hidden}
+
+/* ══════════════════════════════════════
+   VIEW SYSTEM (SPA-style tab switching)
+══════════════════════════════════════ */
+.view{display:none}
+.view.active{display:block}
+
+/* ══════════════════════════════════════
+   HERO (Home view)
+══════════════════════════════════════ */
+.hero{
+  background:linear-gradient(160deg,var(--night-d) 0%,var(--night) 50%,#1a4a5a 100%);
+  padding:52px 32px 48px;text-align:center;position:relative;overflow:hidden;
+}
+.hero::before{
+  content:'';position:absolute;inset:0;
+  background-image:radial-gradient(circle at 20% 50%,rgba(225,179,130,0.08) 0%,transparent 50%),
+    radial-gradient(circle at 80% 20%,rgba(255,255,255,0.04) 0%,transparent 40%);
+  pointer-events:none;
+}
+.hero-badge{
+  display:inline-flex;align-items:center;gap:7px;
+  background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);
+  border-radius:99px;padding:5px 14px;margin-bottom:20px;
+  font-size:12px;font-weight:500;color:rgba(255,255,255,0.75);
+}
+.hero-badge-dot{width:6px;height:6px;border-radius:50%;background:var(--tan);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.5;transform:scale(0.8)}}
+.hero h1{
+  font-size:clamp(32px,5vw,56px);font-weight:800;
+  letter-spacing:-2px;line-height:1.1;color:var(--white);margin-bottom:12px;
+}
+.hero h1 span{color:var(--tan)}
+.hero-hindi{font-size:18px;font-weight:500;color:rgba(255,255,255,0.55);margin-bottom:32px}
 .hero-search{
-  max-width:680px;margin:0 auto 48px;
+  max-width:640px;margin:0 auto 36px;
   background:var(--white);border-radius:var(--r-xl);
-  border:1.5px solid var(--border-d);
-  box-shadow:var(--shadow-md);
   display:flex;align-items:stretch;overflow:hidden;
+  box-shadow:0 20px 40px rgba(0,0,0,0.2);
 }
 .hero-search-loc{
   display:flex;align-items:center;gap:8px;
   padding:0 16px;border-right:1px solid var(--border);
-  min-width:160px;cursor:pointer;flex-shrink:0;
+  cursor:pointer;flex-shrink:0;min-width:150px;
 }
-.hero-search-loc-icon{font-size:16px;color:var(--night)}
-.hero-search-loc-text{font-size:14px;color:var(--text-2);font-weight:500;white-space:nowrap}
+.hero-search-loc-icon{color:var(--night);font-size:14px}
+.hero-search-loc-txt{font-size:13px;font-weight:500;color:var(--text-2);white-space:nowrap}
 .hero-search-loc-arrow{font-size:10px;color:var(--text-4);margin-left:auto}
-.hero-search-input-wrap{
-  flex:1;display:flex;align-items:center;padding:0 16px;
-}
 .hero-search-input{
-  width:100%;font-size:15px;color:var(--text);
-  border:none;outline:none;background:transparent;
-  padding:18px 0;
+  flex:1;padding:16px;font-size:15px;color:var(--text);
+  border:none;outline:none;background:transparent;min-width:0;
 }
 .hero-search-input::placeholder{color:var(--text-4)}
 .hero-search-submit{
-  margin:8px;padding:0 24px;border-radius:var(--r-lg);
+  margin:8px;padding:0 22px;border-radius:var(--r-lg);
   background:var(--night-d);color:var(--white);
-  font-size:14px;font-weight:600;
-  transition:background var(--t);white-space:nowrap;flex-shrink:0;
+  font-size:14px;font-weight:700;flex-shrink:0;
+  transition:background var(--t);
 }
 .hero-search-submit:hover{background:var(--night)}
-
-/* Hero stats */
-.hero-stats{
-  display:flex;align-items:center;justify-content:center;
-  gap:32px;flex-wrap:wrap;
+.hero-tabs{
+  display:flex;align-items:center;justify-content:center;gap:4px;
+  margin-bottom:32px;
 }
+.hero-tab{
+  display:flex;align-items:center;gap:7px;
+  padding:9px 18px;border-radius:99px;
+  font-size:13px;font-weight:600;cursor:pointer;
+  transition:all var(--t);border:1.5px solid rgba(255,255,255,0.15);
+  color:rgba(255,255,255,0.6);
+}
+.hero-tab:hover{border-color:rgba(255,255,255,0.3);color:rgba(255,255,255,0.85)}
+.hero-tab.active{background:var(--tan);color:var(--night-d);border-color:var(--tan)}
+.hero-tab-icon{font-size:16px}
+.hero-stats{display:flex;align-items:center;justify-content:center;gap:28px;flex-wrap:wrap}
 .hero-stat{text-align:center}
-.hero-stat-num{font-size:26px;font-weight:800;color:var(--night-d);letter-spacing:-0.5px}
-.hero-stat-label{font-size:13px;color:var(--text-3);margin-top:2px}
-.hero-stat-div{width:1px;height:36px;background:var(--border)}
+.hero-stat-num{font-size:24px;font-weight:800;color:var(--white);letter-spacing:-0.5px}
+.hero-stat-label{font-size:12px;color:rgba(255,255,255,0.45);margin-top:2px}
+.hero-stat-div{width:1px;height:32px;background:rgba(255,255,255,0.12)}
 
-/* ─────────────────────────────────────
-   CATEGORY STRIP
-───────────────────────────────────── */
+/* ══════════════════════════════════════
+   CITY UPDATES VIDEO STRIP
+══════════════════════════════════════ */
+.city-updates{
+  background:var(--white);border-bottom:1px solid var(--border);
+  padding:24px 0;overflow:hidden;
+}
+.city-updates-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 32px;margin-bottom:16px;
+}
+.city-updates-title{
+  display:flex;align-items:center;gap:10px;
+  font-size:15px;font-weight:700;color:var(--night-d);
+}
+.live-badge{
+  display:flex;align-items:center;gap:5px;
+  padding:3px 8px;border-radius:99px;
+  background:#fee2e2;font-size:10px;font-weight:700;color:var(--red);
+}
+.live-dot{width:6px;height:6px;border-radius:50%;background:var(--red);animation:pulse 1.5s infinite}
+.city-updates-see-all{font-size:13px;font-weight:500;color:var(--night);cursor:pointer}
+.city-updates-track{
+  display:flex;gap:14px;padding:0 32px;
+  overflow-x:auto;scrollbar-width:none;-ms-overflow-style:none;
+  scroll-behavior:smooth;
+}
+.city-updates-track::-webkit-scrollbar{display:none}
+.city-video-card{
+  flex-shrink:0;width:260px;border-radius:var(--r-xl);
+  overflow:hidden;border:1px solid var(--border);
+  box-shadow:var(--shadow-sm);cursor:pointer;
+  transition:all var(--t);
+}
+.city-video-card:hover{transform:translateY(-2px);box-shadow:var(--shadow-md)}
+.city-video-frame{
+  width:100%;aspect-ratio:16/9;background:var(--night-d);
+  position:relative;overflow:hidden;
+}
+.city-video-frame iframe{width:100%;height:100%;border:none;pointer-events:none}
+.city-video-play{
+  position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  background:rgba(0,0,0,0.3);transition:background var(--t);
+}
+.city-video-card:hover .city-video-play{background:rgba(0,0,0,0.1)}
+.city-video-play-btn{
+  width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,0.95);
+  display:flex;align-items:center;justify-content:center;font-size:16px;
+}
+.city-video-body{padding:12px}
+.city-video-tag{font-size:10px;font-weight:700;letter-spacing:0.5px;text-transform:uppercase;color:var(--tan-d);margin-bottom:4px}
+.city-video-title{font-size:13px;font-weight:600;color:var(--night-d);line-height:1.4}
+.city-video-time{font-size:11px;color:var(--text-4);margin-top:4px}
+
+/* Scroll nav buttons */
+.city-updates-nav{display:flex;gap:6px}
+.city-nav-btn{
+  width:30px;height:30px;border-radius:50%;
+  border:1.5px solid var(--border);background:var(--white);
+  color:var(--text-3);font-size:14px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  transition:all var(--t);
+}
+.city-nav-btn:hover{background:var(--night-d);color:var(--white);border-color:var(--night-d)}
+
+/* ══════════════════════════════════════
+   CATEGORY CHIP STRIP
+══════════════════════════════════════ */
 .cat-strip{
-  padding:28px 0;border-bottom:1px solid var(--border);
-  background:var(--white);overflow:hidden;position:relative;
+  background:var(--white);border-bottom:1px solid var(--border);
+  padding:14px 0;overflow:hidden;position:relative;
 }
 .cat-strip::after{
-  content:'';position:absolute;top:0;right:0;bottom:0;width:60px;
-  background:linear-gradient(to right,transparent,var(--white));
-  pointer-events:none;
+  content:'';position:absolute;top:0;right:0;bottom:0;width:48px;
+  background:linear-gradient(to right,transparent,var(--white));pointer-events:none;
 }
 .cat-strip-inner{
-  display:flex;gap:8px;overflow-x:auto;padding:0 24px;
-  scrollbar-width:none;-ms-overflow-style:none;
-  max-width:1160px;margin:0 auto;
+  display:flex;gap:8px;padding:0 32px;
+  overflow-x:auto;scrollbar-width:none;
 }
 .cat-strip-inner::-webkit-scrollbar{display:none}
 .cat-chip{
-  display:flex;align-items:center;gap:8px;
-  padding:10px 16px;border-radius:var(--r-lg);
+  display:flex;align-items:center;gap:7px;
+  padding:8px 14px;border-radius:99px;
   border:1.5px solid var(--border);background:var(--white);
   font-size:13px;font-weight:500;color:var(--text-2);
   white-space:nowrap;cursor:pointer;flex-shrink:0;
   transition:all var(--t);
 }
-.cat-chip:hover{border-color:var(--night);color:var(--night);background:var(--night-l)}
+.cat-chip:hover{border-color:var(--night);color:var(--night)}
 .cat-chip.active{background:var(--night-d);color:var(--white);border-color:var(--night-d)}
-.cat-chip-icon{font-size:18px;line-height:1}
+.cat-chip-icon{font-size:16px}
 
-/* ─────────────────────────────────────
+/* ══════════════════════════════════════
    SECTION COMMON
-───────────────────────────────────── */
-.section{padding:56px 0}
-.section-header{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:32px}
-.section-title{font-size:clamp(20px,2.5vw,26px);font-weight:700;color:var(--night-d);letter-spacing:-0.4px}
-.section-see-all{font-size:14px;font-weight:500;color:var(--night);transition:color var(--t)}
-.section-see-all:hover{color:var(--night-d)}
-.divider{height:1px;background:var(--border)}
+══════════════════════════════════════ */
+.section{padding:32px}
+.section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px}
+.section-title{font-size:18px;font-weight:700;color:var(--night-d);letter-spacing:-0.3px}
+.section-sub{font-size:13px;color:var(--text-3);margin-top:3px}
+.see-all{font-size:13px;font-weight:500;color:var(--night);cursor:pointer;flex-shrink:0}
 
-/* ─────────────────────────────────────
-   PROVIDER CARDS (Airtasker style)
-───────────────────────────────────── */
-.providers-grid{
-  display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));
-  gap:20px;
-}
+/* ══════════════════════════════════════
+   PROVIDER GRID
+══════════════════════════════════════ */
+.providers-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px}
 .provider-card{
-  background:var(--white);border:1px solid var(--border);
-  border-radius:var(--r-xl);overflow:hidden;
-  box-shadow:var(--shadow-sm);transition:all var(--t);cursor:pointer;
+  background:var(--white);border:1px solid var(--border);border-radius:var(--r-xl);
+  overflow:hidden;box-shadow:var(--shadow-xs);transition:all var(--t);cursor:pointer;
 }
 .provider-card:hover{box-shadow:var(--shadow-md);transform:translateY(-2px);border-color:var(--border-d)}
-.provider-card-top{
-  height:100px;position:relative;
-  background:linear-gradient(135deg,var(--night-d) 0%,var(--night) 100%);
-  display:flex;align-items:center;justify-content:center;
+.pc-top{
+  height:90px;position:relative;display:flex;align-items:center;justify-content:center;
+  background:linear-gradient(135deg,var(--night-d),var(--night));
 }
-.provider-card-top.c1{background:linear-gradient(135deg,#12343b,#2d545e)}
-.provider-card-top.c2{background:linear-gradient(135deg,#2d3a4a,#3d5a7a)}
-.provider-card-top.c3{background:linear-gradient(135deg,#3a2d12,#6b4c1a)}
-.provider-card-top.c4{background:linear-gradient(135deg,#1a3a2d,#2d6b4c)}
-.provider-card-emoji{font-size:40px;filter:drop-shadow(0 2px 4px rgba(0,0,0,0.2))}
-.provider-card-badge{
+.pc-top.c1{background:linear-gradient(135deg,#12343b,#2d545e)}
+.pc-top.c2{background:linear-gradient(135deg,#1e3a5f,#2d5a8e)}
+.pc-top.c3{background:linear-gradient(135deg,#3d1a00,#7a3a0a)}
+.pc-top.c4{background:linear-gradient(135deg,#1a3d1a,#2d6b2d)}
+.pc-top.c5{background:linear-gradient(135deg,#3d1a3d,#6b2d6b)}
+.pc-emoji{font-size:36px;filter:drop-shadow(0 2px 4px rgba(0,0,0,0.2))}
+.pc-avail{
   position:absolute;top:10px;right:10px;
-  background:rgba(255,255,255,0.95);
-  border-radius:99px;padding:3px 8px;
-  font-size:11px;font-weight:600;color:var(--night-d);
   display:flex;align-items:center;gap:4px;
+  background:rgba(255,255,255,0.95);border-radius:99px;
+  padding:3px 8px;font-size:10px;font-weight:600;color:var(--night-d);
 }
-.provider-card-badge-dot{width:5px;height:5px;border-radius:50%;background:#16a34a}
-.provider-card-body{padding:16px}
-.provider-card-cat{font-size:11px;font-weight:600;letter-spacing:0.3px;text-transform:uppercase;color:var(--tan-d);margin-bottom:4px}
-.provider-card-name{font-size:16px;font-weight:700;color:var(--night-d);margin-bottom:2px}
-.provider-card-area{font-size:13px;color:var(--text-3);margin-bottom:12px;display:flex;align-items:center;gap:4px}
-.provider-card-meta{display:flex;align-items:center;justify-content:space-between}
-.provider-card-rating{display:flex;align-items:center;gap:5px}
-.provider-card-stars{color:#f59e0b;font-size:13px;letter-spacing:-1px}
-.provider-card-rating-num{font-size:13px;font-weight:600;color:var(--text)}
-.provider-card-rating-count{font-size:12px;color:var(--text-3)}
-.provider-card-price{font-size:14px;font-weight:700;color:var(--night-d)}
-.provider-card-cta{
-  margin-top:14px;width:100%;padding:10px;border-radius:var(--r);
-  font-size:13px;font-weight:600;cursor:pointer;
-  border:1.5px solid var(--night-d);color:var(--night-d);
-  background:var(--white);transition:all var(--t);
+.pc-avail-dot{width:5px;height:5px;border-radius:50%;background:var(--green)}
+.pc-verified{
+  position:absolute;top:10px;left:10px;
+  background:rgba(255,255,255,0.95);border-radius:99px;
+  padding:3px 8px;font-size:10px;font-weight:600;color:var(--night-d);
 }
-.provider-card-cta:hover{background:var(--night-d);color:var(--white)}
-.provider-card-cta.locked{border-color:var(--border-d);color:var(--text-3)}
-.provider-card-cta.locked:hover{background:var(--night-d);border-color:var(--night-d);color:var(--white)}
+.pc-body{padding:14px}
+.pc-cat{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.3px;color:var(--tan-d);margin-bottom:3px}
+.pc-name{font-size:15px;font-weight:700;color:var(--night-d);margin-bottom:2px;line-height:1.3}
+.pc-area{font-size:12px;color:var(--text-3);margin-bottom:10px}
+.pc-meta{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.pc-stars{color:#f59e0b;font-size:12px}
+.pc-rating{font-size:12px;font-weight:600;color:var(--text);margin-left:4px}
+.pc-reviews{font-size:11px;color:var(--text-4)}
+.pc-price{font-size:13px;font-weight:700;color:var(--night-d)}
+.pc-btn{
+  width:100%;padding:9px;border-radius:var(--r);font-size:12px;font-weight:600;
+  border:1.5px solid var(--night-d);color:var(--night-d);background:var(--white);
+  transition:all var(--t);cursor:pointer;
+}
+.pc-btn:hover{background:var(--night-d);color:var(--white)}
+.pc-btn.locked{border-color:var(--border-d);color:var(--text-3)}
+.pc-btn.locked:hover{background:var(--night-d);border-color:var(--night-d);color:var(--white)}
 
-/* ─────────────────────────────────────
-   HOW IT WORKS (Airtasker 3-step)
-───────────────────────────────────── */
-.how-section{background:var(--bg);border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
-.how-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border);border:1px solid var(--border);border-radius:var(--r-xl);overflow:hidden;margin-top:32px}
-.how-card{background:var(--white);padding:36px 32px}
-.how-card:hover{background:#fafbfc}
-.how-step-num{
-  width:36px;height:36px;border-radius:50%;
+/* ══════════════════════════════════════
+   THREE MODE TABS (Services / Shop / Food)
+══════════════════════════════════════ */
+.mode-tabs{
+  display:flex;gap:0;border-bottom:1px solid var(--border);
+  padding:0 32px;background:var(--white);
+}
+.mode-tab{
+  padding:14px 20px;font-size:14px;font-weight:600;
+  color:var(--text-3);cursor:pointer;
+  border-bottom:2px solid transparent;transition:all var(--t);
+  display:flex;align-items:center;gap:8px;
+}
+.mode-tab:hover{color:var(--text-2)}
+.mode-tab.active{color:var(--night-d);border-bottom-color:var(--night-d)}
+
+/* ══════════════════════════════════════
+   FOOD / SHOP GRID
+══════════════════════════════════════ */
+.food-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px}
+.food-card{
+  background:var(--white);border:1px solid var(--border);border-radius:var(--r-xl);
+  overflow:hidden;cursor:pointer;transition:all var(--t);box-shadow:var(--shadow-xs);
+}
+.food-card:hover{box-shadow:var(--shadow-md);transform:translateY(-2px)}
+.food-img{
+  height:120px;background:linear-gradient(135deg,var(--tan-l),#fff3d0);
+  display:flex;align-items:center;justify-content:center;font-size:48px;
+  position:relative;
+}
+.food-tag{
+  position:absolute;bottom:8px;left:8px;
+  background:var(--white);border-radius:99px;
+  padding:3px 8px;font-size:10px;font-weight:600;color:var(--text-2);
+  box-shadow:var(--shadow-xs);
+}
+.food-body{padding:12px}
+.food-name{font-size:14px;font-weight:700;color:var(--night-d);margin-bottom:2px}
+.food-area{font-size:11px;color:var(--text-3);margin-bottom:8px}
+.food-meta{display:flex;align-items:center;justify-content:space-between}
+.food-rating{font-size:12px;font-weight:600;color:var(--text)}
+.food-delivery{font-size:11px;color:var(--green);font-weight:500}
+.food-wa-btn{
+  width:100%;padding:8px;border-radius:var(--r);
+  margin-top:10px;font-size:12px;font-weight:600;
   background:var(--night-d);color:var(--white);
-  font-size:15px;font-weight:700;
-  display:flex;align-items:center;justify-content:center;
-  margin-bottom:20px;
+  transition:background var(--t);cursor:pointer;border:none;
 }
-.how-card-icon{font-size:28px;margin-bottom:14px}
-.how-card-title{font-size:17px;font-weight:700;color:var(--night-d);margin-bottom:8px}
-.how-card-desc{font-size:14px;color:var(--text-3);line-height:1.65}
+.food-wa-btn:hover{background:var(--night)}
 
-/* ─────────────────────────────────────
-   POST A REQUIREMENT (Airtasker's post task)
-───────────────────────────────────── */
-.post-section{background:var(--night-d);padding:64px 0}
-.post-inner{
-  display:grid;grid-template-columns:1fr 420px;gap:64px;align-items:center;
-}
-.post-label{font-size:12px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--tan);margin-bottom:12px}
-.post-title{font-size:clamp(24px,3.5vw,40px);font-weight:800;color:var(--white);letter-spacing:-1px;line-height:1.15;margin-bottom:16px}
-.post-desc{font-size:15px;color:rgba(255,255,255,0.55);line-height:1.7;margin-bottom:28px}
-.post-steps{list-style:none;margin-bottom:32px}
-.post-step{
-  display:flex;align-items:flex-start;gap:14px;
-  padding:12px 0;border-bottom:1px solid rgba(255,255,255,0.06);
-  font-size:14px;color:rgba(255,255,255,0.7);
-}
+/* ══════════════════════════════════════
+   POST A REQUIREMENT
+══════════════════════════════════════ */
+.post-section{background:var(--night-d);padding:40px 32px}
+.post-inner{display:grid;grid-template-columns:1fr 380px;gap:48px;align-items:start}
+.post-label{font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--tan);margin-bottom:10px}
+.post-title{font-size:clamp(22px,3vw,32px);font-weight:800;color:var(--white);letter-spacing:-0.8px;line-height:1.2;margin-bottom:12px}
+.post-desc{font-size:14px;color:rgba(255,255,255,0.5);line-height:1.7;margin-bottom:24px}
+.post-steps{list-style:none;margin-bottom:28px}
+.post-step{display:flex;align-items:flex-start;gap:12px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.06);font-size:13px;color:rgba(255,255,255,0.65)}
 .post-step:last-child{border-bottom:none}
 .post-step-num{
-  width:22px;height:22px;border-radius:50%;flex-shrink:0;
+  width:20px;height:20px;border-radius:50%;flex-shrink:0;
   background:rgba(225,179,130,0.2);color:var(--tan);
-  font-size:11px;font-weight:700;
-  display:flex;align-items:center;justify-content:center;
-  margin-top:1px;
+  font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;margin-top:1px;
 }
-.post-btn{
+.post-cta{
   display:inline-flex;align-items:center;gap:8px;
-  padding:14px 28px;border-radius:var(--r-lg);
+  padding:12px 24px;border-radius:var(--r-lg);
   background:var(--tan);color:var(--night-d);
-  font-size:15px;font-weight:700;
-  transition:background var(--t);
+  font-size:14px;font-weight:700;transition:background var(--t);
 }
-.post-btn:hover{background:var(--tan-d)}
-
-/* Post form card */
-.post-card{
+.post-cta:hover{background:var(--tan-d)}
+.post-form-card{
   background:var(--white);border-radius:var(--r-2xl);
-  padding:28px;box-shadow:var(--shadow-lg);
+  padding:24px;box-shadow:var(--shadow-lg);
 }
-.post-card-title{font-size:17px;font-weight:700;color:var(--night-d);margin-bottom:20px}
-.post-form-group{margin-bottom:14px}
-.post-form-label{font-size:12px;font-weight:600;color:var(--text-3);text-transform:uppercase;letter-spacing:0.3px;margin-bottom:6px;display:block}
-.post-form-input,.post-form-select,.post-form-textarea{
-  width:100%;padding:11px 14px;border-radius:var(--r);
-  border:1.5px solid var(--border);font-size:14px;color:var(--text);
-  background:var(--white);outline:none;font-family:'Inter',sans-serif;
-  transition:border-color var(--t);-webkit-appearance:none;appearance:none;
+.post-form-title{font-size:16px;font-weight:700;color:var(--night-d);margin-bottom:18px}
+.pf-group{margin-bottom:12px}
+.pf-label{display:block;font-size:11px;font-weight:600;color:var(--text-3);text-transform:uppercase;letter-spacing:0.3px;margin-bottom:5px}
+.pf-input,.pf-select,.pf-textarea{
+  width:100%;padding:10px 12px;border-radius:var(--r);
+  border:1.5px solid var(--border);font-size:13px;color:var(--text);
+  background:var(--white);outline:none;transition:border-color var(--t);
+  -webkit-appearance:none;
 }
-.post-form-input:focus,.post-form-select:focus,.post-form-textarea:focus{border-color:var(--night)}
-.post-form-input::placeholder,.post-form-textarea::placeholder{color:var(--text-4)}
-.post-form-textarea{resize:vertical;min-height:80px}
-.post-form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.post-form-submit{
-  width:100%;padding:13px;border-radius:var(--r);
+.pf-input:focus,.pf-select:focus,.pf-textarea:focus{border-color:var(--night)}
+.pf-input::placeholder,.pf-textarea::placeholder{color:var(--text-4)}
+.pf-textarea{resize:vertical;min-height:72px}
+.pf-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.pf-submit{
+  width:100%;padding:12px;border-radius:var(--r-lg);
   background:var(--night-d);color:var(--white);
-  font-size:14px;font-weight:700;font-family:'Inter',sans-serif;
-  border:none;cursor:pointer;margin-top:4px;
+  font-size:13px;font-weight:700;border:none;cursor:pointer;
+  transition:background var(--t);margin-top:4px;
+}
+.pf-submit:hover{background:var(--night)}
+
+/* ══════════════════════════════════════
+   MAP SECTION
+══════════════════════════════════════ */
+.map-section{background:var(--bg);border-top:1px solid var(--border)}
+.map-container{
+  display:grid;grid-template-columns:1fr 320px;gap:24px;align-items:start;
+}
+.map-frame{
+  border:1px solid var(--border);border-radius:var(--r-xl);overflow:hidden;
+  box-shadow:var(--shadow-sm);background:var(--night-l);
+  height:420px;position:relative;
+}
+.map-placeholder{
+  width:100%;height:100%;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:12px;
+  background:linear-gradient(135deg,var(--night-l),#e8f0f2);
+}
+.map-placeholder-icon{font-size:48px;opacity:0.4}
+.map-placeholder-text{font-size:14px;font-weight:500;color:var(--text-3)}
+.map-placeholder-sub{font-size:12px;color:var(--text-4);text-align:center;max-width:200px}
+/* Embedded OpenStreetMap */
+.map-embed{width:100%;height:100%;border:none}
+.map-controls{background:var(--white);border:1px solid var(--border);border-radius:var(--r-xl);padding:20px;box-shadow:var(--shadow-sm)}
+.map-controls-title{font-size:15px;font-weight:700;color:var(--night-d);margin-bottom:16px}
+.map-input-group{margin-bottom:12px}
+.map-input-label{display:block;font-size:11px;font-weight:600;color:var(--text-3);text-transform:uppercase;letter-spacing:0.3px;margin-bottom:5px}
+.map-input,.map-select{
+  width:100%;padding:10px 12px;border-radius:var(--r);
+  border:1.5px solid var(--border);font-size:13px;color:var(--text);
+  background:var(--white);outline:none;transition:border-color var(--t);
+  -webkit-appearance:none;
+}
+.map-input:focus,.map-select:focus{border-color:var(--night)}
+.map-divider{display:flex;align-items:center;gap:8px;margin:12px 0}
+.map-divider-line{flex:1;height:1px;background:var(--border)}
+.map-divider-text{font-size:11px;color:var(--text-4);font-weight:500}
+.map-confirm-btn{
+  width:100%;padding:11px;border-radius:var(--r-lg);
+  background:var(--night-d);color:var(--white);
+  font-size:13px;font-weight:700;border:none;cursor:pointer;
   transition:background var(--t);
 }
-.post-form-submit:hover{background:var(--night)}
+.map-confirm-btn:hover{background:var(--night)}
+.map-pin-btn{
+  width:100%;padding:10px;border-radius:var(--r);
+  border:1.5px solid var(--border);background:var(--white);
+  color:var(--text-2);font-size:13px;font-weight:500;cursor:pointer;
+  transition:all var(--t);display:flex;align-items:center;justify-content:center;gap:6px;
+}
+.map-pin-btn:hover{border-color:var(--night);color:var(--night)}
+.tehsil-chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
+.tehsil-chip{
+  padding:4px 10px;border-radius:99px;border:1px solid var(--border);
+  font-size:11px;font-weight:500;color:var(--text-3);cursor:pointer;transition:all var(--t);
+}
+.tehsil-chip:hover,.tehsil-chip.active{background:var(--night-d);color:var(--white);border-color:var(--night-d)}
 
-/* ─────────────────────────────────────
-   CATEGORY GRID (full)
-───────────────────────────────────── */
-.full-cats{background:var(--bg);border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
-.cats-grid{
-  display:grid;
-  grid-template-columns:repeat(auto-fill,minmax(180px,1fr));
-  gap:12px;
-}
-.cat-card{
-  background:var(--white);border:1px solid var(--border);
-  border-radius:var(--r-xl);padding:20px 16px;
-  display:flex;flex-direction:column;align-items:flex-start;gap:8px;
-  cursor:pointer;transition:all var(--t);text-decoration:none;
-}
-.cat-card:hover{border-color:var(--night);box-shadow:var(--shadow);}
-.cat-card-icon{
-  width:44px;height:44px;border-radius:var(--r-lg);
-  background:var(--night-l);
-  display:flex;align-items:center;justify-content:center;font-size:22px;
-}
-.cat-card-name{font-size:14px;font-weight:600;color:var(--night-d)}
-.cat-card-hindi{font-size:12px;color:var(--text-3)}
-.cat-card-count{font-size:11px;color:var(--text-4)}
-.cat-card.featured .cat-card-icon{background:var(--tan-l)}
-
-/* ─────────────────────────────────────
+/* ══════════════════════════════════════
    CALENDAR SECTION
-───────────────────────────────────── */
-.cal-section{background:var(--white)}
-.cal-layout{display:grid;grid-template-columns:1fr 360px;gap:56px;align-items:start}
-.cal-feature-list{margin-top:20px;list-style:none}
-.cal-feature-item{
-  display:flex;align-items:flex-start;gap:14px;
-  padding:14px 0;border-bottom:1px solid var(--border);
-  font-size:14px;color:var(--text-2);line-height:1.6;
-}
-.cal-feature-item:last-child{border-bottom:none}
-.cal-feature-icon{
-  width:30px;height:30px;border-radius:var(--r);flex-shrink:0;
-  background:var(--night-l);color:var(--night-d);
-  display:flex;align-items:center;justify-content:center;
-  font-size:14px;margin-top:1px;
-}
-
-/* Calendar widget */
-.cal-widget{
-  background:var(--white);border:1px solid var(--border);
-  border-radius:var(--r-xl);overflow:hidden;box-shadow:var(--shadow-md);
-  position:sticky;top:80px;
-}
-.cal-widget-header{
-  padding:16px 20px;border-bottom:1px solid var(--border);
-  display:flex;align-items:center;justify-content:space-between;
-  background:var(--bg);
-}
-.cal-widget-title{font-size:14px;font-weight:700;color:var(--night-d)}
-.cal-widget-sub{font-size:12px;color:var(--text-3);margin-top:2px}
-.cal-navs{display:flex;gap:6px}
-.cal-nav-btn{
-  width:28px;height:28px;border-radius:var(--r);border:1px solid var(--border);
-  background:var(--white);font-size:14px;color:var(--text-2);
-  display:flex;align-items:center;justify-content:center;
-  cursor:pointer;transition:all var(--t);
-}
-.cal-nav-btn:hover{background:var(--night-d);color:var(--white);border-color:var(--night-d)}
-.cal-body{padding:16px}
-.cal-daynames{display:grid;grid-template-columns:repeat(7,1fr);margin-bottom:8px}
-.cal-dayname{text-align:center;font-size:11px;font-weight:600;color:var(--text-4);padding:4px 0}
-.cal-days{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+══════════════════════════════════════ */
+.cal-layout{display:grid;grid-template-columns:1fr 340px;gap:32px;align-items:start}
+.cal-widget{background:var(--white);border:1px solid var(--border);border-radius:var(--r-xl);overflow:hidden;box-shadow:var(--shadow-sm);position:sticky;top:74px}
+.cal-header{padding:14px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:var(--bg)}
+.cal-month{font-size:14px;font-weight:700;color:var(--night-d)}
+.cal-sub{font-size:11px;color:var(--text-3);margin-top:1px}
+.cal-navs{display:flex;gap:4px}
+.cal-nav{width:26px;height:26px;border-radius:var(--r);border:1px solid var(--border);background:var(--white);color:var(--text-3);font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all var(--t)}
+.cal-nav:hover{background:var(--night-d);color:var(--white);border-color:var(--night-d)}
+.cal-body{padding:14px}
+.cal-daynames{display:grid;grid-template-columns:repeat(7,1fr);margin-bottom:6px}
+.cal-dayname{text-align:center;font-size:10px;font-weight:600;color:var(--text-4);padding:3px 0}
+.cal-days-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px}
 .cal-day{
-  aspect-ratio:1;border-radius:var(--r);
-  display:flex;align-items:center;justify-content:center;
+  aspect-ratio:1;border-radius:var(--r);display:flex;align-items:center;justify-content:center;
   font-size:12px;font-weight:500;cursor:pointer;transition:all var(--t);
 }
 .cal-day.empty{cursor:default}
-.cal-day.avail{background:#dcfce7;color:#15803d}
-.cal-day.avail:hover,.cal-day.avail.sel{background:#16a34a;color:var(--white)}
-.cal-day.partial{background:#fef9c3;color:#a16207}
-.cal-day.partial:hover,.cal-day.partial.sel{background:#ca8a04;color:var(--white)}
-.cal-day.booked{background:#fee2e2;color:#b91c1c;cursor:not-allowed}
+.cal-day.avail{background:var(--green-l);color:var(--green)}
+.cal-day.avail:hover,.cal-day.avail.sel{background:var(--green);color:var(--white)}
+.cal-day.partial{background:var(--amber-l);color:var(--amber)}
+.cal-day.partial:hover,.cal-day.partial.sel{background:var(--amber);color:var(--white)}
+.cal-day.booked{background:var(--red-l);color:var(--red);cursor:not-allowed}
 .cal-day.today{outline:2px solid var(--night);outline-offset:1px;font-weight:700}
-.cal-legend{display:flex;gap:14px;padding:12px 16px;border-top:1px solid var(--border);background:var(--bg)}
-.cal-leg{display:flex;align-items:center;gap:6px;font-size:11px;font-weight:500;color:var(--text-3)}
-.cal-leg-dot{width:10px;height:10px;border-radius:3px}
-.cal-leg-dot.a{background:#dcfce7;border:1.5px solid #16a34a}
-.cal-leg-dot.p{background:#fef9c3;border:1.5px solid #ca8a04}
-.cal-leg-dot.b{background:#fee2e2;border:1.5px solid #b91c1c}
-.cal-slot-area{padding:14px 16px;border-top:1px solid var(--border);display:none}
-.cal-slot-area.show{display:block}
-.cal-slot-label{font-size:11px;font-weight:600;color:var(--text-3);text-transform:uppercase;letter-spacing:0.3px;margin-bottom:8px}
-.cal-slots{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
-.cal-slot{
-  padding:6px 12px;border-radius:99px;
-  border:1.5px solid var(--night-l);background:var(--night-l);
-  font-size:12px;font-weight:500;color:var(--night-d);cursor:pointer;
-  transition:all var(--t);
-}
+.cal-legend{display:flex;gap:12px;padding:10px 14px;border-top:1px solid var(--border);background:var(--bg)}
+.cal-leg{display:flex;align-items:center;gap:5px;font-size:10px;color:var(--text-3)}
+.cal-leg-sq{width:8px;height:8px;border-radius:2px}
+.cal-leg-sq.a{background:var(--green-l);border:1.5px solid var(--green)}
+.cal-leg-sq.p{background:var(--amber-l);border:1.5px solid var(--amber)}
+.cal-leg-sq.b{background:var(--red-l);border:1.5px solid var(--red)}
+.cal-slots-area{padding:12px 14px;border-top:1px solid var(--border);display:none}
+.cal-slots-area.show{display:block}
+.cal-slots-label{font-size:10px;font-weight:700;color:var(--text-3);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px}
+.cal-slots{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+.cal-slot{padding:5px 10px;border-radius:99px;border:1.5px solid var(--night-l);background:var(--night-l);font-size:11px;font-weight:500;color:var(--night-d);cursor:pointer;transition:all var(--t)}
 .cal-slot:hover{background:var(--night-d);color:var(--white);border-color:var(--night-d)}
-.cal-contact-btn{
-  width:100%;padding:11px;border-radius:var(--r);
-  background:var(--night-d);color:var(--white);
-  font-size:13px;font-weight:700;font-family:'Inter',sans-serif;
-  border:none;cursor:pointer;transition:background var(--t);
-}
-.cal-contact-btn:hover{background:var(--night)}
+.cal-contact{width:100%;padding:10px;border-radius:var(--r);background:var(--night-d);color:var(--white);font-size:12px;font-weight:700;border:none;cursor:pointer;transition:background var(--t)}
+.cal-contact:hover{background:var(--night)}
 
-/* ─────────────────────────────────────
-   TRUST & SAFETY
-───────────────────────────────────── */
-.trust-section{background:var(--bg);border-top:1px solid var(--border)}
-.trust-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
-.trust-card{
-  background:var(--white);border:1px solid var(--border);
-  border-radius:var(--r-xl);padding:28px 24px;
-  box-shadow:var(--shadow-xs);
-}
-.trust-icon{
-  width:48px;height:48px;border-radius:var(--r-lg);
-  background:var(--night-l);
-  display:flex;align-items:center;justify-content:center;
-  font-size:22px;margin-bottom:16px;
-}
-.trust-title{font-size:16px;font-weight:700;color:var(--night-d);margin-bottom:8px}
-.trust-desc{font-size:14px;color:var(--text-3);line-height:1.65}
+/* Calendar info */
+.cal-feature{display:flex;align-items:flex-start;gap:12px;padding:12px 0;border-bottom:1px solid var(--border);font-size:13px;color:var(--text-2);line-height:1.6}
+.cal-feature:last-child{border-bottom:none}
+.cal-feature-num{font-size:11px;font-weight:700;color:var(--tan-d);flex-shrink:0;padding-top:2px;min-width:18px}
 
-/* ─────────────────────────────────────
-   PRICING
-───────────────────────────────────── */
-.pricing-section{background:var(--white);border-top:1px solid var(--border)}
-.pricing-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;max-width:760px;margin:32px auto 0}
-.price-card{
-  border:1.5px solid var(--border);border-radius:var(--r-xl);
-  padding:32px;transition:border-color var(--t);
-  position:relative;background:var(--white);
+/* ══════════════════════════════════════
+   ABOUT KURUKSHETRA VIEW
+══════════════════════════════════════ */
+.about-hero{
+  background:linear-gradient(135deg,var(--night-d),var(--night));
+  padding:40px 32px;color:var(--white);
+  position:relative;overflow:hidden;
 }
+.about-hero::before{content:'';position:absolute;inset:0;background:url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M20 20c0-5.5-4.5-10-10-10s-10 4.5-10 10 4.5 10 10 10 10-4.5 10-10zm10 0c0-5.5-4.5-10-10-10s-10 4.5-10 10 4.5 10 10 10 10-4.5 10-10z'/%3E%3C/g%3E%3C/svg%3E")}
+.about-hero-label{font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--tan);margin-bottom:10px}
+.about-hero-title{font-size:clamp(28px,4vw,42px);font-weight:800;letter-spacing:-1px;line-height:1.15;margin-bottom:10px}
+.about-hero-sub{font-size:15px;color:rgba(255,255,255,0.55);line-height:1.65;max-width:540px}
+.about-hero-stats{display:flex;gap:24px;margin-top:24px;flex-wrap:wrap}
+.about-stat{background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.1);border-radius:var(--r-lg);padding:14px 20px;text-align:center}
+.about-stat-num{font-size:22px;font-weight:800;color:var(--tan)}
+.about-stat-label{font-size:11px;color:rgba(255,255,255,0.4);margin-top:2px}
+.about-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px}
+.about-card{background:var(--white);border:1px solid var(--border);border-radius:var(--r-xl);overflow:hidden;box-shadow:var(--shadow-xs);transition:all var(--t);cursor:pointer}
+.about-card:hover{box-shadow:var(--shadow-md);transform:translateY(-2px)}
+.about-card-top{height:120px;display:flex;align-items:center;justify-content:center;font-size:56px;position:relative}
+.about-card-top.c1{background:linear-gradient(135deg,#fff3d0,#fde68a)}
+.about-card-top.c2{background:linear-gradient(135deg,#dbeafe,#bfdbfe)}
+.about-card-top.c3{background:linear-gradient(135deg,#d1fae5,#a7f3d0)}
+.about-card-top.c4{background:linear-gradient(135deg,#ffe4e6,#fecdd3)}
+.about-card-top.c5{background:linear-gradient(135deg,#ede9fe,#ddd6fe)}
+.about-card-top.c6{background:linear-gradient(135deg,var(--night-l),#c8dfe3)}
+.about-card-body{padding:16px}
+.about-card-title{font-size:15px;font-weight:700;color:var(--night-d);margin-bottom:4px}
+.about-card-desc{font-size:12px;color:var(--text-3);line-height:1.55}
+.about-card-tag{
+  display:inline-block;margin-top:10px;font-size:10px;font-weight:600;
+  padding:3px 8px;border-radius:99px;background:var(--night-l);color:var(--night-d);
+}
+/* Map embedded for About page */
+.about-map{
+  border:1px solid var(--border);border-radius:var(--r-xl);overflow:hidden;
+  height:360px;box-shadow:var(--shadow-sm);
+}
+.about-map iframe{width:100%;height:100%;border:none}
+.tehsil-table{width:100%;border-collapse:collapse}
+.tehsil-table th{text-align:left;padding:10px 14px;font-size:11px;font-weight:700;letter-spacing:0.5px;text-transform:uppercase;color:var(--text-3);background:var(--bg);border-bottom:1px solid var(--border)}
+.tehsil-table td{padding:12px 14px;font-size:13px;color:var(--text-2);border-bottom:1px solid var(--border)}
+.tehsil-table tr:last-child td{border-bottom:none}
+.tehsil-table tr:hover td{background:var(--bg)}
+
+/* ══════════════════════════════════════
+   PRICING (in view)
+══════════════════════════════════════ */
+.pricing-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;max-width:700px}
+.price-card{border:1.5px solid var(--border);border-radius:var(--r-xl);padding:28px;background:var(--white);position:relative}
 .price-card:hover{border-color:var(--border-d)}
-.price-card.featured{border-color:var(--night-d);background:var(--night-d)}
-.price-popular-badge{
-  position:absolute;top:-12px;left:50%;transform:translateX(-50%);
-  background:var(--tan);color:var(--night-d);
-  font-size:11px;font-weight:700;padding:4px 14px;
-  border-radius:99px;white-space:nowrap;
-}
-.price-plan-name{font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:16px}
-.price-card:not(.featured) .price-plan-name{color:var(--text-3)}
-.price-card.featured .price-plan-name{color:rgba(255,255,255,0.5)}
-.price-amount{font-size:44px;font-weight:800;letter-spacing:-1.5px;line-height:1;margin-bottom:4px}
+.price-card.featured{background:var(--night-d);border-color:var(--night-d)}
+.price-popular{position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:var(--tan);color:var(--night-d);font-size:10px;font-weight:700;padding:3px 12px;border-radius:99px;white-space:nowrap}
+.price-name{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:14px}
+.price-card:not(.featured) .price-name{color:var(--text-3)}
+.price-card.featured .price-name{color:rgba(255,255,255,0.45)}
+.price-amount{font-size:40px;font-weight:800;letter-spacing:-1.5px;line-height:1;margin-bottom:4px}
 .price-card:not(.featured) .price-amount{color:var(--night-d)}
 .price-card.featured .price-amount{color:var(--white)}
-.price-period{font-size:13px;margin-bottom:6px}
+.price-period{font-size:12px;margin-bottom:6px}
 .price-card:not(.featured) .price-period{color:var(--text-3)}
-.price-card.featured .price-period{color:rgba(255,255,255,0.4)}
-.price-trial-badge{
-  display:inline-block;font-size:11px;font-weight:600;
-  padding:3px 10px;border-radius:99px;margin-bottom:24px;
-}
-.price-card:not(.featured) .price-trial-badge{background:var(--night-l);color:var(--night-d)}
-.price-card.featured .price-trial-badge{background:rgba(225,179,130,0.2);color:var(--tan)}
-.price-divider{height:1px;margin-bottom:20px}
-.price-card:not(.featured) .price-divider{background:var(--border)}
-.price-card.featured .price-divider{background:rgba(255,255,255,0.1)}
-.price-feature-list{list-style:none;margin-bottom:24px}
-.price-feature-item{
-  display:flex;align-items:flex-start;gap:10px;
-  padding:8px 0;border-bottom:1px solid;font-size:13px;
-}
-.price-card:not(.featured) .price-feature-item{border-color:var(--border);color:var(--text-2)}
-.price-card.featured .price-feature-item{border-color:rgba(255,255,255,0.08);color:rgba(255,255,255,0.65)}
-.price-feature-item:last-child{border-bottom:none}
-.price-check{
-  width:18px;height:18px;border-radius:4px;flex-shrink:0;
-  display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;
-  margin-top:1px;
-}
+.price-card.featured .price-period{color:rgba(255,255,255,0.35)}
+.price-trial{display:inline-block;font-size:11px;font-weight:500;padding:3px 9px;border-radius:99px;margin-bottom:20px}
+.price-card:not(.featured) .price-trial{background:var(--night-l);color:var(--night-d)}
+.price-card.featured .price-trial{background:rgba(225,179,130,0.2);color:var(--tan)}
+.price-line{height:1px;margin-bottom:18px}
+.price-card:not(.featured) .price-line{background:var(--border)}
+.price-card.featured .price-line{background:rgba(255,255,255,0.08)}
+.price-features{list-style:none;margin-bottom:22px}
+.price-feature{display:flex;gap:8px;padding:7px 0;font-size:13px;border-bottom:1px solid}
+.price-card:not(.featured) .price-feature{border-color:var(--border);color:var(--text-2)}
+.price-card.featured .price-feature{border-color:rgba(255,255,255,0.07);color:rgba(255,255,255,0.6)}
+.price-feature:last-child{border-bottom:none}
+.price-check{width:16px;height:16px;border-radius:4px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;margin-top:2px}
 .price-card:not(.featured) .price-check{background:var(--night-l);color:var(--night-d)}
-.price-card.featured .price-check{background:rgba(225,179,130,0.25);color:var(--tan)}
-.price-cta{
-  width:100%;padding:12px;border-radius:var(--r-lg);
-  font-size:14px;font-weight:700;cursor:pointer;
-  font-family:'Inter',sans-serif;transition:all var(--t);border:none;
-}
-.price-card:not(.featured) .price-cta{background:var(--night-d);color:var(--white)}
-.price-card:not(.featured) .price-cta:hover{background:var(--night)}
-.price-card.featured .price-cta{background:var(--tan);color:var(--night-d)}
-.price-card.featured .price-cta:hover{background:var(--tan-d)}
-.pricing-note{text-align:center;font-size:13px;color:var(--text-3);margin-top:20px}
-.pricing-note strong{color:var(--text-2)}
+.price-card.featured .price-check{background:rgba(225,179,130,0.2);color:var(--tan)}
+.price-btn{width:100%;padding:11px;border-radius:var(--r-lg);font-size:13px;font-weight:700;cursor:pointer;border:none;font-family:'Inter',sans-serif;transition:all var(--t)}
+.price-card:not(.featured) .price-btn{background:var(--night-d);color:var(--white)}
+.price-card:not(.featured) .price-btn:hover{background:var(--night)}
+.price-card.featured .price-btn{background:var(--tan);color:var(--night-d)}
+.price-card.featured .price-btn:hover{background:var(--tan-d)}
 
-/* ─────────────────────────────────────
-   REGISTER
-───────────────────────────────────── */
-.reg-section{background:var(--bg);border-top:1px solid var(--border)}
-.reg-layout{display:grid;grid-template-columns:460px 1fr;gap:64px;align-items:start}
-.reg-form-card{
-  background:var(--white);border:1px solid var(--border);
-  border-radius:var(--r-2xl);overflow:hidden;box-shadow:var(--shadow-md);
-}
+/* ══════════════════════════════════════
+   REGISTER FORM
+══════════════════════════════════════ */
+.reg-layout{display:grid;grid-template-columns:420px 1fr;gap:48px;align-items:start}
+.reg-card{background:var(--white);border:1px solid var(--border);border-radius:var(--r-2xl);overflow:hidden;box-shadow:var(--shadow-md)}
 .reg-tabs-bar{display:flex;border-bottom:1px solid var(--border)}
-.reg-tab{
-  flex:1;padding:14px;font-size:14px;font-weight:600;cursor:pointer;
-  text-align:center;background:var(--bg);color:var(--text-3);
-  border-bottom:2px solid transparent;transition:all var(--t);
-}
+.reg-tab{flex:1;padding:13px;font-size:13px;font-weight:600;color:var(--text-3);background:var(--bg);text-align:center;cursor:pointer;border-bottom:2px solid transparent;transition:all var(--t)}
 .reg-tab.active{background:var(--white);color:var(--night-d);border-bottom-color:var(--night-d)}
-.reg-form-body{padding:28px}
-.form-group{margin-bottom:16px}
-.form-label{display:block;font-size:12px;font-weight:600;color:var(--text-3);text-transform:uppercase;letter-spacing:0.3px;margin-bottom:6px}
-.form-input,.form-select{
-  width:100%;padding:11px 14px;border-radius:var(--r);
-  border:1.5px solid var(--border);font-size:14px;color:var(--text);
-  background:var(--white);outline:none;font-family:'Inter',sans-serif;
-  transition:border-color var(--t);-webkit-appearance:none;appearance:none;
-}
-.form-input:focus,.form-select:focus{border-color:var(--night)}
-.form-input::placeholder{color:var(--text-4)}
-.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.otp-group{display:flex;gap:8px}
-.otp-group .form-input{flex:1}
-.otp-send-btn{
-  padding:11px 16px;border-radius:var(--r);background:var(--night-d);color:var(--white);
-  font-size:13px;font-weight:600;font-family:'Inter',sans-serif;white-space:nowrap;
-  border:none;cursor:pointer;transition:background var(--t);flex-shrink:0;
-}
-.otp-send-btn:hover{background:var(--night)}
-.otp-field{
-  width:100%;padding:12px;border-radius:var(--r);
-  border:1.5px solid var(--border);font-size:22px;font-weight:700;
-  letter-spacing:10px;text-align:center;font-family:'Inter',sans-serif;
-  outline:none;background:var(--white);transition:border-color var(--t);
-  display:none;
-}
-.otp-field.show{display:block}
-.otp-field:focus{border-color:var(--night)}
-.form-check{display:flex;gap:8px;align-items:flex-start;margin-bottom:18px}
-.form-check input{width:14px;height:14px;margin-top:2px;accent-color:var(--night-d);flex-shrink:0}
-.form-check label{font-size:12px;color:var(--text-3);line-height:1.5}
-.form-check a{color:var(--night);font-weight:500}
-.form-submit{
-  width:100%;padding:13px;border-radius:var(--r-lg);
-  background:var(--night-d);color:var(--white);
-  font-size:14px;font-weight:700;border:none;cursor:pointer;
-  font-family:'Inter',sans-serif;transition:background var(--t);
-}
-.form-submit:hover{background:var(--night)}
-.form-note{text-align:center;font-size:12px;color:var(--text-4);margin-top:10px}
-
-/* Benefits */
-.reg-benefits{padding-top:8px}
-.reg-benefits-title{font-size:22px;font-weight:700;color:var(--night-d);letter-spacing:-0.4px;margin-bottom:6px}
-.reg-benefits-sub{font-size:14px;color:var(--text-3);margin-bottom:24px;line-height:1.6}
-.benefit-cards{display:flex;flex-direction:column;gap:1px;border:1px solid var(--border);border-radius:var(--r-xl);overflow:hidden}
-.benefit-card{
-  background:var(--white);padding:18px 20px;
-  display:flex;gap:14px;align-items:flex-start;
-  border-bottom:1px solid var(--border);transition:background var(--t);
-}
-.benefit-card:last-child{border-bottom:none}
-.benefit-card:hover{background:var(--bg)}
-.benefit-icon{
-  width:36px;height:36px;border-radius:var(--r);flex-shrink:0;
-  background:var(--night-l);
-  display:flex;align-items:center;justify-content:center;font-size:16px;
-}
-.benefit-title{font-size:14px;font-weight:600;color:var(--night-d);margin-bottom:2px}
+.reg-body{padding:24px}
+.rf-group{margin-bottom:14px}
+.rf-label{display:block;font-size:11px;font-weight:600;color:var(--text-3);text-transform:uppercase;letter-spacing:0.3px;margin-bottom:5px}
+.rf-input,.rf-select{width:100%;padding:10px 12px;border-radius:var(--r);border:1.5px solid var(--border);font-size:13px;color:var(--text);background:var(--white);outline:none;transition:border-color var(--t);-webkit-appearance:none}
+.rf-input:focus,.rf-select:focus{border-color:var(--night)}
+.rf-input::placeholder{color:var(--text-4)}
+.rf-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.otp-wrap{display:flex;gap:8px}
+.otp-wrap .rf-input{flex:1}
+.otp-send{padding:10px 14px;border-radius:var(--r);background:var(--night-d);color:var(--white);font-size:12px;font-weight:600;border:none;cursor:pointer;white-space:nowrap;transition:background var(--t)}
+.otp-send:hover{background:var(--night)}
+.otp-code{width:100%;padding:11px;border-radius:var(--r);border:1.5px solid var(--border);font-size:22px;font-weight:700;letter-spacing:10px;text-align:center;font-family:'Inter',sans-serif;outline:none;background:var(--white);transition:border-color var(--t);display:none}
+.otp-code.show{display:block}
+.otp-code:focus{border-color:var(--night)}
+.rf-check{display:flex;gap:8px;align-items:flex-start;margin-bottom:16px}
+.rf-check input{width:14px;height:14px;margin-top:2px;accent-color:var(--night-d);flex-shrink:0}
+.rf-check label{font-size:11px;color:var(--text-3);line-height:1.5}
+.rf-check a{color:var(--night);font-weight:500}
+.rf-submit{width:100%;padding:12px;border-radius:var(--r-lg);background:var(--night-d);color:var(--white);font-size:13px;font-weight:700;border:none;cursor:pointer;transition:background var(--t)}
+.rf-submit:hover{background:var(--night)}
+.rf-note{text-align:center;font-size:11px;color:var(--text-4);margin-top:8px}
+.benefit-list{display:flex;flex-direction:column;gap:0;border:1px solid var(--border);border-radius:var(--r-xl);overflow:hidden}
+.benefit-item{display:flex;gap:14px;padding:16px 18px;border-bottom:1px solid var(--border);background:var(--white);transition:background var(--t)}
+.benefit-item:last-child{border-bottom:none}
+.benefit-item:hover{background:var(--bg)}
+.benefit-icon{width:34px;height:34px;border-radius:var(--r);background:var(--night-l);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:15px}
+.benefit-title{font-size:13px;font-weight:600;color:var(--night-d);margin-bottom:2px}
 .benefit-desc{font-size:12px;color:var(--text-3);line-height:1.5}
 
-/* ─────────────────────────────────────
-   FOOTER
-───────────────────────────────────── */
-.footer{background:var(--night-d);padding:56px 0 32px}
-.footer-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:40px;margin-bottom:48px}
-.footer-brand{display:flex;align-items:center;gap:10px;margin-bottom:12px}
-.footer-brand-mark{
-  width:30px;height:30px;border-radius:6px;background:var(--tan);
-  display:flex;align-items:center;justify-content:center;
-}
-.footer-brand-mark svg{width:14px;height:14px}
-.footer-brand-name{font-size:16px;font-weight:700;color:var(--white)}
-.footer-tagline{font-size:13px;color:rgba(255,255,255,0.35);line-height:1.7;max-width:240px;margin-bottom:20px}
-.footer-social{display:flex;gap:8px}
-.footer-soc{
-  width:32px;height:32px;border-radius:var(--r);
-  border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.04);
-  display:flex;align-items:center;justify-content:center;
-  font-size:13px;cursor:pointer;color:rgba(255,255,255,0.5);
-  transition:all var(--t);
-}
-.footer-soc:hover{background:rgba(255,255,255,0.1);color:var(--white)}
-.footer-col-title{font-size:11px;font-weight:700;letter-spacing:0.8px;text-transform:uppercase;color:rgba(255,255,255,0.35);margin-bottom:14px}
-.footer-links{list-style:none}
-.footer-links li{margin-bottom:8px}
-.footer-links a{font-size:13px;color:rgba(255,255,255,0.4);transition:color var(--t)}
-.footer-links a:hover{color:rgba(255,255,255,0.85)}
-.footer-bottom{border-top:1px solid rgba(255,255,255,0.07);padding-top:24px;display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap}
-.footer-copy{font-size:12px;color:rgba(255,255,255,0.2)}
-.footer-disclaimer{font-size:11px;color:rgba(255,255,255,0.15);max-width:460px;line-height:1.6;text-align:right}
+/* ══════════════════════════════════════
+   TRUST SECTION
+══════════════════════════════════════ */
+.trust-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.trust-card{background:var(--white);border:1px solid var(--border);border-radius:var(--r-xl);padding:24px;box-shadow:var(--shadow-xs)}
+.trust-icon{width:44px;height:44px;border-radius:var(--r-lg);background:var(--night-l);display:flex;align-items:center;justify-content:center;font-size:20px;margin-bottom:14px}
+.trust-title{font-size:15px;font-weight:700;color:var(--night-d);margin-bottom:6px}
+.trust-desc{font-size:13px;color:var(--text-3);line-height:1.65}
 
-/* ─────────────────────────────────────
-   FLOATING + MOBILE
-───────────────────────────────────── */
-.floating{position:fixed;bottom:20px;right:20px;z-index:200;display:flex;flex-direction:column;align-items:flex-end;gap:8px}
-.float-btn{
-  display:flex;align-items:center;gap:8px;padding:11px 18px;
-  border-radius:var(--r-xl);font-size:13px;font-weight:600;
-  border:none;cursor:pointer;transition:all var(--t);
-  box-shadow:var(--shadow-md);
-}
-.float-wa{background:#25d366;color:var(--white)}
-.float-wa:hover{background:#1db954}
-.float-main{background:var(--night-d);color:var(--white)}
-.float-main:hover{background:var(--night)}
-.float-up{
-  width:38px;height:38px;padding:0;justify-content:center;
-  background:var(--white);color:var(--text-2);
-  border:1.5px solid var(--border);display:none;
-}
-.float-up.show{display:flex}
-.float-up:hover{background:var(--night-d);color:var(--white);border-color:var(--night-d)}
-
-/* Modal */
-.modal-overlay{position:fixed;inset:0;z-index:1000;background:rgba(17,24,39,0.5);backdrop-filter:blur(4px);display:none;align-items:center;justify-content:center;padding:20px}
+/* ══════════════════════════════════════
+   MODAL
+══════════════════════════════════════ */
+.modal-overlay{position:fixed;inset:0;z-index:1000;background:rgba(17,24,39,.5);backdrop-filter:blur(4px);display:none;align-items:center;justify-content:center;padding:20px}
 .modal-overlay.open{display:flex}
-.modal-box{background:var(--white);border-radius:var(--r-2xl);padding:36px;max-width:400px;width:100%;position:relative;box-shadow:var(--shadow-lg)}
-.modal-x{position:absolute;top:16px;right:16px;width:30px;height:30px;border-radius:var(--r);border:1px solid var(--border);background:var(--white);color:var(--text-3);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;transition:all var(--t)}
+.modal-box{background:var(--white);border-radius:var(--r-2xl);padding:32px;max-width:380px;width:100%;position:relative;box-shadow:var(--shadow-lg)}
+.modal-x{position:absolute;top:14px;right:14px;width:28px;height:28px;border-radius:var(--r);border:1px solid var(--border);background:var(--white);color:var(--text-3);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:14px;transition:all var(--t)}
 .modal-x:hover{background:var(--night-d);color:var(--white);border-color:var(--night-d)}
-.modal-lock{font-size:36px;margin-bottom:14px}
-.modal-title{font-size:20px;font-weight:700;color:var(--night-d);letter-spacing:-0.4px;margin-bottom:6px}
-.modal-sub{font-size:14px;color:var(--text-3);line-height:1.65;margin-bottom:20px}
-.modal-plan-box{padding:16px;border:1.5px solid var(--border);border-radius:var(--r-lg);background:var(--bg);margin-bottom:20px}
+.modal-icon{font-size:32px;margin-bottom:12px}
+.modal-title{font-size:18px;font-weight:700;color:var(--night-d);margin-bottom:6px;letter-spacing:-.3px}
+.modal-sub{font-size:13px;color:var(--text-3);line-height:1.65;margin-bottom:18px}
+.modal-plan{padding:14px 16px;border:1.5px solid var(--border);border-radius:var(--r-lg);background:var(--bg);margin-bottom:18px}
 .modal-plan-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px}
-.modal-plan-name{font-size:15px;font-weight:700;color:var(--night-d)}
-.modal-plan-price{font-size:24px;font-weight:800;color:var(--night-d)}
-.modal-plan-price span{font-size:13px;font-weight:400;color:var(--text-3)}
-.modal-plan-note{font-size:12px;color:var(--text-3)}
-.modal-cta{width:100%;padding:12px;border-radius:var(--r-lg);background:var(--night-d);color:var(--white);font-size:14px;font-weight:700;font-family:'Inter',sans-serif;border:none;cursor:pointer;transition:background var(--t)}
+.modal-plan-name{font-size:14px;font-weight:700;color:var(--night-d)}
+.modal-plan-price{font-size:22px;font-weight:800;color:var(--night-d)}
+.modal-plan-price span{font-size:12px;font-weight:400;color:var(--text-3)}
+.modal-plan-note{font-size:11px;color:var(--text-3)}
+.modal-cta{width:100%;padding:11px;border-radius:var(--r-lg);background:var(--night-d);color:var(--white);font-size:13px;font-weight:700;border:none;cursor:pointer;transition:background var(--t)}
 .modal-cta:hover{background:var(--night)}
-.modal-footnote{text-align:center;font-size:12px;color:var(--text-4);margin-top:10px}
+.modal-footnote{text-align:center;font-size:11px;color:var(--text-4);margin-top:8px}
 
-/* Mobile drawer */
-.mobile-overlay{position:fixed;inset:0;z-index:300;background:rgba(17,24,39,0.4);display:none}
-.mobile-overlay.open{display:block}
-.mobile-drawer{position:fixed;top:0;right:0;bottom:0;width:280px;z-index:301;background:var(--white);box-shadow:var(--shadow-lg);padding:20px;transform:translateX(100%);transition:transform .25s ease;overflow-y:auto}
-.mobile-drawer.open{transform:translateX(0)}
-.mobile-close{display:flex;justify-content:flex-end;margin-bottom:16px}
-.mobile-close-btn{width:32px;height:32px;border-radius:var(--r);border:1.5px solid var(--border);background:var(--white);color:var(--text-3);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px}
-.mobile-link{display:block;padding:12px;border-radius:var(--r);font-size:15px;font-weight:500;color:var(--text-2);transition:all var(--t);margin-bottom:2px}
-.mobile-link:hover{background:var(--bg);color:var(--text)}
-.mobile-divider{height:1px;background:var(--border);margin:12px 0}
-.mobile-cta-primary{display:block;width:100%;padding:12px;border-radius:var(--r-lg);background:var(--night-d);color:var(--white);font-size:14px;font-weight:700;text-align:center;margin-top:8px}
+/* ══════════════════════════════════════
+   FLOATING + MOBILE
+══════════════════════════════════════ */
+.floating{position:fixed;bottom:20px;right:20px;z-index:300;display:flex;flex-direction:column;align-items:flex-end;gap:8px}
+.float-btn{display:flex;align-items:center;gap:7px;padding:10px 16px;border-radius:var(--r-xl);font-size:12px;font-weight:600;border:none;cursor:pointer;transition:all var(--t);box-shadow:var(--shadow-md)}
+.float-wa{background:#25d366;color:var(--white)}.float-wa:hover{background:#1db954}
+.float-main{background:var(--night-d);color:var(--white)}.float-main:hover{background:var(--night)}
+.float-up{width:36px;height:36px;padding:0;justify-content:center;background:var(--white);color:var(--text-2);border:1.5px solid var(--border);display:none;box-shadow:var(--shadow)}
+.float-up.show{display:flex}.float-up:hover{background:var(--night-d);color:var(--white);border-color:var(--night-d)}
 
-/* ─────────────────────────────────────
+/* Mobile sidebar overlay */
+.mob-overlay{position:fixed;inset:0;z-index:400;background:rgba(17,24,39,.4);display:none}
+.mob-overlay.open{display:block}
+.mob-sidebar{position:fixed;top:0;left:0;bottom:0;width:var(--sidebar-w);z-index:401;background:var(--white);box-shadow:var(--shadow-lg);transform:translateX(-100%);transition:transform .25s ease;overflow-y:auto}
+.mob-sidebar.open{transform:translateX(0)}
+.mob-sidebar-close{display:flex;justify-content:flex-end;padding:16px;border-bottom:1px solid var(--border)}
+.mob-close-btn{width:30px;height:30px;border-radius:var(--r);border:1px solid var(--border);background:var(--white);color:var(--text-3);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:14px}
+
+/* ══════════════════════════════════════
    RESPONSIVE
-───────────────────────────────────── */
+══════════════════════════════════════ */
 @media(max-width:1024px){
-  .post-inner,.cal-layout,.reg-layout{grid-template-columns:1fr}
-  .post-card{display:none}
-  .footer-grid{grid-template-columns:1fr 1fr}
-  .how-grid{grid-template-columns:1fr}
-  .how-card{border-bottom:1px solid var(--border)}
-  .how-card:last-child{border-bottom:none}
+  .sidebar{display:none}
+  .topnav-ham{display:flex}
+  .post-inner,.map-container,.cal-layout,.reg-layout{grid-template-columns:1fr}
+  .post-form-card{display:none}
+  .about-map{height:280px}
+  .pricing-grid{max-width:100%}
 }
 @media(max-width:768px){
-  .container{padding:0 16px}
-  .nav-inner{padding:0 16px;gap:16px}
-  .nav-search{display:none}
-  .nav-links{display:none}
-  .nav-ham{display:flex}
-  .hero{padding:40px 0 48px}
-  .section{padding:40px 0}
+  .topnav-search{max-width:200px}
+  .topnav-right{display:none}
   .providers-grid{grid-template-columns:1fr 1fr}
   .trust-grid{grid-template-columns:1fr}
+  .section{padding:24px 16px}
+  .hero{padding:36px 16px 32px}
+  .post-section{padding:32px 16px}
+  .about-hero{padding:28px 16px}
+  .city-updates-header,.city-updates-track{padding-left:16px;padding-right:16px}
+  .cat-strip-inner{padding:0 16px}
+  .mode-tabs{padding:0 16px}
+  .about-grid{grid-template-columns:1fr 1fr}
   .pricing-grid{grid-template-columns:1fr}
-  .cats-grid{grid-template-columns:repeat(3,1fr)}
-  .footer-grid{grid-template-columns:1fr}
-  .footer-disclaimer{text-align:left}
-  .hero-stats{gap:20px}
+  .reg-layout{grid-template-columns:1fr}
 }
 @media(max-width:480px){
   .providers-grid{grid-template-columns:1fr}
-  .cats-grid{grid-template-columns:repeat(2,1fr)}
+  .food-grid{grid-template-columns:1fr 1fr}
+  .about-grid{grid-template-columns:1fr}
+  .hero-tabs{flex-wrap:wrap}
+  .rf-row,.pf-row{grid-template-columns:1fr}
   .hero-stat-div{display:none}
-  .form-row{grid-template-columns:1fr}
-  .post-form-row{grid-template-columns:1fr}
 }
 </style>
 </head>
 <body>
+<div class="app">
 
-<!-- NAV -->
-<nav class="nav">
-  <div class="nav-inner">
-    <a class="nav-logo" href="#">
-      <div class="nav-logo-mark">
-        <svg viewBox="0 0 24 24" fill="none" stroke="#e1b382" stroke-width="2.5" stroke-linecap="round"><path d="M12 2L2 7l10 5 10-5-10-5M2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+<!-- ══════ TOP NAV ══════ -->
+<nav class="topnav">
+  <div class="topnav-inner">
+    <div class="topnav-logo">
+      <div class="topnav-mark">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#12343b" stroke-width="2.5" stroke-linecap="round"><path d="M12 2L2 7l10 5 10-5-10-5M2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
       </div>
-      <span class="nav-logo-name">My KKR</span>
-    </a>
-    <div class="nav-search">
-      <input class="nav-search-input" type="text" placeholder="Search businesses, services...">
-      <button class="nav-search-btn">Search</button>
+      <span class="topnav-name">My KKR</span>
     </div>
-    <div class="nav-links">
-      <a class="nav-link" href="#categories">Browse</a>
-      <a class="nav-link" href="#post">Post requirement</a>
-      <a class="nav-link" href="#pricing">Pricing</a>
+    <div class="topnav-search">
+      <div class="topnav-search-loc">
+        <span style="font-size:12px">📍</span>
+        <span class="topnav-search-loc-txt">Kurukshetra</span>
+      </div>
+      <input class="topnav-search-input" type="text" placeholder="Search services, businesses...">
+      <button class="topnav-search-btn">Search</button>
     </div>
-    <div class="nav-links">
-      <button class="nav-btn-outline" onclick="document.getElementById('reg-section').scrollIntoView({behavior:'smooth'})">Sign in</button>
-      <button class="nav-btn-primary" onclick="document.getElementById('reg-section').scrollIntoView({behavior:'smooth'})">List your business</button>
+    <div class="topnav-right">
+      <button class="topnav-btn ghost" onclick="showView('register')">Sign in</button>
+      <button class="topnav-btn primary" onclick="showView('register')">List your business</button>
     </div>
-    <div class="nav-ham" onclick="openDrawer()"><span></span><span></span><span></span></div>
+    <div class="topnav-ham" onclick="openMobSidebar()"><span></span><span></span><span></span></div>
   </div>
 </nav>
 
-<!-- MOBILE DRAWER -->
-<div class="mobile-overlay" id="mob-overlay" onclick="closeDrawer()"></div>
-<div class="mobile-drawer" id="mob-drawer">
-  <div class="mobile-close"><button class="mobile-close-btn" onclick="closeDrawer()">✕</button></div>
-  <a class="mobile-link" href="#categories" onclick="closeDrawer()">Browse</a>
-  <a class="mobile-link" href="#post" onclick="closeDrawer()">Post requirement</a>
-  <a class="mobile-link" href="#pricing" onclick="closeDrawer()">Pricing</a>
-  <div class="mobile-divider"></div>
-  <a class="mobile-link" href="#reg-section" onclick="closeDrawer()">Sign in</a>
-  <a class="mobile-cta-primary" href="#reg-section" onclick="closeDrawer()">List your business</a>
-</div>
+<!-- ══════ APP BODY ══════ -->
+<div class="app-body">
 
-<!-- HERO -->
-<div class="hero">
-  <div class="container">
-    <div class="hero-eyebrow">
-      <span class="hero-eyebrow-dot"></span>
-      Now live in Kurukshetra, Haryana
-    </div>
-    <h1>Find anything in<br><em>Kurukshetra</em></h1>
-    <p class="hero-sub">
-      From wedding DJs to local plumbers —<br>
-      <span class="hindi">कुरुक्षेत्र की हर ज़रूरत, एक जगह</span>
-    </p>
-
-    <div class="hero-search">
-      <div class="hero-search-loc">
-        <span class="hero-search-loc-icon">📍</span>
-        <span class="hero-search-loc-text">Kurukshetra</span>
-        <span class="hero-search-loc-arrow">▾</span>
+  <!-- ══════ SIDEBAR ══════ -->
+  <aside class="sidebar">
+    <div class="sidebar-section">
+      <div class="sidebar-section-label">Discover</div>
+      <div class="sidebar-item active" onclick="showView('home')">
+        <span class="sidebar-item-icon">🏠</span>Home
       </div>
-      <div class="hero-search-input-wrap">
-        <input class="hero-search-input" type="text" placeholder="What are you looking for? e.g. DJ, Plumber, Caterer...">
+      <div class="sidebar-item" onclick="showView('services')">
+        <span class="sidebar-item-icon">🔧</span>Services
+        <span class="sidebar-item-badge">66+</span>
       </div>
-      <button class="hero-search-submit">Search</button>
+      <div class="sidebar-item" onclick="showView('shop')">
+        <span class="sidebar-item-icon">🛍️</span>Shop
+        <span class="sidebar-item-new">NEW</span>
+      </div>
+      <div class="sidebar-item" onclick="showView('food')">
+        <span class="sidebar-item-icon">🍛</span>Food & Dining
+      </div>
+      <div class="sidebar-item" onclick="showView('post')">
+        <span class="sidebar-item-icon">📋</span>Post a Requirement
+      </div>
     </div>
 
-    <div class="hero-stats">
-      <div class="hero-stat">
-        <div class="hero-stat-num">66+</div>
-        <div class="hero-stat-label">Service categories</div>
+    <div class="sidebar-divider"></div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-section-label">Features</div>
+      <div class="sidebar-item" onclick="showView('calendar')">
+        <span class="sidebar-item-icon">📅</span>Availability Calendar
       </div>
-      <div class="hero-stat-div"></div>
-      <div class="hero-stat">
-        <div class="hero-stat-num">₹0</div>
-        <div class="hero-stat-label">Commission charged</div>
+      <div class="sidebar-item" onclick="showView('map')">
+        <span class="sidebar-item-icon">🗺️</span>Area Map
       </div>
-      <div class="hero-stat-div"></div>
-      <div class="hero-stat">
-        <div class="hero-stat-num">100%</div>
-        <div class="hero-stat-label">Local businesses</div>
-      </div>
-      <div class="hero-stat-div"></div>
-      <div class="hero-stat">
-        <div class="hero-stat-num">Live</div>
-        <div class="hero-stat-label">Availability calendar</div>
+      <div class="sidebar-item" onclick="showView('home');setTimeout(()=>document.getElementById('city-updates').scrollIntoView({behavior:'smooth'}),200)">
+        <span class="sidebar-item-icon">📺</span>City Updates
       </div>
     </div>
-  </div>
-</div>
 
-<!-- CATEGORY STRIP -->
-<div class="cat-strip">
-  <div class="cat-strip-inner" id="catStrip">
-    <div class="cat-chip active" onclick="setChip(this)"><span class="cat-chip-icon">⊕</span>All</div>
-    <div class="cat-chip" onclick="setChip(this)"><span class="cat-chip-icon">🎵</span>DJ & Sound</div>
-    <div class="cat-chip" onclick="setChip(this)"><span class="cat-chip-icon">🍽️</span>Catering</div>
-    <div class="cat-chip" onclick="setChip(this)"><span class="cat-chip-icon">📸</span>Photography</div>
-    <div class="cat-chip" onclick="setChip(this)"><span class="cat-chip-icon">💒</span>Venues & Halls</div>
-    <div class="cat-chip" onclick="setChip(this)"><span class="cat-chip-icon">🌿</span>Mehendi</div>
-    <div class="cat-chip" onclick="setChip(this)"><span class="cat-chip-icon">⚡</span>Electrician</div>
-    <div class="cat-chip" onclick="setChip(this)"><span class="cat-chip-icon">🚿</span>Plumber</div>
-    <div class="cat-chip" onclick="setChip(this)"><span class="cat-chip-icon">🛒</span>Kirana</div>
-    <div class="cat-chip" onclick="setChip(this)"><span class="cat-chip-icon">🍛</span>Restaurant</div>
-    <div class="cat-chip" onclick="setChip(this)"><span class="cat-chip-icon">🙏</span>Pandit Ji</div>
-    <div class="cat-chip" onclick="setChip(this)"><span class="cat-chip-icon">🚗</span>Taxi & Cab</div>
-    <div class="cat-chip" onclick="setChip(this)"><span class="cat-chip-icon">🪵</span>Carpenter</div>
-    <div class="cat-chip" onclick="setChip(this)"><span class="cat-chip-icon">🎂</span>Bakery</div>
-    <div class="cat-chip" onclick="setChip(this)"><span class="cat-chip-icon">💇</span>Salon</div>
-  </div>
-</div>
+    <div class="sidebar-divider"></div>
 
-<!-- FEATURED PROVIDERS -->
-<section class="section">
-  <div class="container">
-    <div class="section-header">
-      <h2 class="section-title">Featured providers near you</h2>
-      <a class="section-see-all" href="#">View all →</a>
-    </div>
-    <div class="providers-grid">
-      <div class="provider-card" onclick="openModal()">
-        <div class="provider-card-top c1">
-          <span class="provider-card-emoji">🎵</span>
-          <div class="provider-card-badge"><span class="provider-card-badge-dot"></span>Available today</div>
+    <div class="sidebar-section">
+      <div class="sidebar-section-label">Explore Kurukshetra</div>
+      <!-- Collapsible -->
+      <div class="sidebar-collapsible">
+        <div class="sidebar-collapsible-header" onclick="toggleCollapse(this)">
+          <span class="sidebar-item-icon">🏛️</span>
+          <span style="font-size:13px;font-weight:500;color:var(--text-2)">About Kurukshetra</span>
+          <span class="sidebar-collapsible-arrow">▾</span>
         </div>
-        <div class="provider-card-body">
-          <div class="provider-card-cat">DJ & Sound System</div>
-          <div class="provider-card-name">Sharma Sound & DJ</div>
-          <div class="provider-card-area">📍 Thanesar, Kurukshetra</div>
-          <div class="provider-card-meta">
-            <div class="provider-card-rating">
-              <span class="provider-card-stars">★★★★★</span>
-              <span class="provider-card-rating-num">4.8</span>
-              <span class="provider-card-rating-count">(32 reviews)</span>
+        <div class="sidebar-children">
+          <div class="sidebar-child" onclick="showAbout('overview')"><span class="sidebar-child-dot"></span>Overview & History</div>
+          <div class="sidebar-child" onclick="showAbout('tourist')"><span class="sidebar-child-dot"></span>Tourist Places</div>
+          <div class="sidebar-child" onclick="showAbout('tehsils')"><span class="sidebar-child-dot"></span>Tehsils & Villages</div>
+          <div class="sidebar-child" onclick="showAbout('map')"><span class="sidebar-child-dot"></span>District Map</div>
+          <div class="sidebar-child" onclick="showAbout('events')"><span class="sidebar-child-dot"></span>Local Events</div>
+          <div class="sidebar-child" onclick="showAbout('institutions')"><span class="sidebar-child-dot"></span>Universities</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sidebar-divider"></div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-section-label">Account</div>
+      <div class="sidebar-item" onclick="showView('pricing')">
+        <span class="sidebar-item-icon">💳</span>Pricing
+      </div>
+      <div class="sidebar-item" onclick="showView('register')">
+        <span class="sidebar-item-icon">👤</span>Sign in / Register
+      </div>
+    </div>
+
+    <div class="sidebar-bottom">
+      <a class="sidebar-post-btn" onclick="showView('post')">+ Post a Requirement</a>
+    </div>
+  </aside>
+
+  <!-- ══════ MAIN ══════ -->
+  <main class="main">
+
+    <!-- ════ HOME VIEW ════ -->
+    <div class="view active" id="view-home">
+
+      <!-- Hero -->
+      <div class="hero">
+        <div class="hero-badge"><span class="hero-badge-dot"></span>Now live · Kurukshetra, Haryana</div>
+        <h1>Find Anything in<br><span>Kurukshetra</span></h1>
+        <p class="hero-hindi hindi">कुरुक्षेत्र की हर ज़रूरत — एक जगह</p>
+        <div class="hero-search">
+          <div class="hero-search-loc">
+            <span class="hero-search-loc-icon">📍</span>
+            <span class="hero-search-loc-txt">Kurukshetra</span>
+            <span class="hero-search-loc-arrow">▾</span>
+          </div>
+          <input class="hero-search-input" type="text" placeholder="Search DJs, venues, plumbers, caterers...">
+          <button class="hero-search-submit">Search</button>
+        </div>
+        <div class="hero-tabs">
+          <div class="hero-tab active" onclick="setHeroTab(this,'services')"><span class="hero-tab-icon">🔧</span>Services</div>
+          <div class="hero-tab" onclick="setHeroTab(this,'shop')"><span class="hero-tab-icon">🛍️</span>Shop</div>
+          <div class="hero-tab" onclick="setHeroTab(this,'food')"><span class="hero-tab-icon">🍛</span>Food</div>
+          <div class="hero-tab" onclick="setHeroTab(this,'post')"><span class="hero-tab-icon">📋</span>Post Requirement</div>
+        </div>
+        <div class="hero-stats">
+          <div class="hero-stat"><div class="hero-stat-num">66+</div><div class="hero-stat-label">Categories</div></div>
+          <div class="hero-stat-div"></div>
+          <div class="hero-stat"><div class="hero-stat-num">₹0</div><div class="hero-stat-label">Commission</div></div>
+          <div class="hero-stat-div"></div>
+          <div class="hero-stat"><div class="hero-stat-num">Live</div><div class="hero-stat-label">Availability</div></div>
+          <div class="hero-stat-div"></div>
+          <div class="hero-stat"><div class="hero-stat-num">100%</div><div class="hero-stat-label">Local</div></div>
+        </div>
+      </div>
+
+      <!-- City Updates -->
+      <div class="city-updates" id="city-updates">
+        <div class="city-updates-header">
+          <div class="city-updates-title">
+            City Updates
+            <div class="live-badge"><span class="live-dot"></span>Live</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px">
+            <div class="city-updates-nav">
+              <button class="city-nav-btn" onclick="scrollVideos(-1)">‹</button>
+              <button class="city-nav-btn" onclick="scrollVideos(1)">›</button>
+            </div>
+            <span class="city-updates-see-all">See all →</span>
+          </div>
+        </div>
+        <div class="city-updates-track" id="videoTrack">
+          <!-- Video 1 — YouTube embed -->
+          <div class="city-video-card">
+            <div class="city-video-frame">
+              <iframe src="https://www.youtube.com/embed/LXb3EKWsInQ?autoplay=0&mute=1&controls=0&showinfo=0&rel=0" allowfullscreen loading="lazy"></iframe>
+              <div class="city-video-play" onclick="this.style.display='none';this.previousElementSibling.src+=''">
+                <div class="city-video-play-btn">▶</div>
+              </div>
+            </div>
+            <div class="city-video-body">
+              <div class="city-video-tag">Tourism</div>
+              <div class="city-video-title">Brahmsarovar — The sacred lake of Kurukshetra</div>
+              <div class="city-video-time">Pinned by admin</div>
             </div>
           </div>
-          <div class="provider-card-meta" style="margin-top:6px">
-            <span class="provider-card-price">₹4,000 – ₹12,000</span>
-          </div>
-          <button class="provider-card-cta">Contact on WhatsApp</button>
-        </div>
-      </div>
-
-      <div class="provider-card" onclick="openModal()">
-        <div class="provider-card-top c2">
-          <span class="provider-card-emoji">💒</span>
-          <div class="provider-card-badge"><span class="provider-card-badge-dot"></span>3 dates open</div>
-        </div>
-        <div class="provider-card-body">
-          <div class="provider-card-cat">Marriage Hall & Lawn</div>
-          <div class="provider-card-name">Kurukshetra Banquet Hall</div>
-          <div class="provider-card-area">📍 Pipli Road, Kurukshetra</div>
-          <div class="provider-card-meta">
-            <div class="provider-card-rating">
-              <span class="provider-card-stars">★★★★★</span>
-              <span class="provider-card-rating-num">4.9</span>
-              <span class="provider-card-rating-count">(18 reviews)</span>
+          <!-- Video 2 -->
+          <div class="city-video-card">
+            <div class="city-video-frame">
+              <iframe src="https://www.youtube.com/embed/MBkAV-kp9gA?autoplay=0&mute=1&controls=0&rel=0" allowfullscreen loading="lazy"></iframe>
+              <div class="city-video-play" onclick="this.style.display='none'">
+                <div class="city-video-play-btn">▶</div>
+              </div>
+            </div>
+            <div class="city-video-body">
+              <div class="city-video-tag">History</div>
+              <div class="city-video-title">Jyotisar — Where the Bhagavad Gita was spoken</div>
+              <div class="city-video-time">Pinned by admin</div>
             </div>
           </div>
-          <div class="provider-card-meta" style="margin-top:6px">
-            <span class="provider-card-price">₹50,000 – ₹2,00,000</span>
-          </div>
-          <button class="provider-card-cta locked">🔒 Subscribe to contact</button>
-        </div>
-      </div>
-
-      <div class="provider-card" onclick="openModal()">
-        <div class="provider-card-top c3">
-          <span class="provider-card-emoji">📸</span>
-          <div class="provider-card-badge"><span class="provider-card-badge-dot"></span>Available</div>
-        </div>
-        <div class="provider-card-body">
-          <div class="provider-card-cat">Photography & Videography</div>
-          <div class="provider-card-name">Pixel Perfect Studio</div>
-          <div class="provider-card-area">📍 Sector 13, Kurukshetra</div>
-          <div class="provider-card-meta">
-            <div class="provider-card-rating">
-              <span class="provider-card-stars">★★★★★</span>
-              <span class="provider-card-rating-num">4.7</span>
-              <span class="provider-card-rating-count">(45 reviews)</span>
+          <!-- Placeholder cards — admin will replace these -->
+          <div class="city-video-card">
+            <div class="city-video-frame" style="background:var(--night-l);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px">
+              <span style="font-size:32px;opacity:0.3">📺</span>
+              <span style="font-size:12px;color:var(--text-4)">Admin pastes link here</span>
+            </div>
+            <div class="city-video-body">
+              <div class="city-video-tag">Update 3</div>
+              <div class="city-video-title">City update slot — paste YouTube or Instagram link in admin panel</div>
+              <div class="city-video-time">Awaiting content</div>
             </div>
           </div>
-          <div class="provider-card-meta" style="margin-top:6px">
-            <span class="provider-card-price">₹8,000 – ₹25,000</span>
-          </div>
-          <button class="provider-card-cta locked">🔒 Subscribe to contact</button>
-        </div>
-      </div>
-
-      <div class="provider-card" onclick="openModal()">
-        <div class="provider-card-top c4">
-          <span class="provider-card-emoji">🌿</span>
-          <div class="provider-card-badge"><span class="provider-card-badge-dot"></span>Available</div>
-        </div>
-        <div class="provider-card-body">
-          <div class="provider-card-cat">Mehendi Artist</div>
-          <div class="provider-card-name">Priya Mehendi Art</div>
-          <div class="provider-card-area">📍 Brahmsarovar, Kurukshetra</div>
-          <div class="provider-card-meta">
-            <div class="provider-card-rating">
-              <span class="provider-card-stars">★★★★★</span>
-              <span class="provider-card-rating-num">4.9</span>
-              <span class="provider-card-rating-count">(67 reviews)</span>
+          <div class="city-video-card">
+            <div class="city-video-frame" style="background:var(--night-l);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px">
+              <span style="font-size:32px;opacity:0.3">📺</span>
+              <span style="font-size:12px;color:var(--text-4)">Admin pastes link here</span>
+            </div>
+            <div class="city-video-body">
+              <div class="city-video-tag">Update 4</div>
+              <div class="city-video-title">City update slot — paste YouTube or Instagram link in admin panel</div>
+              <div class="city-video-time">Awaiting content</div>
             </div>
           </div>
-          <div class="provider-card-meta" style="margin-top:6px">
-            <span class="provider-card-price">₹1,500 – ₹5,000</span>
-          </div>
-          <button class="provider-card-cta locked">🔒 Subscribe to contact</button>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<div class="divider"></div>
-
-<!-- HOW IT WORKS -->
-<section class="section how-section">
-  <div class="container">
-    <div class="section-header">
-      <h2 class="section-title">How My KKR works</h2>
-    </div>
-    <div class="how-grid">
-      <div class="how-card">
-        <div class="how-step-num">1</div>
-        <div class="how-card-icon">🔍</div>
-        <div class="how-card-title">Search or browse</div>
-        <div class="how-card-desc">Search by name or browse 66+ categories. See photos, ratings, price ranges, and live availability — completely free, no account needed.</div>
-      </div>
-      <div class="how-card">
-        <div class="how-step-num">2</div>
-        <div class="how-card-icon">📅</div>
-        <div class="how-card-title">Check live availability</div>
-        <div class="how-card-desc">Every event service shows a real-time calendar. Enter your event date and time — see only who's available. No more calling 10 DJs one by one.</div>
-      </div>
-      <div class="how-card">
-        <div class="how-step-num">3</div>
-        <div class="how-card-icon">💬</div>
-        <div class="how-card-title">Contact directly on WhatsApp</div>
-        <div class="how-card-desc">Subscribe for ₹49/month to unlock WhatsApp numbers. Talk directly, negotiate your price, confirm your booking. My KKR takes zero commission.</div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- POST A REQUIREMENT -->
-<section class="section post-section" id="post">
-  <div class="container">
-    <div class="post-inner">
-      <div>
-        <div class="post-label">Post a requirement</div>
-        <div class="post-title">Need something done?<br>Describe it and get quotes.</div>
-        <div class="post-desc">Planning a wedding? Looking for a caterer? Need an electrician urgently? Post your requirement and let businesses come to you with quotes.</div>
-        <ul class="post-steps">
-          <li class="post-step"><span class="post-step-num">1</span>Describe what you need and set your budget</li>
-          <li class="post-step"><span class="post-step-num">2</span>Receive quotes from verified local businesses</li>
-          <li class="post-step"><span class="post-step-num">3</span>Choose the best quote and connect on WhatsApp</li>
-        </ul>
-        <button class="post-btn" onclick="document.getElementById('reg-section').scrollIntoView({behavior:'smooth'})">Post your requirement →</button>
-      </div>
-      <div class="post-card">
-        <div class="post-card-title">Post a requirement</div>
-        <div class="post-form-group">
-          <label class="post-form-label">What do you need?</label>
-          <input class="post-form-input" type="text" placeholder="e.g. DJ for wedding, Electrician for wiring...">
-        </div>
-        <div class="post-form-group">
-          <label class="post-form-label">Category</label>
-          <select class="post-form-select">
-            <option value="">Select a category</option>
-            <option>DJ & Sound System</option>
-            <option>Catering & Food</option>
-            <option>Photography</option>
-            <option>Marriage Hall</option>
-            <option>Electrician</option>
-            <option>Plumber</option>
-            <option>Other</option>
-          </select>
-        </div>
-        <div class="post-form-row">
-          <div class="post-form-group">
-            <label class="post-form-label">Date needed</label>
-            <input class="post-form-input" type="date">
-          </div>
-          <div class="post-form-group">
-            <label class="post-form-label">Budget (₹)</label>
-            <input class="post-form-input" type="text" placeholder="e.g. 5,000–10,000">
+          <div class="city-video-card">
+            <div class="city-video-frame" style="background:var(--night-l);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:8px">
+              <span style="font-size:32px;opacity:0.3">📺</span>
+              <span style="font-size:12px;color:var(--text-4)">Admin pastes link here</span>
+            </div>
+            <div class="city-video-body">
+              <div class="city-video-tag">Update 5</div>
+              <div class="city-video-title">City update slot — paste YouTube or Instagram link in admin panel</div>
+              <div class="city-video-time">Awaiting content</div>
+            </div>
           </div>
         </div>
-        <div class="post-form-group">
-          <label class="post-form-label">Description</label>
-          <textarea class="post-form-textarea" placeholder="Add more details — location, number of guests, specific requirements..."></textarea>
-        </div>
-        <button class="post-form-submit">Post requirement — it's free</button>
       </div>
-    </div>
-  </div>
-</section>
 
-<!-- ALL CATEGORIES -->
-<section class="section full-cats" id="categories">
-  <div class="container">
-    <div class="section-header">
-      <h2 class="section-title">Browse all categories</h2>
-      <a class="section-see-all" href="#">All 66 categories →</a>
-    </div>
-    <div class="cats-grid">
-      <a class="cat-card featured" href="#"><div class="cat-card-icon">🎵</div><div class="cat-card-name">DJ & Sound System</div><div class="cat-card-hindi hindi">डीजे और साउंड</div><div class="cat-card-count">12 listed · Calendar</div></a>
-      <a class="cat-card featured" href="#"><div class="cat-card-icon">🍽️</div><div class="cat-card-name">Catering & Food</div><div class="cat-card-hindi hindi">केटरिंग</div><div class="cat-card-count">8 listed · Calendar</div></a>
-      <a class="cat-card" href="#"><div class="cat-card-icon">📸</div><div class="cat-card-name">Photography</div><div class="cat-card-hindi hindi">फोटोग्राफी</div><div class="cat-card-count">15 listed</div></a>
-      <a class="cat-card" href="#"><div class="cat-card-icon">💒</div><div class="cat-card-name">Marriage Hall</div><div class="cat-card-hindi hindi">विवाह भवन</div><div class="cat-card-count">6 listed</div></a>
-      <a class="cat-card" href="#"><div class="cat-card-icon">🌿</div><div class="cat-card-name">Mehendi Artist</div><div class="cat-card-hindi hindi">मेहंदी आर्टिस्ट</div><div class="cat-card-count">9 listed</div></a>
-      <a class="cat-card" href="#"><div class="cat-card-icon">⚡</div><div class="cat-card-name">Electrician</div><div class="cat-card-hindi hindi">बिजली मिस्त्री</div><div class="cat-card-count">14 listed</div></a>
-      <a class="cat-card" href="#"><div class="cat-card-icon">🚿</div><div class="cat-card-name">Plumber</div><div class="cat-card-hindi hindi">प्लंबर</div><div class="cat-card-count">10 listed</div></a>
-      <a class="cat-card" href="#"><div class="cat-card-icon">🛒</div><div class="cat-card-name">Kirana Store</div><div class="cat-card-hindi hindi">किराना</div><div class="cat-card-count">24 listed</div></a>
-      <a class="cat-card" href="#"><div class="cat-card-icon">🍛</div><div class="cat-card-name">Restaurant</div><div class="cat-card-hindi hindi">रेस्तरां</div><div class="cat-card-count">18 listed</div></a>
-      <a class="cat-card" href="#"><div class="cat-card-icon">🙏</div><div class="cat-card-name">Pandit Ji</div><div class="cat-card-hindi hindi">पंडित पूजा</div><div class="cat-card-count">8 listed</div></a>
-      <a class="cat-card" href="#"><div class="cat-card-icon">🚗</div><div class="cat-card-name">Taxi & Cab</div><div class="cat-card-hindi hindi">टैक्सी</div><div class="cat-card-count">8 listed</div></a>
-      <a class="cat-card" href="#"><div class="cat-card-icon">🪵</div><div class="cat-card-name">Carpenter</div><div class="cat-card-hindi hindi">बढ़ई</div><div class="cat-card-count">7 listed</div></a>
-      <a class="cat-card" href="#"><div class="cat-card-icon">🎂</div><div class="cat-card-name">Bakery & Cakes</div><div class="cat-card-hindi hindi">बेकरी</div><div class="cat-card-count">7 listed</div></a>
-      <a class="cat-card" href="#"><div class="cat-card-icon">✂️</div><div class="cat-card-name">Salon & Barber</div><div class="cat-card-hindi hindi">सैलून</div><div class="cat-card-count">14 listed</div></a>
-      <a class="cat-card" href="#"><div class="cat-card-icon">⛺</div><div class="cat-card-name">Tent & Shamiana</div><div class="cat-card-hindi hindi">टेंट शामियाना</div><div class="cat-card-count">5 listed</div></a>
-      <a class="cat-card" href="#"><div class="cat-card-icon">➕</div><div class="cat-card-name">View all 66</div><div class="cat-card-hindi hindi">सभी देखें</div><div class="cat-card-count">66 categories</div></a>
-    </div>
-  </div>
-</section>
-
-<!-- CALENDAR SECTION -->
-<section class="section cal-section" id="calendar">
-  <div class="container">
-    <div class="cal-layout">
-      <div>
-        <h2 class="section-title">Live availability calendar</h2>
-        <p style="font-size:15px;color:var(--text-3);margin-top:8px;line-height:1.65;max-width:460px">The feature no other local directory has. Every event service provider shows their live calendar — green is free, red is booked. Search by date and see exactly who's available for your event.</p>
-        <ul class="cal-feature-list">
-          <li class="cal-feature-item"><div class="cal-feature-icon">📅</div>Search by your exact event date — instantly see only available providers</li>
-          <li class="cal-feature-item"><div class="cal-feature-icon">⏰</div>Set time slots — morning, evening, or specific hours</li>
-          <li class="cal-feature-item"><div class="cal-feature-icon">🔄</div>Providers update in real time — always accurate, no surprises</li>
-          <li class="cal-feature-item"><div class="cal-feature-icon">💬</div>Once you find who's free — contact directly on WhatsApp</li>
-        </ul>
-        <div style="margin-top:24px;display:flex;gap:10px;flex-wrap:wrap">
-          <input type="date" style="padding:10px 14px;border-radius:var(--r);border:1.5px solid var(--border);font-size:14px;font-family:'Inter',sans-serif;outline:none;color:var(--text)">
-          <select style="padding:10px 14px;border-radius:var(--r);border:1.5px solid var(--border);font-size:14px;font-family:'Inter',sans-serif;outline:none;color:var(--text);background:var(--white);-webkit-appearance:none">
-            <option>Any category</option>
-            <option>DJ & Sound</option>
-            <option>Catering</option>
-            <option>Photography</option>
-            <option>Marriage Hall</option>
-          </select>
-          <button style="padding:10px 20px;border-radius:var(--r);background:var(--night-d);color:var(--white);font-size:14px;font-weight:600;border:none;cursor:pointer;font-family:'Inter',sans-serif">Find available</button>
+      <!-- Category chip strip -->
+      <div class="cat-strip">
+        <div class="cat-strip-inner">
+          <div class="cat-chip active" onclick="setChip(this)"><span class="cat-chip-icon">⊕</span>All</div>
+          <div class="cat-chip" onclick="setChip(this)"><span class="cat-chip-icon">🎵</span>DJ & Sound</div>
+          <div class="cat-chip" onclick="setChip(this)"><span class="cat-chip-icon">🍽️</span>Catering</div>
+          <div class="cat-chip" onclick="setChip(this)"><span class="cat-chip-icon">📸</span>Photography</div>
+          <div class="cat-chip" onclick="setChip(this)"><span class="cat-chip-icon">💒</span>Venues</div>
+          <div class="cat-chip" onclick="setChip(this)"><span class="cat-chip-icon">🌿</span>Mehendi</div>
+          <div class="cat-chip" onclick="setChip(this)"><span class="cat-chip-icon">⚡</span>Electrician</div>
+          <div class="cat-chip" onclick="setChip(this)"><span class="cat-chip-icon">🚿</span>Plumber</div>
+          <div class="cat-chip" onclick="setChip(this)"><span class="cat-chip-icon">🛒</span>Kirana</div>
+          <div class="cat-chip" onclick="setChip(this)"><span class="cat-chip-icon">🍛</span>Restaurant</div>
+          <div class="cat-chip" onclick="setChip(this)"><span class="cat-chip-icon">🙏</span>Pandit Ji</div>
+          <div class="cat-chip" onclick="setChip(this)"><span class="cat-chip-icon">🚗</span>Taxi</div>
+          <div class="cat-chip" onclick="setChip(this)"><span class="cat-chip-icon">✂️</span>Salon</div>
+          <div class="cat-chip" onclick="setChip(this)"><span class="cat-chip-icon">🎂</span>Bakery</div>
         </div>
       </div>
 
-      <div class="cal-widget">
-        <div class="cal-widget-header">
+      <!-- Featured providers -->
+      <div class="section">
+        <div class="section-header">
+          <div><div class="section-title">Featured providers</div><div class="section-sub">Verified local businesses in Kurukshetra</div></div>
+          <span class="see-all">View all →</span>
+        </div>
+        <div class="providers-grid">
+          <div class="provider-card">
+            <div class="pc-top c1"><span class="pc-emoji">🎵</span><div class="pc-avail"><span class="pc-avail-dot"></span>Available</div><div class="pc-verified">✓ Verified</div></div>
+            <div class="pc-body">
+              <div class="pc-cat">DJ & Sound System</div>
+              <div class="pc-name">Sharma Sound & DJ</div>
+              <div class="pc-area">📍 Thanesar, KKR</div>
+              <div class="pc-meta">
+                <div><span class="pc-stars">★★★★★</span><span class="pc-rating">4.8</span><span class="pc-reviews"> (32)</span></div>
+              </div>
+              <div class="pc-price">₹4,000 – ₹12,000</div>
+              <button class="pc-btn" onclick="openModal()">Contact on WhatsApp</button>
+            </div>
+          </div>
+          <div class="provider-card">
+            <div class="pc-top c2"><span class="pc-emoji">💒</span><div class="pc-avail"><span class="pc-avail-dot"></span>3 dates open</div><div class="pc-verified">✓ Verified</div></div>
+            <div class="pc-body">
+              <div class="pc-cat">Marriage Hall & Lawn</div>
+              <div class="pc-name">Kurukshetra Banquet Hall</div>
+              <div class="pc-area">📍 Pipli Road, KKR</div>
+              <div class="pc-meta"><div><span class="pc-stars">★★★★★</span><span class="pc-rating">4.9</span><span class="pc-reviews"> (18)</span></div></div>
+              <div class="pc-price">₹50,000 – ₹2,00,000</div>
+              <button class="pc-btn locked" onclick="openModal()">🔒 Subscribe to contact</button>
+            </div>
+          </div>
+          <div class="provider-card">
+            <div class="pc-top c3"><span class="pc-emoji">📸</span><div class="pc-avail"><span class="pc-avail-dot"></span>Available</div></div>
+            <div class="pc-body">
+              <div class="pc-cat">Photography</div>
+              <div class="pc-name">Pixel Perfect Studio</div>
+              <div class="pc-area">📍 Sector 13, KKR</div>
+              <div class="pc-meta"><div><span class="pc-stars">★★★★★</span><span class="pc-rating">4.7</span><span class="pc-reviews"> (45)</span></div></div>
+              <div class="pc-price">₹8,000 – ₹25,000</div>
+              <button class="pc-btn locked" onclick="openModal()">🔒 Subscribe to contact</button>
+            </div>
+          </div>
+          <div class="provider-card">
+            <div class="pc-top c4"><span class="pc-emoji">🌿</span><div class="pc-avail"><span class="pc-avail-dot"></span>Available</div><div class="pc-verified">✓ Verified</div></div>
+            <div class="pc-body">
+              <div class="pc-cat">Mehendi Artist</div>
+              <div class="pc-name">Priya Mehendi Art</div>
+              <div class="pc-area">📍 Brahmsarovar, KKR</div>
+              <div class="pc-meta"><div><span class="pc-stars">★★★★★</span><span class="pc-rating">4.9</span><span class="pc-reviews"> (67)</span></div></div>
+              <div class="pc-price">₹1,500 – ₹5,000</div>
+              <button class="pc-btn locked" onclick="openModal()">🔒 Subscribe to contact</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Trust section -->
+      <div class="section" style="background:var(--bg);border-top:1px solid var(--border)">
+        <div class="section-header"><div class="section-title">Built on trust</div></div>
+        <div class="trust-grid">
+          <div class="trust-card"><div class="trust-icon">✓</div><div class="trust-title">Verified businesses</div><div class="trust-desc">Every business reviewed before going live. Verified badges show who has been checked by our team.</div></div>
+          <div class="trust-card"><div class="trust-icon">★</div><div class="trust-title">Real ratings & reviews</div><div class="trust-desc">Reviews from real customers who contacted businesses through My KKR — honest and verified.</div></div>
+          <div class="trust-card"><div class="trust-icon">🔒</div><div class="trust-title">OTP secured login</div><div class="trust-desc">No passwords. Phone OTP login — secure, simple, the same way every major Indian app works.</div></div>
+        </div>
+      </div>
+    </div>
+    <!-- END HOME VIEW -->
+
+    <!-- ════ SERVICES VIEW ════ -->
+    <div class="view" id="view-services">
+      <div class="mode-tabs">
+        <div class="mode-tab active" onclick="setModeTab(this)">🔧 All Services</div>
+        <div class="mode-tab" onclick="setModeTab(this)">🎉 Events</div>
+        <div class="mode-tab" onclick="setModeTab(this)">🏛️ Venues</div>
+        <div class="mode-tab" onclick="setModeTab(this)">🏠 Home Services</div>
+        <div class="mode-tab" onclick="setModeTab(this)">🚗 Transport</div>
+        <div class="mode-tab" onclick="setModeTab(this)">💼 Professional</div>
+      </div>
+      <div class="section">
+        <div class="section-header"><div><div class="section-title">All Service Providers</div><div class="section-sub">66+ categories · Kurukshetra district</div></div><span class="see-all">Filter ↓</span></div>
+        <div class="providers-grid">
+          <div class="provider-card"><div class="pc-top c1"><span class="pc-emoji">🎵</span><div class="pc-avail"><span class="pc-avail-dot"></span>Available</div><div class="pc-verified">✓</div></div><div class="pc-body"><div class="pc-cat">DJ & Sound</div><div class="pc-name">Sharma Sound & DJ</div><div class="pc-area">📍 Thanesar</div><div class="pc-meta"><span class="pc-stars">★★★★★</span><span class="pc-rating">4.8</span><span class="pc-reviews">(32)</span></div><div class="pc-price">₹4,000–₹12,000</div><button class="pc-btn" onclick="openModal()">Contact</button></div></div>
+          <div class="provider-card"><div class="pc-top c2"><span class="pc-emoji">📸</span><div class="pc-avail"><span class="pc-avail-dot"></span>Available</div></div><div class="pc-body"><div class="pc-cat">Photography</div><div class="pc-name">Pixel Perfect Studio</div><div class="pc-area">📍 Sector 13</div><div class="pc-meta"><span class="pc-stars">★★★★★</span><span class="pc-rating">4.7</span><span class="pc-reviews">(45)</span></div><div class="pc-price">₹8,000–₹25,000</div><button class="pc-btn locked" onclick="openModal()">🔒 Subscribe</button></div></div>
+          <div class="provider-card"><div class="pc-top c3"><span class="pc-emoji">⚡</span><div class="pc-avail"><span class="pc-avail-dot"></span>Available</div><div class="pc-verified">✓</div></div><div class="pc-body"><div class="pc-cat">Electrician</div><div class="pc-name">Ramesh Electric Works</div><div class="pc-area">📍 Gandhi Nagar</div><div class="pc-meta"><span class="pc-stars">★★★★☆</span><span class="pc-rating">4.5</span><span class="pc-reviews">(22)</span></div><div class="pc-price">₹200–₹500/hr</div><button class="pc-btn locked" onclick="openModal()">🔒 Subscribe</button></div></div>
+          <div class="provider-card"><div class="pc-top c4"><span class="pc-emoji">🌿</span><div class="pc-avail"><span class="pc-avail-dot"></span>Available</div><div class="pc-verified">✓</div></div><div class="pc-body"><div class="pc-cat">Mehendi Artist</div><div class="pc-name">Priya Mehendi Art</div><div class="pc-area">📍 Brahmsarovar</div><div class="pc-meta"><span class="pc-stars">★★★★★</span><span class="pc-rating">4.9</span><span class="pc-reviews">(67)</span></div><div class="pc-price">₹1,500–₹5,000</div><button class="pc-btn locked" onclick="openModal()">🔒 Subscribe</button></div></div>
+          <div class="provider-card"><div class="pc-top c5"><span class="pc-emoji">🚿</span><div class="pc-avail"><span class="pc-avail-dot"></span>Available</div></div><div class="pc-body"><div class="pc-cat">Plumber</div><div class="pc-name">KKR Plumbing Services</div><div class="pc-area">📍 Thanesar</div><div class="pc-meta"><span class="pc-stars">★★★★☆</span><span class="pc-rating">4.3</span><span class="pc-reviews">(15)</span></div><div class="pc-price">₹150–₹400/hr</div><button class="pc-btn locked" onclick="openModal()">🔒 Subscribe</button></div></div>
+          <div class="provider-card"><div class="pc-top c1"><span class="pc-emoji">🙏</span><div class="pc-avail"><span class="pc-avail-dot"></span>Available</div><div class="pc-verified">✓</div></div><div class="pc-body"><div class="pc-cat">Pandit Ji</div><div class="pc-name">Pt. Sharma Ji</div><div class="pc-area">📍 Old City, KKR</div><div class="pc-meta"><span class="pc-stars">★★★★★</span><span class="pc-rating">5.0</span><span class="pc-reviews">(41)</span></div><div class="pc-price">₹1,100–₹5,100</div><button class="pc-btn locked" onclick="openModal()">🔒 Subscribe</button></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════ SHOP VIEW ════ -->
+    <div class="view" id="view-shop">
+      <div class="section" style="background:var(--white);border-bottom:1px solid var(--border);padding-bottom:16px">
+        <div class="section-header"><div><div class="section-title">🛍️ Shop Local</div><div class="section-sub">Order from local stores — rider delivers to your door</div></div></div>
+        <div style="background:var(--tan-l);border:1px solid rgba(225,179,130,0.3);border-radius:var(--r-lg);padding:14px 16px;font-size:13px;color:var(--tan-d);display:flex;gap:10px;align-items:flex-start">
+          <span style="font-size:18px;flex-shrink:0">ℹ️</span>
+          <div><strong style="color:var(--night-d)">How shopping works on My KKR:</strong> Browse the store, WhatsApp your order directly to the shop, pay the shop directly (UPI/cash). If you need delivery, the shop will arrange a local rider — fee paid in cash at delivery. My KKR takes zero commission.</div>
+        </div>
+      </div>
+      <div class="section">
+        <div class="section-header"><div class="section-title">Kirana & Grocery Stores</div><span class="see-all">View all →</span></div>
+        <div class="food-grid">
+          <div class="food-card"><div class="food-img">🛒<div class="food-tag">Delivery available</div></div><div class="food-body"><div class="food-name">Sharma Kirana Store</div><div class="food-area">📍 Gandhi Nagar, KKR</div><div class="food-meta"><span class="food-rating">★ 4.6</span><span class="food-delivery">🚴 Delivers nearby</span></div><button class="food-wa-btn" onclick="openModal()">Order on WhatsApp</button></div></div>
+          <div class="food-card"><div class="food-img">🥦<div class="food-tag">Fresh daily</div></div><div class="food-body"><div class="food-name">Radha Vegetables</div><div class="food-area">📍 Sector 13 Market</div><div class="food-meta"><span class="food-rating">★ 4.8</span><span class="food-delivery">🚴 Delivers nearby</span></div><button class="food-wa-btn" onclick="openModal()">Order on WhatsApp</button></div></div>
+          <div class="food-card"><div class="food-img">💊<div class="food-tag">Open 24hr</div></div><div class="food-body"><div class="food-name">City Medical Store</div><div class="food-area">📍 Railway Road, KKR</div><div class="food-meta"><span class="food-rating">★ 4.7</span><span class="food-delivery">🚴 Delivers nearby</span></div><button class="food-wa-btn" onclick="openModal()">Order on WhatsApp</button></div></div>
+          <div class="food-card"><div class="food-img">🪔</div><div class="food-body"><div class="food-name">Pooja Samagri Bhandar</div><div class="food-area">📍 Brahmsarovar, KKR</div><div class="food-meta"><span class="food-rating">★ 4.9</span><span class="food-delivery">Pickup only</span></div><button class="food-wa-btn" onclick="openModal()">Order on WhatsApp</button></div></div>
+        </div>
+      </div>
+      <!-- Delivery info -->
+      <div class="post-section" style="padding:32px">
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px">
+          <div style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:var(--r-xl);padding:20px">
+            <div style="font-size:28px;margin-bottom:10px">🚴</div>
+            <div style="font-size:14px;font-weight:700;color:var(--white);margin-bottom:4px">Local Rider Delivery</div>
+            <div style="font-size:12px;color:rgba(255,255,255,0.45);line-height:1.6">Rider accepts via Telegram. Cash fee at delivery. Shop arranges — you pay nothing extra to My KKR.</div>
+          </div>
+          <div style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:var(--r-xl);padding:20px">
+            <div style="font-size:28px;margin-bottom:10px">🏪</div>
+            <div style="font-size:14px;font-weight:700;color:var(--white);margin-bottom:4px">Click & Collect</div>
+            <div style="font-size:12px;color:rgba(255,255,255,0.45);line-height:1.6">Order on WhatsApp, walk in and collect. No queue — your order is ready when you arrive.</div>
+          </div>
+          <div style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:var(--r-xl);padding:20px">
+            <div style="font-size:28px;margin-bottom:10px">💰</div>
+            <div style="font-size:14px;font-weight:700;color:var(--white);margin-bottom:4px">Zero Commission</div>
+            <div style="font-size:12px;color:rgba(255,255,255,0.45);line-height:1.6">All payments go directly between you and the shop. My KKR never touches your money. Ever.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════ FOOD VIEW ════ -->
+    <div class="view" id="view-food">
+      <div class="section" style="background:var(--white);border-bottom:1px solid var(--border)">
+        <div class="section-header"><div><div class="section-title">🍛 Food & Dining</div><div class="section-sub">Restaurants, dhabas, tiffin services and bakeries in Kurukshetra</div></div></div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <div class="cat-chip active" onclick="setChip(this)">All</div>
+          <div class="cat-chip" onclick="setChip(this)">🍛 Restaurant</div>
+          <div class="cat-chip" onclick="setChip(this)">🍺 Dhaba</div>
+          <div class="cat-chip" onclick="setChip(this)">🍱 Tiffin</div>
+          <div class="cat-chip" onclick="setChip(this)">🎂 Bakery</div>
+          <div class="cat-chip" onclick="setChip(this)">🍬 Sweets</div>
+          <div class="cat-chip" onclick="setChip(this)">☕ Chai</div>
+        </div>
+      </div>
+      <div class="section">
+        <div class="section-header"><div class="section-title">Open now</div><span class="see-all">View all →</span></div>
+        <div class="food-grid">
+          <div class="food-card"><div class="food-img">🍛<div class="food-tag">Open now</div></div><div class="food-body"><div class="food-name">Hotel Natraj Restaurant</div><div class="food-area">📍 Thanesar Chowk</div><div class="food-meta"><span class="food-rating">★ 4.4</span><span class="food-delivery" style="color:var(--amber)">Dine-in + Delivery</span></div><button class="food-wa-btn" onclick="openModal()">Order on WhatsApp</button></div></div>
+          <div class="food-card"><div class="food-img">🫕<div class="food-tag">Pure veg</div></div><div class="food-body"><div class="food-name">Gita Dhaba</div><div class="food-area">📍 Jyotisar Road</div><div class="food-meta"><span class="food-rating">★ 4.7</span><span class="food-delivery">Dine-in only</span></div><button class="food-wa-btn" onclick="openModal()">Order on WhatsApp</button></div></div>
+          <div class="food-card"><div class="food-img">🍱</div><div class="food-body"><div class="food-name">Maa Tiffin Service</div><div class="food-area">📍 Sector 7, KKR</div><div class="food-meta"><span class="food-rating">★ 4.8</span><span class="food-delivery">🚴 Home delivery</span></div><button class="food-wa-btn" onclick="openModal()">Order on WhatsApp</button></div></div>
+          <div class="food-card"><div class="food-img">🎂</div><div class="food-body"><div class="food-name">Sweet Dreams Bakery</div><div class="food-area">📍 Model Town, KKR</div><div class="food-meta"><span class="food-rating">★ 4.6</span><span class="food-delivery">🚴 Delivers nearby</span></div><button class="food-wa-btn" onclick="openModal()">Order on WhatsApp</button></div></div>
+          <div class="food-card"><div class="food-img">🍬<div class="food-tag">Since 1985</div></div><div class="food-body"><div class="food-name">Brijwasi Sweets</div><div class="food-area">📍 Old Anaj Mandi</div><div class="food-meta"><span class="food-rating">★ 4.9</span><span class="food-delivery">Pickup + Delivery</span></div><button class="food-wa-btn" onclick="openModal()">Order on WhatsApp</button></div></div>
+          <div class="food-card"><div class="food-img">☕</div><div class="food-body"><div class="food-name">Chai & More</div><div class="food-area">📍 KU Gate, KKR</div><div class="food-meta"><span class="food-rating">★ 4.5</span><span class="food-delivery">Dine-in</span></div><button class="food-wa-btn" onclick="openModal()">Order on WhatsApp</button></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════ POST REQUIREMENT VIEW ════ -->
+    <div class="view" id="view-post">
+      <div class="post-section">
+        <div class="post-inner">
           <div>
-            <div class="cal-widget-title">April 2025</div>
-            <div class="cal-widget-sub">Sharma Sound & DJ</div>
+            <div class="post-label">Post a requirement</div>
+            <div class="post-title">Need something done?<br>Describe it. Get quotes.</div>
+            <div class="post-desc">Planning a wedding, need an electrician urgently, or want a caterer for 500 people? Post your requirement and let Kurukshetra's best businesses come to you with quotes.</div>
+            <ul class="post-steps">
+              <li class="post-step"><span class="post-step-num">1</span>Describe what you need and set your budget range</li>
+              <li class="post-step"><span class="post-step-num">2</span>Receive quotes from verified local businesses within hours</li>
+              <li class="post-step"><span class="post-step-num">3</span>Choose the best quote and connect directly on WhatsApp</li>
+            </ul>
+            <button class="post-cta">Post requirement — it's free</button>
           </div>
-          <div class="cal-navs">
-            <button class="cal-nav-btn">‹</button>
-            <button class="cal-nav-btn">›</button>
+          <div class="post-form-card">
+            <div class="post-form-title">Post your requirement</div>
+            <div class="pf-group"><label class="pf-label">What do you need?</label><input class="pf-input" type="text" placeholder="e.g. DJ for wedding reception on 15 March..."></div>
+            <div class="pf-group"><label class="pf-label">Category</label><select class="pf-select"><option value="">Select</option><option>DJ & Sound</option><option>Catering</option><option>Photography</option><option>Marriage Hall</option><option>Electrician</option><option>Plumber</option><option>Other</option></select></div>
+            <div class="pf-row">
+              <div class="pf-group"><label class="pf-label">Date needed</label><input class="pf-input" type="date"></div>
+              <div class="pf-group"><label class="pf-label">Budget (₹)</label><input class="pf-input" type="text" placeholder="e.g. 5,000–15,000"></div>
+            </div>
+            <div class="pf-group"><label class="pf-label">Area in Kurukshetra</label><select class="pf-select"><option value="">Select area</option><option>Thanesar</option><option>Pipli Road</option><option>Brahmsarovar</option><option>Sector 13</option><option>Ladwa</option><option>Shahabad</option><option>Pehowa</option><option>Other</option></select></div>
+            <div class="pf-group"><label class="pf-label">More details</label><textarea class="pf-textarea" placeholder="Number of guests, specific requirements, timing..."></textarea></div>
+            <button class="pf-submit">Post requirement — free</button>
           </div>
-        </div>
-        <div class="cal-body">
-          <div class="cal-daynames">
-            <div class="cal-dayname">Su</div><div class="cal-dayname">Mo</div>
-            <div class="cal-dayname">Tu</div><div class="cal-dayname">We</div>
-            <div class="cal-dayname">Th</div><div class="cal-dayname">Fr</div>
-            <div class="cal-dayname">Sa</div>
-          </div>
-          <div class="cal-days" id="calGrid"></div>
-        </div>
-        <div class="cal-legend">
-          <div class="cal-leg"><div class="cal-leg-dot a"></div>Available</div>
-          <div class="cal-leg"><div class="cal-leg-dot p"></div>Partial</div>
-          <div class="cal-leg"><div class="cal-leg-dot b"></div>Booked</div>
-        </div>
-        <div class="cal-slot-area" id="calSlots">
-          <div class="cal-slot-label">Open time slots</div>
-          <div class="cal-slots">
-            <span class="cal-slot">10:00 – 14:00</span>
-            <span class="cal-slot">19:00 – 23:00</span>
-          </div>
-          <button class="cal-contact-btn" onclick="openModal()">Contact on WhatsApp</button>
         </div>
       </div>
     </div>
-  </div>
-</section>
 
-<!-- TRUST & SAFETY -->
-<section class="section trust-section">
-  <div class="container">
-    <div class="section-header">
-      <h2 class="section-title">Built on trust</h2>
-    </div>
-    <div class="trust-grid">
-      <div class="trust-card">
-        <div class="trust-icon">✓</div>
-        <div class="trust-title">Verified businesses</div>
-        <div class="trust-desc">Every business is reviewed before going live. Verified badges show who has been checked by our team — giving you confidence before you contact.</div>
-      </div>
-      <div class="trust-card">
-        <div class="trust-icon">★</div>
-        <div class="trust-title">Real ratings & reviews</div>
-        <div class="trust-desc">Reviews come from real customers who contacted the business through My KKR. Pick the right provider based on genuine feedback from your neighbours.</div>
-      </div>
-      <div class="trust-card">
-        <div class="trust-icon">🔒</div>
-        <div class="trust-title">OTP secured login</div>
-        <div class="trust-desc">No passwords to forget. Phone OTP login means your account is tied to your mobile number — secure, simple, and the same way every major Indian app works.</div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- PRICING -->
-<section class="section pricing-section" id="pricing">
-  <div class="container">
-    <div style="text-align:center;max-width:520px;margin:0 auto">
-      <h2 class="section-title">Simple, honest pricing</h2>
-      <p style="font-size:15px;color:var(--text-3);margin-top:8px;line-height:1.65">No commission on your sales. No hidden fees. You keep every rupee you earn from every booking.</p>
-    </div>
-    <div class="pricing-grid">
-      <div class="price-card">
-        <div class="price-plan-name">Customer Plan</div>
-        <div class="price-amount">₹49</div>
-        <div class="price-period">per month + 18% GST</div>
-        <div class="price-trial-badge">7-day free trial</div>
-        <div class="price-divider"></div>
-        <ul class="price-feature-list">
-          <li class="price-feature-item"><span class="price-check">✓</span>Browse all 66+ categories free</li>
-          <li class="price-feature-item"><span class="price-check">✓</span>Unlock WhatsApp contact of all businesses</li>
-          <li class="price-feature-item"><span class="price-check">✓</span>View live availability calendars</li>
-          <li class="price-feature-item"><span class="price-check">✓</span>Post requirements & receive quotes</li>
-          <li class="price-feature-item"><span class="price-check">✓</span>Save favourite businesses</li>
-          <li class="price-feature-item"><span class="price-check">✓</span>Cancel anytime</li>
-        </ul>
-        <button class="price-cta" onclick="document.getElementById('reg-section').scrollIntoView({behavior:'smooth'})">Start free trial →</button>
-      </div>
-      <div class="price-card featured">
-        <div class="price-popular-badge">Most popular</div>
-        <div class="price-plan-name">Business Plan</div>
-        <div class="price-amount">₹299</div>
-        <div class="price-period">per month + 18% GST</div>
-        <div class="price-trial-badge">First month free</div>
-        <div class="price-divider"></div>
-        <ul class="price-feature-list">
-          <li class="price-feature-item"><span class="price-check">✓</span>Full profile with unlimited photos</li>
-          <li class="price-feature-item"><span class="price-check">✓</span>Live availability calendar</li>
-          <li class="price-feature-item"><span class="price-check">✓</span>Listed in all relevant categories</li>
-          <li class="price-feature-item"><span class="price-check">✓</span>WhatsApp contact for subscribers</li>
-          <li class="price-feature-item"><span class="price-check">✓</span>Verified business badge</li>
-          <li class="price-feature-item"><span class="price-check">✓</span>Analytics — views and inquiries</li>
-          <li class="price-feature-item"><span class="price-check">✓</span>Delivery network access</li>
-          <li class="price-feature-item"><span class="price-check">✓</span>Zero commission on any sale — ever</li>
-        </ul>
-        <button class="price-cta" onclick="document.getElementById('reg-section').scrollIntoView({behavior:'smooth'})">List your business free →</button>
-      </div>
-    </div>
-    <div class="pricing-note"><strong>My KKR takes zero commission</strong> on any sale, booking, or delivery. All payments go directly between buyer and seller.</div>
-  </div>
-</section>
-
-<!-- REGISTER -->
-<section class="section reg-section" id="reg-section">
-  <div class="container">
-    <div class="reg-layout">
-      <div class="reg-form-card">
-        <div class="reg-tabs-bar">
-          <button class="reg-tab active" id="tab-biz" onclick="switchTab('biz')">List my business</button>
-          <button class="reg-tab" id="tab-cust" onclick="switchTab('cust')">I'm a customer</button>
-        </div>
-        <div class="reg-form-body" id="form-biz">
-          <div class="form-group">
-            <label class="form-label">Business name</label>
-            <input class="form-input" type="text" placeholder="e.g. Sharma DJ Services">
+    <!-- ════ CALENDAR VIEW ════ -->
+    <div class="view" id="view-calendar">
+      <div class="section">
+        <div class="section-header"><div><div class="section-title">📅 Live Availability Calendar</div><div class="section-sub">The feature no other local directory has</div></div></div>
+        <div class="cal-layout">
+          <div>
+            <div style="font-size:15px;color:var(--text-3);line-height:1.7;margin-bottom:20px;max-width:480px">Every event service provider on My KKR shows their live calendar. Green dates are free, red are booked. Search by your date and see exactly who's available.</div>
+            <div style="margin-bottom:20px;display:flex;gap:10px;flex-wrap:wrap">
+              <input type="date" style="padding:10px 12px;border-radius:var(--r);border:1.5px solid var(--border);font-size:13px;font-family:'Inter',sans-serif;outline:none;color:var(--text);transition:border-color var(--t)" onfocus="this.style.borderColor='var(--night)'" onblur="this.style.borderColor='var(--border)'">
+              <select style="padding:10px 12px;border-radius:var(--r);border:1.5px solid var(--border);font-size:13px;font-family:'Inter',sans-serif;outline:none;-webkit-appearance:none;color:var(--text)">
+                <option>Any category</option><option>DJ & Sound</option><option>Catering</option><option>Photography</option><option>Marriage Hall</option>
+              </select>
+              <button style="padding:10px 20px;border-radius:var(--r);background:var(--night-d);color:var(--white);font-size:13px;font-weight:600;border:none;cursor:pointer;font-family:'Inter',sans-serif">Find available</button>
+            </div>
+            <div class="cal-feature"><div class="cal-feature-num">01</div>Search by exact date and time — see only available providers</div>
+            <div class="cal-feature"><div class="cal-feature-num">02</div>Providers update calendars in real time — always accurate</div>
+            <div class="cal-feature"><div class="cal-feature-num">03</div>Set specific time slots — morning, evening, or custom hours</div>
+            <div class="cal-feature"><div class="cal-feature-num">04</div>Find who's free, then contact directly on WhatsApp</div>
           </div>
-          <div class="form-row">
-            <div class="form-group">
-              <label class="form-label">Category</label>
-              <select class="form-select">
-                <option value="">Select</option>
-                <option>DJ & Sound System</option>
-                <option>Catering & Food</option>
-                <option>Photography</option>
-                <option>Marriage Hall</option>
-                <option>Mehendi Artist</option>
-                <option>Electrician</option>
-                <option>Plumber</option>
-                <option>Kirana Store</option>
-                <option>Restaurant</option>
-                <option>Pandit Ji</option>
-                <option>Other</option>
+          <div class="cal-widget">
+            <div class="cal-header">
+              <div><div class="cal-month">April 2025</div><div class="cal-sub">Sharma Sound & DJ</div></div>
+              <div class="cal-navs"><button class="cal-nav">‹</button><button class="cal-nav">›</button></div>
+            </div>
+            <div class="cal-body">
+              <div class="cal-daynames"><div class="cal-dayname">Su</div><div class="cal-dayname">Mo</div><div class="cal-dayname">Tu</div><div class="cal-dayname">We</div><div class="cal-dayname">Th</div><div class="cal-dayname">Fr</div><div class="cal-dayname">Sa</div></div>
+              <div class="cal-days-grid" id="calGrid2"></div>
+            </div>
+            <div class="cal-legend"><div class="cal-leg"><div class="cal-leg-sq a"></div>Available</div><div class="cal-leg"><div class="cal-leg-sq p"></div>Partial</div><div class="cal-leg"><div class="cal-leg-sq b"></div>Booked</div></div>
+            <div class="cal-slots-area" id="calSlots2"><div class="cal-slots-label">Open slots</div><div class="cal-slots"><span class="cal-slot">10:00–14:00</span><span class="cal-slot">19:00–23:00</span></div><button class="cal-contact" onclick="openModal()">Contact on WhatsApp</button></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════ MAP VIEW ════ -->
+    <div class="view" id="view-map">
+      <div class="section">
+        <div class="section-header"><div><div class="section-title">🗺️ Kurukshetra District Map</div><div class="section-sub">Find businesses by area — drop a pin or select your tehsil</div></div></div>
+        <div class="map-container">
+          <div class="map-frame">
+            <!-- OpenStreetMap embed — completely free, no API key -->
+            <iframe
+              class="map-embed"
+              src="https://www.openstreetmap.org/export/embed.html?bbox=76.5%2C29.8%2C77.2%2C30.2&layer=mapnik&marker=29.9695%2C76.8783"
+              loading="lazy"
+              title="Kurukshetra District Map">
+            </iframe>
+          </div>
+          <div class="map-controls">
+            <div class="map-controls-title">Find businesses near you</div>
+            <div class="map-input-group">
+              <label class="map-input-label">Select Tehsil</label>
+              <div class="tehsil-chips">
+                <div class="tehsil-chip active" onclick="setTehsil(this)">All KKR</div>
+                <div class="tehsil-chip" onclick="setTehsil(this)">Thanesar</div>
+                <div class="tehsil-chip" onclick="setTehsil(this)">Shahabad</div>
+                <div class="tehsil-chip" onclick="setTehsil(this)">Pehowa</div>
+                <div class="tehsil-chip" onclick="setTehsil(this)">Ladwa</div>
+                <div class="tehsil-chip" onclick="setTehsil(this)">Babain</div>
+                <div class="tehsil-chip" onclick="setTehsil(this)">Ismailabad</div>
+                <div class="tehsil-chip" onclick="setTehsil(this)">Guhla</div>
+                <div class="tehsil-chip" onclick="setTehsil(this)">Rajound</div>
+              </div>
+            </div>
+            <div class="map-input-group">
+              <label class="map-input-label">Select area / sector</label>
+              <select class="map-select" id="areaSelect">
+                <optgroup label="Kurukshetra City Sectors">
+                  <option>Sector 1</option><option>Sector 2</option><option>Sector 3</option><option>Sector 4</option><option>Sector 5</option><option>Sector 6</option><option>Sector 7</option><option>Sector 8</option><option>Sector 9</option><option>Sector 10</option><option>Sector 11</option><option>Sector 12</option><option>Sector 13 Market</option><option>Sector 14</option><option>Sector 15</option><option>Sector 16</option><option>Sector 17</option>
+                </optgroup>
+                <optgroup label="Thanesar Areas">
+                  <option>Brahmsarovar</option><option>Sannihit Sarovar</option><option>Railway Road</option><option>Model Town</option><option>Gandhi Nagar</option><option>Nehru Colony</option><option>New Colony</option><option>Old Anaj Mandi</option><option>Bus Stand Area</option><option>Thanesar Old City</option><option>KU Gate Area</option><option>Jyotisar Road</option><option>Pipli Road</option><option>Narkatari</option><option>Umri</option><option>Dhanouri</option>
+                </optgroup>
+                <optgroup label="Other Towns">
+                  <option>Shahabad Markanda</option><option>Pehowa</option><option>Ladwa</option><option>Babain</option><option>Ismailabad</option><option>Guhla Cheeka</option><option>Rajound</option>
+                </optgroup>
               </select>
             </div>
-            <div class="form-group">
-              <label class="form-label">Area</label>
-              <select class="form-select">
-                <option value="">Select</option>
-                <option>Thanesar</option>
-                <option>Pipli Road</option>
-                <option>Brahmsarovar</option>
-                <option>Sector 13</option>
-                <option>Ladwa</option>
-                <option>Shahabad</option>
-                <option>Other</option>
-              </select>
+            <div class="map-divider"><div class="map-divider-line"></div><span class="map-divider-text">or</span><div class="map-divider-line"></div></div>
+            <div class="map-input-group">
+              <label class="map-input-label">Enter address manually</label>
+              <input class="map-input" type="text" placeholder="e.g. House 14, Nehru Colony, Thanesar">
             </div>
+            <button class="map-pin-btn" style="margin-bottom:10px">📍 Drop pin on map</button>
+            <button class="map-confirm-btn">Find businesses here</button>
           </div>
-          <div class="form-group">
-            <label class="form-label">WhatsApp business number</label>
-            <div class="otp-group">
-              <input class="form-input" type="tel" placeholder="+91 98765 43210">
-              <button class="otp-send-btn" onclick="showOtp('biz')">Send OTP</button>
-            </div>
-            <input class="otp-field" id="otp-biz" type="text" maxlength="6" placeholder="- - - - - -">
-          </div>
-          <div class="form-group">
-            <label class="form-label">Owner name</label>
-            <input class="form-input" type="text" placeholder="Your full name">
-          </div>
-          <div class="form-check">
-            <input type="checkbox" id="biz-t">
-            <label for="biz-t">I agree to the <a href="#">Terms of Service</a>. My KKR is a connector platform — all transactions are directly between buyers and sellers.</label>
-          </div>
-          <button class="form-submit">List my business — first month free</button>
-        </div>
-        <div class="reg-form-body" id="form-cust" style="display:none">
-          <div class="form-group">
-            <label class="form-label">Your name</label>
-            <input class="form-input" type="text" placeholder="Your full name">
-          </div>
-          <div class="form-group">
-            <label class="form-label">Mobile number</label>
-            <div class="otp-group">
-              <input class="form-input" type="tel" placeholder="+91 98765 43210">
-              <button class="otp-send-btn" onclick="showOtp('cust')">Send OTP</button>
-            </div>
-            <input class="otp-field" id="otp-cust" type="text" maxlength="6" placeholder="- - - - - -">
-          </div>
-          <div class="form-group">
-            <label class="form-label">Your area</label>
-            <select class="form-select">
-              <option value="">Select area</option>
-              <option>Thanesar</option>
-              <option>Pipli Road</option>
-              <option>Brahmsarovar</option>
-              <option>Other</option>
-            </select>
-          </div>
-          <div class="form-check">
-            <input type="checkbox" id="cust-t">
-            <label for="cust-t">I agree to the <a href="#">Terms of Service</a>. All payments are directly with the business — My KKR takes no commission.</label>
-          </div>
-          <button class="form-submit">Start 7-day free trial</button>
-          <div class="form-note">No payment during trial · ₹49 + GST after 7 days · Cancel anytime</div>
-        </div>
-      </div>
-
-      <div class="reg-benefits">
-        <div class="reg-benefits-title">Why businesses choose My KKR</div>
-        <div class="reg-benefits-sub">Less than the cost of printing 100 flyers — and your listing runs 24 hours a day, 7 days a week.</div>
-        <div class="benefit-cards">
-          <div class="benefit-card"><div class="benefit-icon">📅</div><div><div class="benefit-title">Live availability calendar</div><div class="benefit-desc">Mark when you're booked. Customers see it instantly — no missed calls, no double bookings.</div></div></div>
-          <div class="benefit-card"><div class="benefit-icon">💬</div><div><div class="benefit-title">Direct WhatsApp connection</div><div class="benefit-desc">Paying customers contact you directly on WhatsApp. No middleman. No commission.</div></div></div>
-          <div class="benefit-card"><div class="benefit-icon">₹</div><div><div class="benefit-title">Zero commission — ever</div><div class="benefit-desc">₹299 flat monthly rate. Keep every rupee from every booking you make.</div></div></div>
-          <div class="benefit-card"><div class="benefit-icon">✓</div><div><div class="benefit-title">Verified business badge</div><div class="benefit-desc">Earn a verified badge that builds instant trust with customers browsing your profile.</div></div></div>
-          <div class="benefit-card"><div class="benefit-icon">📊</div><div><div class="benefit-title">Analytics dashboard</div><div class="benefit-desc">See exactly how many people viewed your listing, clicked your profile, and sent inquiries.</div></div></div>
         </div>
       </div>
     </div>
+
+    <!-- ════ ABOUT KURUKSHETRA VIEW ════ -->
+    <div class="view" id="view-about">
+      <div class="about-hero">
+        <div class="about-hero-label">Explore Kurukshetra</div>
+        <div class="about-hero-title">Kurukshetra — Land of the Gita</div>
+        <div class="about-hero-sub">One of India's most sacred cities. The site of the Mahabharata war. Home to the Bhagavad Gita. A living centre of dharma, culture, and heritage for 5,000 years.</div>
+        <div class="about-hero-stats">
+          <div class="about-stat"><div class="about-stat-num">5,000+</div><div class="about-stat-label">Years of history</div></div>
+          <div class="about-stat"><div class="about-stat-num">48 Kos</div><div class="about-stat-label">Sacred parikrama</div></div>
+          <div class="about-stat"><div class="about-stat-num">8</div><div class="about-stat-label">Tehsils</div></div>
+          <div class="about-stat"><div class="about-stat-num">964+</div><div class="about-stat-label">Villages</div></div>
+        </div>
+      </div>
+
+      <!-- Sub-navigation -->
+      <div class="mode-tabs">
+        <div class="mode-tab active" onclick="setModeTab(this)">🏛️ Overview</div>
+        <div class="mode-tab" onclick="setModeTab(this)">🕌 Tourist Places</div>
+        <div class="mode-tab" onclick="setModeTab(this)">🗺️ Tehsils & Villages</div>
+        <div class="mode-tab" onclick="setModeTab(this)">📅 Events</div>
+        <div class="mode-tab" onclick="setModeTab(this)">🎓 Universities</div>
+      </div>
+
+      <!-- Overview content -->
+      <div class="section">
+        <div class="section-header"><div class="section-title">Historical & Tourist Places</div><span class="see-all">View all →</span></div>
+        <div class="about-grid">
+          <div class="about-card"><div class="about-card-top c1">🌊</div><div class="about-card-body"><div class="about-card-title">Brahmsarovar</div><div class="about-card-desc">The largest sacred tank in India. Thousands of pilgrims take a holy dip here, especially during solar eclipses when lakhs come from across India.</div><span class="about-card-tag">Sacred Site</span></div></div>
+          <div class="about-card"><div class="about-card-top c2">🙏</div><div class="about-card-body"><div class="about-card-title">Jyotisar — Birthplace of the Gita</div><div class="about-card-desc">The exact spot under a sacred peepul tree where Lord Krishna delivered the Bhagavad Gita to Arjuna before the Mahabharata war.</div><span class="about-card-tag">Pilgrimage</span></div></div>
+          <div class="about-card"><div class="about-card-top c3">⚔️</div><div class="about-card-body"><div class="about-card-title">Kurukshetra Panorama</div><div class="about-card-desc">A stunning 360-degree painting depicting the Mahabharata war. A must-visit science and heritage centre in the heart of the city.</div><span class="about-card-tag">Museum</span></div></div>
+          <div class="about-card"><div class="about-card-top c4">🛕</div><div class="about-card-body"><div class="about-card-title">Sthaneshwar Mahadev</div><div class="about-card-desc">One of the most ancient Shiva temples in North India. The Pandavas are said to have prayed here before the Mahabharata war.</div><span class="about-card-tag">Temple</span></div></div>
+          <div class="about-card"><div class="about-card-top c5">🌺</div><div class="about-card-body"><div class="about-card-title">Bhadrakali Temple</div><div class="about-card-desc">A powerful goddess temple with deep historical significance. Visitors from across Haryana come for blessings, especially during Navratri.</div><span class="about-card-tag">Temple</span></div></div>
+          <div class="about-card"><div class="about-card-top c6">🏛️</div><div class="about-card-body"><div class="about-card-title">Sannihit Sarovar</div><div class="about-card-desc">A sacred lake where all holy rivers are believed to converge on the new moon night. An important pilgrimage site in Thanesar city.</div><span class="about-card-tag">Sacred Site</span></div></div>
+        </div>
+      </div>
+
+      <!-- District map -->
+      <div class="section" style="background:var(--bg);border-top:1px solid var(--border)">
+        <div class="section-header"><div class="section-title">Kurukshetra District Map</div></div>
+        <div class="about-map">
+          <iframe src="https://www.openstreetmap.org/export/embed.html?bbox=76.4%2C29.7%2C77.3%2C30.3&layer=mapnik" loading="lazy" title="Kurukshetra District Map"></iframe>
+        </div>
+      </div>
+
+      <!-- Tehsil table -->
+      <div class="section">
+        <div class="section-header"><div class="section-title">All 8 Tehsils of Kurukshetra District</div></div>
+        <div style="background:var(--white);border:1px solid var(--border);border-radius:var(--r-xl);overflow:hidden;box-shadow:var(--shadow-xs)">
+          <table class="tehsil-table">
+            <thead><tr><th>Tehsil</th><th>Major Areas</th><th>Known For</th></tr></thead>
+            <tbody>
+              <tr><td><strong>Thanesar</strong></td><td>Brahmsarovar, Sector 13, Model Town, KU</td><td>District HQ, Brahmsarovar, Jyotisar</td></tr>
+              <tr><td><strong>Shahabad Markanda</strong></td><td>Shahabad town, Markanda River</td><td>Industrial area, Markanda River</td></tr>
+              <tr><td><strong>Pehowa</strong></td><td>Pehowa town, Saraswati River</td><td>Pitru tarpan, Saraswati ghats</td></tr>
+              <tr><td><strong>Ladwa</strong></td><td>Ladwa town, surrounding villages</td><td>Agricultural hub</td></tr>
+              <tr><td><strong>Babain</strong></td><td>Babain town</td><td>Border area with Yamuna Nagar</td></tr>
+              <tr><td><strong>Ismailabad</strong></td><td>Ismailabad, Umri</td><td>Farming community</td></tr>
+              <tr><td><strong>Guhla-Cheeka</strong></td><td>Guhla, Cheeka town</td><td>Northern tehsil, border with Punjab</td></tr>
+              <tr><td><strong>Rajound</strong></td><td>Rajound town</td><td>Southern area of district</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ════ PRICING VIEW ════ -->
+    <div class="view" id="view-pricing">
+      <div class="section">
+        <div class="section-header"><div><div class="section-title">Simple, honest pricing</div><div class="section-sub">No commission on your sales. No hidden fees. You keep every rupee.</div></div></div>
+        <div class="pricing-grid">
+          <div class="price-card">
+            <div class="price-name">Customer Plan</div>
+            <div class="price-amount">₹49</div>
+            <div class="price-period">per month + 18% GST</div>
+            <div class="price-trial">7-day free trial</div>
+            <div class="price-line"></div>
+            <ul class="price-features">
+              <li class="price-feature"><span class="price-check">✓</span>Browse all 66+ categories free</li>
+              <li class="price-feature"><span class="price-check">✓</span>Unlock WhatsApp contact of businesses</li>
+              <li class="price-feature"><span class="price-check">✓</span>View live availability calendars</li>
+              <li class="price-feature"><span class="price-check">✓</span>Post requirements & receive quotes</li>
+              <li class="price-feature"><span class="price-check">✓</span>Cancel anytime</li>
+            </ul>
+            <button class="price-btn" onclick="showView('register')">Start free trial →</button>
+          </div>
+          <div class="price-card featured">
+            <div class="price-popular">Most popular</div>
+            <div class="price-name">Business Plan</div>
+            <div class="price-amount">₹299</div>
+            <div class="price-period">per month + 18% GST</div>
+            <div class="price-trial">First month free</div>
+            <div class="price-line"></div>
+            <ul class="price-features">
+              <li class="price-feature"><span class="price-check">✓</span>Full profile with unlimited photos</li>
+              <li class="price-feature"><span class="price-check">✓</span>Live availability calendar</li>
+              <li class="price-feature"><span class="price-check">✓</span>Listed in all relevant categories</li>
+              <li class="price-feature"><span class="price-check">✓</span>WhatsApp contact for subscribers</li>
+              <li class="price-feature"><span class="price-check">✓</span>Verified business badge</li>
+              <li class="price-feature"><span class="price-check">✓</span>Analytics dashboard</li>
+              <li class="price-feature"><span class="price-check">✓</span>Delivery network access</li>
+              <li class="price-feature"><span class="price-check">✓</span>Zero commission — ever</li>
+            </ul>
+            <button class="price-btn" onclick="showView('register')">List your business free →</button>
+          </div>
+        </div>
+        <div style="margin-top:20px;font-size:13px;color:var(--text-3);text-align:center"><strong style="color:var(--text-2)">My KKR takes zero commission</strong> on any sale, booking, or delivery. All payments go directly between buyer and seller.</div>
+      </div>
+    </div>
+
+    <!-- ════ REGISTER VIEW ════ -->
+    <div class="view" id="view-register">
+      <div class="section">
+        <div class="reg-layout">
+          <div class="reg-card">
+            <div class="reg-tabs-bar">
+              <button class="reg-tab active" id="rtab-biz" onclick="switchRegTab('biz')">List my business</button>
+              <button class="reg-tab" id="rtab-cust" onclick="switchRegTab('cust')">I'm a customer</button>
+            </div>
+            <div class="reg-body" id="rform-biz">
+              <div class="rf-group"><label class="rf-label">Business name</label><input class="rf-input" type="text" placeholder="e.g. Sharma DJ Services"></div>
+              <div class="rf-row">
+                <div class="rf-group"><label class="rf-label">Category</label><select class="rf-select"><option value="">Select</option><option>DJ & Sound</option><option>Catering</option><option>Photography</option><option>Marriage Hall</option><option>Electrician</option><option>Plumber</option><option>Kirana</option><option>Restaurant</option><option>Pandit Ji</option><option>Other</option></select></div>
+                <div class="rf-group"><label class="rf-label">Area</label><select class="rf-select"><option value="">Select</option><option>Thanesar</option><option>Pipli Road</option><option>Brahmsarovar</option><option>Sector 13</option><option>Ladwa</option><option>Shahabad</option><option>Pehowa</option><option>Other</option></select></div>
+              </div>
+              <div class="rf-group"><label class="rf-label">WhatsApp number</label><div class="otp-wrap"><input class="rf-input" type="tel" placeholder="+91 98765 43210"><button class="otp-send" onclick="showOtpCode('biz')">Send OTP</button></div><input class="otp-code" id="rcotp-biz" type="text" maxlength="6" placeholder="- - - - - -"></div>
+              <div class="rf-group"><label class="rf-label">Owner name</label><input class="rf-input" type="text" placeholder="Your full name"></div>
+              <div class="rf-check"><input type="checkbox" id="rt-biz"><label for="rt-biz">I agree to the <a href="#">Terms of Service</a>. My KKR is a connector platform — all transactions are directly between buyers and sellers.</label></div>
+              <button class="rf-submit">List my business — first month free</button>
+            </div>
+            <div class="reg-body" id="rform-cust" style="display:none">
+              <div class="rf-group"><label class="rf-label">Your name</label><input class="rf-input" type="text" placeholder="Your full name"></div>
+              <div class="rf-group"><label class="rf-label">Mobile number</label><div class="otp-wrap"><input class="rf-input" type="tel" placeholder="+91 98765 43210"><button class="otp-send" onclick="showOtpCode('cust')">Send OTP</button></div><input class="otp-code" id="rcotp-cust" type="text" maxlength="6" placeholder="- - - - - -"></div>
+              <div class="rf-group"><label class="rf-label">Your area</label><select class="rf-select"><option value="">Select area</option><option>Thanesar</option><option>Pipli Road</option><option>Brahmsarovar</option><option>Sector 13</option><option>Other</option></select></div>
+              <div class="rf-check"><input type="checkbox" id="rt-cust"><label for="rt-cust">I agree to the <a href="#">Terms of Service</a>. All payments are directly with the business — My KKR takes no commission.</label></div>
+              <button class="rf-submit">Start 7-day free trial</button>
+              <div class="rf-note">No payment during trial · ₹49+GST after 7 days · Cancel anytime</div>
+            </div>
+          </div>
+          <div>
+            <div style="font-size:20px;font-weight:700;color:var(--night-d);letter-spacing:-.3px;margin-bottom:6px">Why businesses choose My KKR</div>
+            <div style="font-size:13px;color:var(--text-3);margin-bottom:20px">Less than the cost of printing 100 flyers — running 24 hours a day.</div>
+            <div class="benefit-list">
+              <div class="benefit-item"><div class="benefit-icon">📅</div><div><div class="benefit-title">Live availability calendar</div><div class="benefit-desc">Mark when you're booked. Customers see it instantly — no missed calls.</div></div></div>
+              <div class="benefit-item"><div class="benefit-icon">💬</div><div><div class="benefit-title">Direct WhatsApp connection</div><div class="benefit-desc">Paying customers contact you directly. No middleman. No commission.</div></div></div>
+              <div class="benefit-item"><div class="benefit-icon">₹</div><div><div class="benefit-title">Zero commission — ever</div><div class="benefit-desc">₹299 flat rate. Keep every rupee from every booking.</div></div></div>
+              <div class="benefit-item"><div class="benefit-icon">✓</div><div><div class="benefit-title">Verified business badge</div><div class="benefit-desc">Builds instant trust with customers browsing your profile.</div></div></div>
+              <div class="benefit-item"><div class="benefit-icon">📊</div><div><div class="benefit-title">Analytics dashboard</div><div class="benefit-desc">See views, clicks, and inquiries on your listing.</div></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+<!-- END APP BODY -->
+
+</div>
+<!-- END APP -->
+
+<!-- Mobile sidebar -->
+<div class="mob-overlay" id="mobOverlay" onclick="closeMobSidebar()"></div>
+<div class="mob-sidebar" id="mobSidebar">
+  <div class="mob-sidebar-close"><button class="mob-close-btn" onclick="closeMobSidebar()">✕</button></div>
+  <div style="padding:0 12px">
+    <div class="sidebar-item" onclick="showView('home');closeMobSidebar()"><span class="sidebar-item-icon">🏠</span>Home</div>
+    <div class="sidebar-item" onclick="showView('services');closeMobSidebar()"><span class="sidebar-item-icon">🔧</span>Services</div>
+    <div class="sidebar-item" onclick="showView('shop');closeMobSidebar()"><span class="sidebar-item-icon">🛍️</span>Shop</div>
+    <div class="sidebar-item" onclick="showView('food');closeMobSidebar()"><span class="sidebar-item-icon">🍛</span>Food & Dining</div>
+    <div class="sidebar-item" onclick="showView('post');closeMobSidebar()"><span class="sidebar-item-icon">📋</span>Post Requirement</div>
+    <div class="sidebar-divider"></div>
+    <div class="sidebar-item" onclick="showView('calendar');closeMobSidebar()"><span class="sidebar-item-icon">📅</span>Availability Calendar</div>
+    <div class="sidebar-item" onclick="showView('map');closeMobSidebar()"><span class="sidebar-item-icon">🗺️</span>Area Map</div>
+    <div class="sidebar-divider"></div>
+    <div class="sidebar-item" onclick="showView('about');closeMobSidebar()"><span class="sidebar-item-icon">🏛️</span>About Kurukshetra</div>
+    <div class="sidebar-divider"></div>
+    <div class="sidebar-item" onclick="showView('pricing');closeMobSidebar()"><span class="sidebar-item-icon">💳</span>Pricing</div>
+    <div class="sidebar-item" onclick="showView('register');closeMobSidebar()"><span class="sidebar-item-icon">👤</span>Sign in / Register</div>
   </div>
-</section>
+</div>
 
-<!-- FOOTER -->
-<footer class="footer">
-  <div class="container">
-    <div class="footer-grid">
-      <div>
-        <div class="footer-brand">
-          <div class="footer-brand-mark">
-            <svg viewBox="0 0 24 24" fill="none" stroke="#12343b" stroke-width="2.5" stroke-linecap="round"><path d="M12 2L2 7l10 5 10-5-10-5M2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
-          </div>
-          <span class="footer-brand-name">My KKR</span>
-        </div>
-        <p class="footer-tagline">Kurukshetra ka apna bazaar. Connecting local businesses with local people — simply and honestly.</p>
-        <div class="footer-social">
-          <div class="footer-soc">f</div>
-          <div class="footer-soc">in</div>
-          <div class="footer-soc">tw</div>
-          <div class="footer-soc">yt</div>
-        </div>
-      </div>
-      <div>
-        <div class="footer-col-title">For business</div>
-        <ul class="footer-links">
-          <li><a href="#">List your business</a></li>
-          <li><a href="#">How it works</a></li>
-          <li><a href="#">Pricing</a></li>
-          <li><a href="#">Verified badge</a></li>
-          <li><a href="#">Delivery network</a></li>
-        </ul>
-      </div>
-      <div>
-        <div class="footer-col-title">Browse</div>
-        <ul class="footer-links">
-          <li><a href="#">Event services</a></li>
-          <li><a href="#">Venues & halls</a></li>
-          <li><a href="#">Home services</a></li>
-          <li><a href="#">Food & dining</a></li>
-          <li><a href="#">All 66 categories</a></li>
-        </ul>
-      </div>
-      <div>
-        <div class="footer-col-title">Company</div>
-        <ul class="footer-links">
-          <li><a href="#">About My KKR</a></li>
-          <li><a href="#">Contact us</a></li>
-          <li><a href="#">Privacy policy</a></li>
-          <li><a href="#">Terms of service</a></li>
-          <li><a href="#">Refund policy</a></li>
-        </ul>
-      </div>
-    </div>
-    <div class="footer-bottom">
-      <div class="footer-copy">© 2025 My KKR · Kurukshetra, Haryana · <a href="https://mykkr.in" style="color:rgba(255,255,255,0.3)">mykkr.in</a></div>
-      <div class="footer-disclaimer">My KKR is a connector platform only. All transactions, payments, and service quality are solely between buyers and sellers. My KKR takes no responsibility for any dispute or outcome.</div>
-    </div>
-  </div>
-</footer>
-
-<!-- FLOATING -->
+<!-- Floating -->
 <div class="floating">
   <button class="float-btn float-up" id="floatUp" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
-  <button class="float-btn float-wa" onclick="window.open('https://wa.me/91XXXXXXXXXX','_blank')">WhatsApp</button>
-  <button class="float-btn float-main" onclick="document.getElementById('reg-section').scrollIntoView({behavior:'smooth'})">List business</button>
+  <button class="float-btn float-wa" onclick="window.open('https://wa.me/91XXXXXXXXXX','_blank')">💬 Help</button>
+  <button class="float-btn float-main" onclick="showView('post')">+ Post Requirement</button>
 </div>
 
-<!-- MODAL -->
+<!-- Modal -->
 <div class="modal-overlay" id="modal" onclick="if(event.target===this)closeModal()">
   <div class="modal-box">
     <button class="modal-x" onclick="closeModal()">✕</button>
-    <div class="modal-lock">🔒</div>
+    <div class="modal-icon">🔒</div>
     <div class="modal-title">Subscribe to contact</div>
-    <div class="modal-sub">Subscribe for ₹49/month to unlock WhatsApp numbers and contact any business on My KKR directly. Start with a 7-day free trial.</div>
-    <div class="modal-plan-box">
-      <div class="modal-plan-top">
-        <span class="modal-plan-name">Customer Plan</span>
-        <span class="modal-plan-price">₹49<span>/mo</span></span>
-      </div>
+    <div class="modal-sub">Subscribe for ₹49/month to unlock WhatsApp numbers and contact any business directly. Start with a 7-day free trial — no payment needed.</div>
+    <div class="modal-plan">
+      <div class="modal-plan-top"><span class="modal-plan-name">Customer Plan</span><span class="modal-plan-price">₹49<span>/mo</span></span></div>
       <div class="modal-plan-note">7-day free trial · Unlimited contacts · Cancel anytime</div>
     </div>
-    <button class="modal-cta" onclick="closeModal();document.getElementById('reg-section').scrollIntoView({behavior:'smooth'})">Start free trial →</button>
+    <button class="modal-cta" onclick="closeModal();showView('register')">Start free trial →</button>
     <div class="modal-footnote">No payment needed during the 7-day trial</div>
   </div>
 </div>
 
 <script>
-// Scroll effects
-window.addEventListener('scroll',()=>{
-  document.getElementById('floatUp').classList.toggle('show',window.scrollY>500)
-})
-
-// Mobile drawer
-function openDrawer(){document.getElementById('mob-overlay').classList.add('open');document.getElementById('mob-drawer').classList.add('open');document.body.style.overflow='hidden'}
-function closeDrawer(){document.getElementById('mob-overlay').classList.remove('open');document.getElementById('mob-drawer').classList.remove('open');document.body.style.overflow=''}
-
-// Category chips
-function setChip(el){document.querySelectorAll('.cat-chip').forEach(c=>c.classList.remove('active'));el.classList.add('active')}
-
-// Register tabs
-function switchTab(t){
-  ['biz','cust'].forEach(id=>{
-    document.getElementById('form-'+id).style.display=id===t?'block':'none'
-    document.getElementById('tab-'+id).classList.toggle('active',id===t)
+// ── VIEW SYSTEM ──
+const views=['home','services','shop','food','post','calendar','map','about','pricing','register']
+function showView(id){
+  views.forEach(v=>{
+    const el=document.getElementById('view-'+v)
+    if(el) el.classList.toggle('active',v===id)
+    const si=document.querySelector(`.sidebar-item[onclick*="'${v}'"]`)
+    if(si) si.classList.toggle('active',v===id)
   })
+  window.scrollTo({top:0,behavior:'smooth'})
+  // Build calendar if needed
+  if(id==='calendar') buildCal('calGrid2')
 }
 
-// OTP
-function showOtp(t){const f=document.getElementById('otp-'+t);f.classList.add('show');f.focus()}
+// ── SIDEBAR COLLAPSE ──
+function toggleCollapse(header){
+  const arr=header.querySelector('.sidebar-collapsible-arrow')
+  const children=header.nextElementSibling
+  arr.classList.toggle('open')
+  children.classList.toggle('open')
+}
 
-// Modal
+function showAbout(sub){
+  showView('about')
+  // In a full build this would scroll to the right sub-section
+}
+
+// ── MOBILE SIDEBAR ──
+function openMobSidebar(){document.getElementById('mobOverlay').classList.add('open');document.getElementById('mobSidebar').classList.add('open');document.body.style.overflow='hidden'}
+function closeMobSidebar(){document.getElementById('mobOverlay').classList.remove('open');document.getElementById('mobSidebar').classList.remove('open');document.body.style.overflow=''}
+
+// ── MODAL ──
 function openModal(){document.getElementById('modal').classList.add('open')}
 function closeModal(){document.getElementById('modal').classList.remove('open')}
 
-// Calendar
-(function(){
+// ── TABS ──
+function setHeroTab(el,view){
+  document.querySelectorAll('.hero-tab').forEach(t=>t.classList.remove('active'))
+  el.classList.add('active')
+  if(view!=='services') showView(view)
+}
+function setChip(el){document.querySelectorAll('.cat-chip').forEach(c=>c.classList.remove('active'));el.classList.add('active')}
+function setModeTab(el){el.parentElement.querySelectorAll('.mode-tab').forEach(t=>t.classList.remove('active'));el.classList.add('active')}
+function setTehsil(el){document.querySelectorAll('.tehsil-chip').forEach(c=>c.classList.remove('active'));el.classList.add('active')}
+
+// ── REGISTER TABS ──
+function switchRegTab(t){
+  ['biz','cust'].forEach(id=>{
+    document.getElementById('rform-'+id).style.display=id===t?'block':'none'
+    document.getElementById('rtab-'+id).classList.toggle('active',id===t)
+  })
+}
+function showOtpCode(t){const el=document.getElementById('rcotp-'+t);el.classList.add('show');el.focus()}
+
+// ── CALENDAR ──
+function buildCal(gridId){
   const booked=[5,6,12,13,19,20,26,27]
-  const partial=[8,15,22]
-  const today=9
+  const partial=[8,15,22];const today=9
   let html=''
   for(let i=0;i<2;i++) html+=`<div class="cal-day empty"></div>`
   for(let d=1;d<=30;d++){
     const c=booked.includes(d)?'booked':partial.includes(d)?'partial':'avail'
     const t=d===today?' today':''
-    html+=`<div class="cal-day ${c}${t}" onclick="pickDay(${d},this)">${d}</div>`
+    html+=`<div class="cal-day ${c}${t}" onclick="pickDay(this,'${gridId}')">${d}</div>`
   }
-  document.getElementById('calGrid').innerHTML=html
-})()
-function pickDay(d,el){
+  const el=document.getElementById(gridId)
+  if(el) el.innerHTML=html
+}
+function pickDay(el,gridId){
   if(el.classList.contains('booked'))return
-  document.querySelectorAll('.cal-day').forEach(x=>x.classList.remove('sel'))
+  document.querySelectorAll(`#${gridId} .cal-day`).forEach(x=>x.classList.remove('sel'))
   el.classList.add('sel')
-  document.getElementById('calSlots').classList.add('show')
+  const slotId=gridId==='calGrid2'?'calSlots2':'calSlots'
+  const slots=document.getElementById(slotId)
+  if(slots) slots.classList.add('show')
+}
+buildCal('calGrid2')
+
+// ── VIDEO SCROLL ──
+function scrollVideos(dir){
+  const track=document.getElementById('videoTrack')
+  track.scrollBy({left:dir*280,behavior:'smooth'})
 }
 
-// Smooth scroll
-document.querySelectorAll('a[href^="#"]').forEach(a=>{
-  a.addEventListener('click',e=>{
-    const t=document.querySelector(a.getAttribute('href'))
-    if(t){e.preventDefault();t.scrollIntoView({behavior:'smooth'})}
-  })
+// ── FLOATING UP ──
+window.addEventListener('scroll',()=>{
+  document.getElementById('floatUp').classList.toggle('show',window.scrollY>400)
 })
 </script>
 </body>
