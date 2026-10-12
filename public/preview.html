@@ -696,6 +696,133 @@ input,select,textarea{font-family:inherit}
   .pf-row,.rf-row{grid-template-columns:1fr}
   .hs-field:not(:first-child){display:none}
 }
+
+/* ── SMART SEARCH ── */
+.smart-search-wrap{max-width:700px;margin:0 auto 10px}
+.smart-search-box{
+  background:#fff;border-radius:var(--r-xl);
+  display:flex;align-items:center;overflow:hidden;
+  box-shadow:0 20px 40px rgba(0,0,0,.2);
+  border:2px solid transparent;transition:border-color .2s;
+}
+.smart-search-box:focus-within{border-color:var(--tan)}
+.smart-search-icon{padding:0 16px;font-size:20px;flex-shrink:0;color:var(--text-3)}
+.smart-search-input{
+  flex:1;padding:18px 0;font-size:16px;color:var(--text);
+  border:none;outline:none;background:transparent;min-width:0;
+}
+.smart-search-input::placeholder{color:var(--text-4);font-size:15px}
+.smart-search-submit{
+  margin:8px;padding:12px 24px;border-radius:var(--r-lg);
+  background:var(--night-d);color:#fff;
+  font-size:14px;font-weight:700;cursor:pointer;border:none;
+  transition:background var(--t);flex-shrink:0;
+}
+.smart-search-submit:hover{background:var(--night)}
+.smart-search-hint{font-size:12px;color:rgba(255,255,255,0.4);margin-top:8px;text-align:center;line-height:1.6}
+
+/* Search tags result */
+.search-tags{display:flex;gap:8px;flex-wrap:wrap;padding:0 28px 14px;display:none}
+.search-tags.show{display:flex}
+.search-tag{display:flex;align-items:center;gap:5px;padding:5px 12px;border-radius:99px;background:var(--night-l);border:1px solid rgba(45,84,94,0.2);font-size:12px;font-weight:600;color:var(--night-d)}
+.search-tag-x{cursor:pointer;color:var(--text-3);font-size:14px;line-height:1}
+.search-results-bar{padding:8px 28px;font-size:13px;color:var(--text-3);display:none}
+.search-results-bar.show{display:block}
+.search-results-bar strong{color:var(--night-d)}
+
+/* ── TWO-LEVEL CATEGORY SYSTEM ── */
+.cat-l1{background:#fff;border-bottom:1px solid var(--border);overflow:hidden;position:relative}
+.cat-l1::after{content:'';position:absolute;top:0;right:0;bottom:0;width:40px;background:linear-gradient(to right,transparent,#fff);pointer-events:none}
+.cat-l1-inner{display:flex;gap:0;overflow-x:auto;scrollbar-width:none;padding:0}
+.cat-l1-inner::-webkit-scrollbar{display:none}
+.cat-l1-tab{
+  display:flex;align-items:center;gap:7px;
+  padding:14px 18px;font-size:13px;font-weight:600;
+  color:var(--text-3);cursor:pointer;flex-shrink:0;
+  border-bottom:2px solid transparent;transition:all var(--t);
+  white-space:nowrap;
+}
+.cat-l1-tab:hover{color:var(--text-2)}
+.cat-l1-tab.active{color:var(--night-d);border-bottom-color:var(--night-d)}
+
+.cat-l2{background:var(--bg);border-bottom:1px solid var(--border);overflow:hidden;position:relative;min-height:52px}
+.cat-l2::after{content:'';position:absolute;top:0;right:0;bottom:0;width:40px;background:linear-gradient(to right,transparent,var(--bg));pointer-events:none}
+.cat-l2-inner{display:flex;gap:8px;padding:10px 16px;overflow-x:auto;scrollbar-width:none}
+.cat-l2-inner::-webkit-scrollbar{display:none}
+.cat-l2-chip{
+  display:flex;align-items:center;gap:6px;
+  padding:7px 14px;border-radius:99px;
+  border:1.5px solid var(--border);background:#fff;
+  font-size:12px;font-weight:500;color:var(--text-2);
+  white-space:nowrap;cursor:pointer;flex-shrink:0;
+  transition:all var(--t);
+}
+.cat-l2-chip:hover{border-color:var(--night);color:var(--night)}
+.cat-l2-chip.active{background:var(--night-d);color:#fff;border-color:var(--night-d)}
+
+/* ── TRUST STRIP (horizontal scroll) ── */
+.trust-strip{background:#fff;border-top:1px solid var(--border);border-bottom:1px solid var(--border);overflow:hidden;padding:20px 0;position:relative}
+.trust-strip::after{content:'';position:absolute;top:0;right:0;bottom:0;width:48px;background:linear-gradient(to right,transparent,#fff);pointer-events:none}
+.trust-strip-inner{display:flex;gap:12px;padding:0 28px;overflow-x:auto;scrollbar-width:none}
+.trust-strip-inner::-webkit-scrollbar{display:none}
+.trust-pill{
+  display:flex;align-items:center;gap:10px;
+  padding:12px 18px;border-radius:var(--r-xl);
+  border:1px solid var(--border);background:#fff;
+  box-shadow:var(--shadow-xs);flex-shrink:0;min-width:200px;
+  transition:all var(--t);
+}
+.trust-pill:hover{border-color:var(--night-l);box-shadow:var(--shadow-sm)}
+.trust-pill-icon{width:36px;height:36px;border-radius:var(--r);background:var(--night-l);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.trust-pill-title{font-size:13px;font-weight:700;color:var(--night-d);margin-bottom:2px}
+.trust-pill-desc{font-size:11px;color:var(--text-3);line-height:1.4}
+
+/* ── FOOTER ── */
+.site-footer{background:var(--night-d)}
+.footer-main{padding:44px 28px 28px;display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:36px;max-width:100%}
+.footer-brand-area{}
+.footer-brand-row{display:flex;align-items:center;gap:9px;margin-bottom:11px}
+.footer-brand-mark{width:28px;height:28px;border-radius:6px;background:var(--tan);display:flex;align-items:center;justify-content:center}
+.footer-brand-mark svg{width:13px;height:13px}
+.footer-brand-name{font-size:15px;font-weight:700;color:#fff}
+.footer-brand-tagline{font-size:12px;color:rgba(255,255,255,0.35);line-height:1.7;max-width:220px;margin-bottom:16px}
+.footer-social-row{display:flex;gap:8px}
+.footer-soc{
+  width:32px;height:32px;border-radius:var(--r);
+  border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.04);
+  display:flex;align-items:center;justify-content:center;
+  font-size:13px;color:rgba(255,255,255,0.5);cursor:pointer;
+  transition:all var(--t);text-decoration:none;
+}
+.footer-soc:hover{background:rgba(255,255,255,0.12);color:#fff}
+.footer-col-head{font-size:10px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;color:rgba(255,255,255,0.3);margin-bottom:12px}
+.footer-col-links{list-style:none}
+.footer-col-links li{margin-bottom:8px}
+.footer-col-links a{font-size:13px;color:rgba(255,255,255,0.4);transition:color var(--t);cursor:pointer}
+.footer-col-links a:hover{color:rgba(255,255,255,0.85)}
+.footer-bottom-bar{
+  border-top:1px solid rgba(255,255,255,0.07);
+  padding:16px 28px;
+  display:flex;justify-content:space-between;align-items:center;
+  flex-wrap:wrap;gap:12px;
+}
+.footer-bottom-left{font-size:12px;color:rgba(255,255,255,0.2)}
+.footer-bottom-left a{color:var(--tan)}
+.footer-bottom-disclaimer{font-size:11px;color:rgba(255,255,255,0.15);max-width:440px;line-height:1.6;text-align:right}
+@media(max-width:768px){
+  .footer-main{grid-template-columns:1fr 1fr;gap:24px}
+  .footer-bottom-disclaimer{text-align:left}
+  /* Hide top nav search on mobile — hero has the real one */
+  .topnav-search{display:none}
+  .tnav-ham{display:flex}
+}
+@media(max-width:480px){
+  .footer-main{grid-template-columns:1fr}
+}
+/* Fix top nav — show minimal version on mobile */
+@media(max-width:768px){
+  .topnav-inner{gap:8px}
+}
 </style>
 </head>
 <body>
@@ -805,42 +932,27 @@ input,select,textarea{font-family:inherit}
     <h1>Find Anything in<br><span>Kurukshetra</span></h1>
     <p class="hero-hindi hindi">कुरुक्षेत्र की हर ज़रूरत — एक जगह</p>
 
-    <!-- Enhanced search with 3 fields -->
-    <div class="hero-search-wrap">
-      <div class="hero-search-box">
-        <div class="hs-field">
-          <span class="hs-label">What do you need?</span>
-          <input class="hs-input" type="text" placeholder="e.g. DJ, Plumber, Caterer...">
-        </div>
-        <div class="hs-field" style="min-width:140px;max-width:160px">
-          <span class="hs-label">Area / Sector</span>
-          <select class="hs-select">
-            <option>Anywhere in KKR</option>
-            <optgroup label="Sectors">
-              <option>Sector 1</option><option>Sector 7</option><option>Sector 13</option><option>Sector 17</option>
-            </optgroup>
-            <optgroup label="Areas">
-              <option>Thanesar</option><option>Brahmsarovar</option><option>Pipli Road</option><option>Gandhi Nagar</option><option>Model Town</option><option>Railway Road</option>
-            </optgroup>
-            <optgroup label="Tehsils">
-              <option>Shahabad</option><option>Pehowa</option><option>Ladwa</option><option>Babain</option>
-            </optgroup>
-          </select>
-        </div>
-        <div class="hs-field" style="min-width:110px;max-width:130px">
-          <span class="hs-label">Within distance</span>
-          <select class="hs-select">
-            <option>5 km</option>
-            <option>10 km</option>
-            <option selected>25 km</option>
-            <option>50 km</option>
-            <option>100 km</option>
-          </select>
-        </div>
-        <button class="hero-search-submit">Search →</button>
+    <!-- Smart natural language search -->
+    <div class="smart-search-wrap">
+      <div class="smart-search-box">
+        <span class="smart-search-icon">🔍</span>
+        <input
+          class="smart-search-input"
+          id="smartSearch"
+          type="text"
+          placeholder='Try: "DJ in Sector 5 on 15 Oct" or "Plumber near Brahmsarovar"'
+          oninput="parseSearch(this.value)"
+          onkeydown="if(event.key==='Enter')doSearch()"
+        >
+        <button class="smart-search-submit" onclick="doSearch()">Search →</button>
       </div>
-      <div class="hero-search-hint">Popular: DJ · Wedding Hall · Electrician · Catering · Pandit Ji</div>
+      <div class="smart-search-hint">
+        Just type naturally · Examples: "Wedding photographer Thanesar" · "Electrician Sector 13 tomorrow" · "Catering for 200 guests 20 Nov"
+      </div>
     </div>
+    <!-- Parsed search tags shown here -->
+    <div class="search-tags" id="searchTags"></div>
+    <div class="search-results-bar" id="searchBar"></div>
 
     <div class="hero-tabs">
       <div class="hero-tab active" onclick="setHeroTab(this,'services')">🔧 Services</div>
@@ -901,23 +1013,24 @@ input,select,textarea{font-family:inherit}
     </div>
   </div>
 
-  <!-- Category strip -->
-  <div class="cat-strip">
-    <div class="cat-strip-inner">
-      <div class="chip active" onclick="setChip(this)"><span class="chip-icon">⊕</span>All</div>
-      <div class="chip" onclick="setChip(this)"><span class="chip-icon">🎵</span>DJ & Sound</div>
-      <div class="chip" onclick="setChip(this)"><span class="chip-icon">🍽️</span>Catering</div>
-      <div class="chip" onclick="setChip(this)"><span class="chip-icon">📸</span>Photography</div>
-      <div class="chip" onclick="setChip(this)"><span class="chip-icon">💒</span>Venues</div>
-      <div class="chip" onclick="setChip(this)"><span class="chip-icon">🌿</span>Mehendi</div>
-      <div class="chip" onclick="setChip(this)"><span class="chip-icon">⚡</span>Electrician</div>
-      <div class="chip" onclick="setChip(this)"><span class="chip-icon">🚿</span>Plumber</div>
-      <div class="chip" onclick="setChip(this)"><span class="chip-icon">🛒</span>Kirana</div>
-      <div class="chip" onclick="setChip(this)"><span class="chip-icon">🍛</span>Restaurant</div>
-      <div class="chip" onclick="setChip(this)"><span class="chip-icon">🙏</span>Pandit Ji</div>
-      <div class="chip" onclick="setChip(this)"><span class="chip-icon">🚗</span>Taxi</div>
-      <div class="chip" onclick="setChip(this)"><span class="chip-icon">✂️</span>Salon</div>
-      <div class="chip" onclick="setChip(this)"><span class="chip-icon">🎂</span>Bakery</div>
+  <!-- TWO-LEVEL CATEGORY SYSTEM -->
+  <!-- Level 1 — Main groups -->
+  <div class="cat-l1">
+    <div class="cat-l1-inner" id="catL1">
+      <div class="cat-l1-tab active" onclick="selectL1(this,'all')">⊕ All</div>
+      <div class="cat-l1-tab" onclick="selectL1(this,'events')">🎉 Event Services</div>
+      <div class="cat-l1-tab" onclick="selectL1(this,'venues')">🏛️ Venues</div>
+      <div class="cat-l1-tab" onclick="selectL1(this,'food')">🍛 Food & Dining</div>
+      <div class="cat-l1-tab" onclick="selectL1(this,'goods')">🛒 Goods & Shops</div>
+      <div class="cat-l1-tab" onclick="selectL1(this,'home')">🔧 Home Services</div>
+      <div class="cat-l1-tab" onclick="selectL1(this,'transport')">🚗 Transport</div>
+      <div class="cat-l1-tab" onclick="selectL1(this,'pro')">💼 Professional</div>
+    </div>
+  </div>
+  <!-- Level 2 — Sub-categories (changes based on L1 selection) -->
+  <div class="cat-l2">
+    <div class="cat-l2-inner" id="catL2">
+      <!-- Populated by JS -->
     </div>
   </div>
 
@@ -932,13 +1045,17 @@ input,select,textarea{font-family:inherit}
     </div>
   </div>
 
-  <!-- Trust -->
-  <div class="section" style="background:var(--bg);border-top:1px solid var(--border)">
-    <div class="sec-header"><div class="sec-title">Built on trust</div></div>
-    <div class="trust-grid">
-      <div class="trust-card"><div class="trust-icon">✓</div><div class="trust-title">Verified businesses</div><div class="trust-desc">Every business reviewed before going live. Verified badges show who has been checked by our team.</div></div>
-      <div class="trust-card"><div class="trust-icon">★</div><div class="trust-title">Real ratings & reviews</div><div class="trust-desc">Reviews from real customers who contacted businesses through My KKR — honest and verified.</div></div>
-      <div class="trust-card"><div class="trust-icon">🔒</div><div class="trust-title">OTP secured login</div><div class="trust-desc">Phone OTP login — secure and simple. Same as Paytm, PhonePe, or any major Indian app.</div></div>
+  <!-- Trust horizontal scroll strip -->
+  <div class="trust-strip">
+    <div class="trust-strip-inner">
+      <div class="trust-pill"><div class="trust-pill-icon">✓</div><div><div class="trust-pill-title">Verified businesses</div><div class="trust-pill-desc">Every business reviewed before going live</div></div></div>
+      <div class="trust-pill"><div class="trust-pill-icon">★</div><div><div class="trust-pill-title">Real reviews</div><div class="trust-pill-desc">From real customers — honest & verified</div></div></div>
+      <div class="trust-pill"><div class="trust-pill-icon">🔒</div><div><div class="trust-pill-title">OTP secured login</div><div class="trust-pill-desc">Phone number login — no password needed</div></div></div>
+      <div class="trust-pill"><div class="trust-pill-icon">💸</div><div><div class="trust-pill-title">Zero commission</div><div class="trust-pill-desc">All payments directly between buyer & seller</div></div></div>
+      <div class="trust-pill"><div class="trust-pill-icon">📅</div><div><div class="trust-pill-title">Live availability</div><div class="trust-pill-desc">See who's free on your exact event date</div></div></div>
+      <div class="trust-pill"><div class="trust-pill-icon">💬</div><div><div class="trust-pill-title">Direct WhatsApp</div><div class="trust-pill-desc">Contact any business instantly on WhatsApp</div></div></div>
+      <div class="trust-pill"><div class="trust-pill-icon">🚴</div><div><div class="trust-pill-title">Local delivery</div><div class="trust-pill-desc">Telegram rider network for same-day delivery</div></div></div>
+      <div class="trust-pill"><div class="trust-pill-icon">🏅</div><div><div class="trust-pill-title">100% local</div><div class="trust-pill-desc">Only real Kurukshetra businesses listed</div></div></div>
     </div>
   </div>
 </div>
@@ -1428,6 +1545,74 @@ input,select,textarea{font-family:inherit}
 </div><!-- end app-body -->
 </div><!-- end app -->
 
+
+<!-- ══ SITE FOOTER ══ -->
+<footer class="site-footer">
+  <div class="footer-main">
+    <!-- Brand -->
+    <div class="footer-brand-area">
+      <div class="footer-brand-row">
+        <div class="footer-brand-mark">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#12343b" stroke-width="2.5" stroke-linecap="round"><path d="M12 2L2 7l10 5 10-5-10-5M2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+        </div>
+        <span class="footer-brand-name">My KKR</span>
+      </div>
+      <p class="footer-brand-tagline">Kurukshetra ka apna bazaar. Connecting local businesses with local people — simply and honestly.</p>
+      <div class="footer-social-row">
+        <a class="footer-soc" href="#" title="Facebook">f</a>
+        <a class="footer-soc" href="#" title="Instagram">📸</a>
+        <a class="footer-soc" href="#" title="YouTube">▶</a>
+        <a class="footer-soc" href="#" title="WhatsApp">💬</a>
+      </div>
+    </div>
+    <!-- Discover -->
+    <div>
+      <div class="footer-col-head">Discover</div>
+      <ul class="footer-col-links">
+        <li><a onclick="showView('services')">Services</a></li>
+        <li><a onclick="showView('shop')">Shop</a></li>
+        <li><a onclick="showView('food')">Food & Dining</a></li>
+        <li><a onclick="showView('post')">Post Requirement</a></li>
+        <li><a onclick="showView('calendar')">Availability Calendar</a></li>
+        <li><a onclick="showView('map')">Find by Area</a></li>
+      </ul>
+    </div>
+    <!-- Explore -->
+    <div>
+      <div class="footer-col-head">Explore KKR</div>
+      <ul class="footer-col-links">
+        <li><a onclick="showView('about')">About Kurukshetra</a></li>
+        <li><a onclick="showView('about')">Tourist Places</a></li>
+        <li><a onclick="showView('about')">Tehsils & Villages</a></li>
+        <li><a onclick="showView('about')">District Map</a></li>
+        <li><a onclick="showView('about')">Events & Festivals</a></li>
+        <li><a onclick="showView('about')">Universities</a></li>
+      </ul>
+    </div>
+    <!-- Company -->
+    <div>
+      <div class="footer-col-head">Company</div>
+      <ul class="footer-col-links">
+        <li><a onclick="showView('register')">List your business</a></li>
+        <li><a onclick="showView('pricing')">Pricing</a></li>
+        <li><a href="#">About My KKR</a></li>
+        <li><a href="#">Privacy Policy</a></li>
+        <li><a href="#">Terms of Service</a></li>
+        <li><a href="#">Refund Policy</a></li>
+        <li><a href="https://wa.me/91XXXXXXXXXX" target="_blank">Help & Support</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom-bar">
+    <div class="footer-bottom-left">
+      © 2025 My KKR · Made with ❤️ in Kurukshetra · <a href="https://mykkr.in">mykkr.in</a>
+    </div>
+    <div class="footer-bottom-disclaimer">
+      ⚠️ My KKR is a connector platform only. All transactions, payments, and service quality are solely between buyers and sellers. My KKR takes no responsibility for any dispute or outcome.
+    </div>
+  </div>
+</footer>
+
 <!-- Mobile sidebar -->
 <div class="mob-overlay" id="mobOverlay" onclick="closeMob()"></div>
 <div class="mob-sidebar" id="mobSidebar">
@@ -1639,6 +1824,178 @@ document.querySelectorAll('a[href^="#"]').forEach(a=>{
     if(t){e.preventDefault();t.scrollIntoView({behavior:'smooth'})}
   })
 })
+
+// ── TWO-LEVEL CATEGORY DATA ──
+const CAT_DATA = {
+  all: {
+    subs: ['All','🎵 DJ','🍽️ Catering','📸 Photography','💒 Venue','🌿 Mehendi','⚡ Electrician','🚿 Plumber','🛒 Kirana','🍛 Restaurant','🙏 Pandit Ji','🚗 Taxi','✂️ Salon','🎂 Bakery','⛺ Tent','🎬 Videography','🥁 Band','🐴 Horse Barat','🪔 Pooja','🌾 Agriculture','💊 Medical','📱 Mobile','💇 Parlour','🎓 Tuition','⚖️ Lawyer','📊 CA'],
+    filter: null
+  },
+  events: {
+    subs: ['All Events','🎵 DJ & Sound','🍽️ Catering','📸 Photography','🎬 Videography','🌿 Mehendi Artist','💄 Makeup Artist','🥁 Band & Music','🐴 Horse & Barat','🌸 Decoration','⛺ Tent & Shamiana','💌 Wedding Cards','✨ Lighting','🎆 Fireworks','🎭 Event Management','🙏 Pandit Ji'],
+    filter: 'events'
+  },
+  venues: {
+    subs: ['All Venues','💒 Marriage Hall & Lawn','🏪 Banquet Hall','🌳 Farmhouse & Garden','🏠 Dharamshala','🏨 Hotel Rooms','🏢 Conference Room'],
+    filter: 'venues'
+  },
+  food: {
+    subs: ['All Food','🍛 Restaurant','🫕 Dhaba','🍱 Tiffin Service','🎂 Bakery & Cakes','🍬 Sweets & Mithai','☕ Chai & Snacks','🥤 Juice & Cold Drinks'],
+    filter: 'food'
+  },
+  goods: {
+    subs: ['All Shops','🛒 Kirana & Grocery','🥦 Fruits & Vegetables','🥛 Dairy & Eggs','💊 Medical & Pharmacy','👗 Clothing & Fabrics','📱 Mobile & Electronics','🪔 Pooja Samagri','🌾 Agricultural Supplies'],
+    filter: 'goods'
+  },
+  home: {
+    subs: ['All Home Services','⚡ Electrician','🚿 Plumber','🪵 Carpenter','🖌️ Painter','❄️ AC & Appliance','🧹 Cleaning','☀️ Solar & Inverter','🐛 Pest Control'],
+    filter: 'home'
+  },
+  transport: {
+    subs: ['All Transport','🛺 Auto Rickshaw','🚗 Cab & Taxi','🚛 Tempo & Truck','📦 Packers & Movers','🚜 Tractor & Farm'],
+    filter: 'transport'
+  },
+  pro: {
+    subs: ['All Professional','📊 CA & Tax Filing','⚖️ Lawyer','📖 Tuition & Coaching','💇 Beauty Parlour','✂️ Salon & Barber','💪 Gym & Fitness','🧵 Tailoring','🖨️ Printing & Banners','🏡 Property Dealer'],
+    filter: 'pro'
+  }
+}
+
+let activeL1 = 'all'
+let activeL2 = 'All'
+
+function selectL1(el, key) {
+  document.querySelectorAll('.cat-l1-tab').forEach(t => t.classList.remove('active'))
+  el.classList.add('active')
+  activeL1 = key
+  activeL2 = null
+  renderL2(key)
+  filterBusinesses()
+}
+
+function renderL2(key) {
+  const data = CAT_DATA[key]
+  const container = document.getElementById('catL2')
+  if (!container) return
+  container.innerHTML = data.subs.map((sub, i) =>
+    `<div class="cat-l2-chip${i===0?' active':''}" onclick="selectL2(this,'${sub.replace(/'/g,"\'")}'">${sub}</div>`
+  ).join('')
+  activeL2 = data.subs[0]
+}
+
+function selectL2(el, name) {
+  document.querySelectorAll('.cat-l2-chip').forEach(c => c.classList.remove('active'))
+  el.classList.add('active')
+  activeL2 = name
+  filterBusinesses()
+}
+
+function filterBusinesses() {
+  // In production this calls the API with filters
+  // For demo: show/hide provider cards based on active category
+  const cards = document.querySelectorAll('#view-home .pc')
+  cards.forEach(card => {
+    card.style.display = 'block' // show all for now
+  })
+  // Update results count
+  const bar = document.getElementById('searchBar')
+  if (bar && activeL1 !== 'all') {
+    bar.textContent = `Showing results for: ${activeL2 || CAT_DATA[activeL1].subs[0]}`
+    bar.classList.add('show')
+  }
+}
+
+// Init L2 on load
+renderL2('all')
+
+// ── SMART NATURAL LANGUAGE SEARCH ──
+const AREAS = ['sector 1','sector 2','sector 3','sector 4','sector 5','sector 6','sector 7','sector 8','sector 9','sector 10','sector 11','sector 12','sector 13','sector 14','sector 15','sector 16','sector 17','thanesar','brahmsarovar','pipli','gandhi nagar','model town','railway road','nehru colony','old city','shahabad','pehowa','ladwa','babain','ismailabad','guhla','cheeka','rajound','jyotisar','narkatari','umri']
+const SERVICES = ['dj','sound','catering','food','photography','photo','photographer','venue','hall','lawn','mehendi','henna','electrician','electric','plumber','plumbing','carpenter','carpenter','painter','ac','repair','cleaning','solar','taxi','cab','auto','rickshaw','tempo','truck','pandit','pooja','tutor','tuition','coaching','salon','barber','parlour','makeup','kirana','grocery','vegetable','dairy','medical','pharmacy','mobile','property','lawyer','ca','accountant','tent','decoration','band','fireworks','videography','video']
+const MONTHS = {jan:1,feb:2,mar:3,apr:4,may:5,jun:6,jul:7,aug:8,sep:9,oct:10,nov:11,dec:12}
+
+let parsedSearch = {service:'', area:'', date:'', raw:''}
+
+function parseSearch(val) {
+  const lower = val.toLowerCase()
+  parsedSearch.raw = val
+
+  // Extract service
+  parsedSearch.service = ''
+  for (const s of SERVICES) {
+    if (lower.includes(s)) { parsedSearch.service = s; break }
+  }
+
+  // Extract area
+  parsedSearch.area = ''
+  for (const a of AREAS) {
+    if (lower.includes(a)) { parsedSearch.area = a; break }
+  }
+
+  // Extract date — patterns: "15 oct", "oct 15", "tomorrow", "today", "15/10", "15-10"
+  parsedSearch.date = ''
+  const tomorrow = /tomorrow/i.test(val) ? 'Tomorrow' : ''
+  const today = /today/i.test(val) ? 'Today' : ''
+  const dateMatch = val.match(/(\d{1,2})[\/\-\s](jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)/i)
+    || val.match(/(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[\/\-\s](\d{1,2})/i)
+    || val.match(/(\d{1,2})[\/\-](\d{1,2})/i)
+  if (tomorrow) parsedSearch.date = 'Tomorrow'
+  else if (today) parsedSearch.date = 'Today'
+  else if (dateMatch) parsedSearch.date = dateMatch[0]
+
+  // Render tags
+  renderSearchTags()
+}
+
+function renderSearchTags() {
+  const container = document.getElementById('searchTags')
+  if (!container) return
+  const tags = []
+  if (parsedSearch.service) tags.push({label:'Service: '+parsedSearch.service, key:'service'})
+  if (parsedSearch.area) tags.push({label:'Area: '+parsedSearch.area, key:'area'})
+  if (parsedSearch.date) tags.push({label:'Date: '+parsedSearch.date, key:'date'})
+
+  if (tags.length === 0) {
+    container.classList.remove('show')
+    container.innerHTML = ''
+    return
+  }
+  container.classList.add('show')
+  container.innerHTML = tags.map(t =>
+    `<div class="search-tag">${t.label}<span class="search-tag-x" onclick="clearTag('${t.key}')">×</span></div>`
+  ).join('')
+}
+
+function clearTag(key) {
+  parsedSearch[key] = ''
+  const input = document.getElementById('smartSearch')
+  // Remove the term from input
+  renderSearchTags()
+}
+
+function doSearch() {
+  const q = document.getElementById('smartSearch')?.value
+  if (!q || q.trim().length < 2) return
+
+  const bar = document.getElementById('searchBar')
+  const parts = []
+  if (parsedSearch.service) parts.push(parsedSearch.service)
+  if (parsedSearch.area) parts.push('in ' + parsedSearch.area)
+  if (parsedSearch.date) parts.push('on ' + parsedSearch.date)
+
+  const desc = parts.length > 0
+    ? `<strong>${parts.join(' ')}</strong>`
+    : `<strong>"${q}"</strong>`
+
+  if (bar) {
+    bar.innerHTML = `Showing results for ${desc} — 4 businesses found`
+    bar.classList.add('show')
+  }
+
+  // Scroll to results on home page
+  const grid = document.querySelector('#view-home .pgrid')
+  if (grid) grid.scrollIntoView({behavior:'smooth', block:'start'})
+}
+
 </script>
 </body>
 </html>
