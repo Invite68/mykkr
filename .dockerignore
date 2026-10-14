@@ -1,0 +1,43 @@
+# ══ SECRETS — never in Docker image ══
+.env
+.env.*
+.env.local
+.env.production
+.env.staging
+*.pem
+*.key
+*.p12
+id_rsa
+id_rsa.pub
+id_ed25519
+serviceAccountKey.json
+firebase-adminsdk*.json
+secrets.json
+
+# ══ Dev-only files ══
+.git
+.gitignore
+.github
+README.md
+DEPLOY.md
+*.md
+.DS_Store
+.vscode
+.idea
+
+# ══ Build artifacts (rebuilt inside Docker) ══
+node_modules
+.next
+dist
+build
+out
+
+# ══ Test files ══
+**/*.test.ts
+**/*.test.tsx
+**/*.spec.ts
+coverage
+
+# ══ Logs ══
+*.log
+logs/
