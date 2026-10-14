@@ -2,6 +2,11 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.gstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.gstatic.com; img-src 'self' data: https://*.tile.openstreetmap.org https://nominatim.openstreetmap.org; frame-src https://www.openstreetmap.org; connect-src 'self' https://nominatim.openstreetmap.org https://router.project-osrm.org https://fonts.googleapis.com; font-src https://fonts.gstatic.com;">
+<meta http-equiv="X-Frame-Options" content="DENY">
+<meta http-equiv="X-Content-Type-Options" content="nosniff">
+<meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
+<meta http-equiv="Permissions-Policy" content="camera=(), microphone=(), payment=()">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>My KKR — Kurukshetra Local Marketplace</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Noto+Sans+Devanagari:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -684,6 +689,77 @@ input,select,textarea{font-family:inherit}
 @media(max-width:480px){.rd-row{grid-template-columns:1fr}.rd-vehicles{grid-template-columns:repeat(3,1fr)}}
 
 </style>
+
+<!--
+=======================================================
+MY KKR — PRODUCTION SECURITY CHECKLIST (for backend developer)
+=======================================================
+
+AUTHENTICATION & SESSION
+✅ Phone OTP via Firebase Auth or custom OTP service (not stored as plain text)
+✅ JWT tokens — short expiry (15 min access, 7 day refresh)
+✅ Refresh token rotation on every use
+✅ Session invalidation on logout (server-side token blacklist or Redis)
+✅ OTP: max 3 requests per 10 min per phone, max 5 attempts per OTP, 60s expiry
+✅ Bcrypt/Argon2 for any password storage (none currently — OTP only)
+✅ HTTPS only — no HTTP endpoints, HSTS header, min TLS 1.2
+
+DATABASE SECURITY
+✅ PostgreSQL — least privilege roles (app user ≠ admin user)
+✅ Customer phone/email encrypted at rest (AES-256, key in environment variable)
+✅ No raw SQL queries — use Prisma ORM with parameterised queries
+✅ Input validation at API layer before DB — Zod schemas
+✅ No PII in logs — redact phone, email, name before any console.log
+✅ Daily encrypted backups (enabled on Coolify/Hostinger)
+✅ PostGIS for location — never store precise home address in logs
+
+API SECURITY
+✅ Rate limiting: 100 req/min per IP general, 5 req/min for OTP, 10 req/min for booking
+✅ CORS whitelist: mykkr.in only, no wildcard
+✅ Helmet.js for HTTP security headers on NestJS
+✅ Input validation: Zod on every endpoint, no raw req.body pass-through
+✅ SQL injection: impossible via Prisma parameterised queries
+✅ XSS: sanitise-html on any user content stored to DB
+✅ CSRF: double-submit cookie pattern or SameSite=Strict cookies
+✅ File uploads: signed URLs via Cloudflare R2/Supabase storage, max 5MB, image types only
+✅ No stack traces in production error responses
+
+PAYMENT (Razorpay)
+✅ Amount calculated server-side, never trust client total
+✅ Webhook signature verification (Razorpay-Signature header)
+✅ Idempotency keys on payment creation
+✅ Store only: subscription_id, customer_id, plan_id, status — never card details
+✅ PCI-DSS delegated to Razorpay — My KKR never sees card numbers
+
+PRIVACY (India — DPDP Act 2023)
+✅ Privacy Policy page required before launch
+✅ Explicit consent checkbox on registration (logged with timestamp)
+✅ Data minimisation — collect only what's needed
+✅ Right to deletion — user can request account + data deletion
+✅ Driver contact revealed to customer ONLY after job assignment
+✅ Customer contact revealed to driver ONLY after job assignment
+✅ Location data: store last known only, purge after 30 days for completed orders
+
+INFRASTRUCTURE (Coolify on Hostinger VPS)
+✅ Coolify behind Cloudflare (free) — DDoS protection, WAF
+✅ Fail2ban on VPS for SSH brute force
+✅ SSH key only — no password login to VPS
+✅ Monarx malware scanner (already enabled)
+✅ Auto-backups (already enabled)
+✅ n8n editor NOT public — local access or VPN only
+✅ PostgreSQL port 5432 NOT exposed publicly — internal Docker network only
+✅ Environment variables in Coolify secrets — never in code
+
+OPERATIONS
+✅ Uptime monitoring: UptimeRobot free tier
+✅ Error tracking: Sentry free tier
+✅ Log retention: 30 days, no PII in logs
+✅ Dependency updates: monthly audit (npm audit)
+✅ Security headers test: securityheaders.com before launch
+✅ Penetration test: run OWASP ZAP against staging before launch
+
+=======================================================
+-->
 </head>
 <body>
 <div class="app">
@@ -1356,6 +1432,9 @@ input,select,textarea{font-family:inherit}
       </div>
     </div>
     <p style="text-align:center;font-size:12px;color:var(--text-3);margin-top:14px"><strong style="color:var(--text-2)">My KKR takes zero commission</strong> on any sale, booking, or delivery. All payments directly between buyer and seller.</p>
+<div style="margin-top:12px;background:var(--green-l);border:1px solid rgba(22,163,74,0.2);border-radius:var(--r-lg);padding:12px 16px;font-size:12px;color:#166534;text-align:center">
+🔒 <strong>My KKR never processes payments.</strong> We have no access to your card details, UPI PIN, or bank account. Subscription payments go through <strong>Razorpay</strong> — India's most trusted payment gateway — with full PCI-DSS compliance. My KKR stores only the subscription status, never payment credentials.
+</div>
   </div>
 </div>
 
@@ -1397,10 +1476,10 @@ input,select,textarea{font-family:inherit}
           <div class="rf-group">
             <label class="rf-label">WhatsApp business number</label>
             <div class="otp-wrap">
-              <input class="rf-input" type="tel" id="bizPhone" placeholder="+91 98765 43210">
+              <input class="rf-input" type="tel" id="bizPhone" maxlength="15" placeholder="+91 98765 43210">
               <button class="otp-send" onclick="sendOTP('biz')">Send OTP</button>
             </div>
-            <input class="otp-code" id="otp-biz" type="text" maxlength="6" placeholder="- - - - - -">
+            <input class="otp-code" id="otp-biz" type="text" maxlength="6" autocomplete="one-time-code" inputmode="numeric" pattern="[0-9]{6}" placeholder="- - - - - -">
             <div class="otp-hint" id="otp-biz-hint" style="display:none">OTP sent to your WhatsApp number. Valid for 60 seconds.</div>
           </div>
           <!-- Address block -->
@@ -1432,10 +1511,10 @@ input,select,textarea{font-family:inherit}
           <div class="rf-group">
             <label class="rf-label">Mobile number</label>
             <div class="otp-wrap">
-              <input class="rf-input" type="tel" id="custPhone" placeholder="+91 98765 43210">
+              <input class="rf-input" type="tel" id="custPhone" maxlength="15" placeholder="+91 98765 43210">
               <button class="otp-send" onclick="sendOTP('cust')">Send OTP</button>
             </div>
-            <input class="otp-code" id="otp-cust" type="text" maxlength="6" placeholder="- - - - - -">
+            <input class="otp-code" id="otp-cust" type="text" maxlength="6" autocomplete="one-time-code" inputmode="numeric" pattern="[0-9]{6}" placeholder="- - - - - -">
             <div class="otp-hint" id="otp-cust-hint" style="display:none">OTP sent to your mobile number. Valid for 60 seconds.</div>
           </div>
           <!-- Address block -->
@@ -1457,6 +1536,7 @@ input,select,textarea{font-family:inherit}
           <div class="rf-check"><input type="checkbox" id="rt-cust"><label for="rt-cust">I agree to the <a href="#">Terms of Service</a>. All payments are directly with the business — My KKR takes no commission.</label></div>
           <button class="rf-submit">Start 7-day free trial</button>
           <div class="rf-note">No payment during trial · ₹49+GST after 7 days · Cancel anytime</div>
+          <div style="text-align:center;margin-top:10px"><button onclick="showForgotOTP()" style="font-size:12px;color:var(--night);background:none;border:none;cursor:pointer;text-decoration:underline">Forgot your number? Send a new OTP</button></div>
         </div>
       </div>
 
@@ -1545,11 +1625,11 @@ input,select,textarea{font-family:inherit}
               <div class="rd-row" style="margin-bottom:10px">
                 <div>
                   <div style="font-size:10px;font-weight:600;color:var(--text-3);text-transform:uppercase;letter-spacing:.3px;margin-bottom:5px">Your name</div>
-                  <input class="rd-input" type="text" id="rdName" placeholder="Full name" required>
+                  <input class="rd-input" type="text" id="rdName" maxlength="80" placeholder="Full name" required>
                 </div>
                 <div>
                   <div style="font-size:10px;font-weight:600;color:var(--text-3);text-transform:uppercase;letter-spacing:.3px;margin-bottom:5px">Phone number</div>
-                  <input class="rd-input" type="tel" id="rdPhone" placeholder="+91 98765 43210" required>
+                  <input class="rd-input" type="tel" id="rdPhone" maxlength="15" placeholder="+91 98765 43210" required>
                 </div>
               </div>
               <div class="rd-privacy">
@@ -1564,14 +1644,14 @@ input,select,textarea{font-family:inherit}
               <div style="margin-bottom:10px">
                 <div style="font-size:10px;font-weight:600;color:var(--text-3);text-transform:uppercase;letter-spacing:.3px;margin-bottom:5px">Pickup location</div>
                 <div style="display:flex;gap:8px">
-                  <input class="rd-input" type="text" id="rdPickup" placeholder="e.g. Sector 13 Market, Thanesar" style="flex:1">
+                  <input class="rd-input" type="text" id="rdPickup" maxlength="200" placeholder="e.g. Sector 13 Market, Thanesar" style="flex:1">
                   <button onclick="locateAddr('pickup')" style="padding:10px 12px;border-radius:var(--r);border:1.5px solid var(--border);background:#fff;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;transition:all var(--t);color:var(--text-2)" onmouseover="this.style.borderColor='var(--green)'" onmouseout="this.style.borderColor='var(--border)'">📍 Locate</button>
                 </div>
               </div>
               <div style="margin-bottom:12px">
                 <div style="font-size:10px;font-weight:600;color:var(--text-3);text-transform:uppercase;letter-spacing:.3px;margin-bottom:5px">Drop-off location</div>
                 <div style="display:flex;gap:8px">
-                  <input class="rd-input" type="text" id="rdDropoff" placeholder="e.g. Brahmsarovar, Pipli Road" style="flex:1">
+                  <input class="rd-input" type="text" id="rdDropoff" maxlength="200" placeholder="e.g. Brahmsarovar, Pipli Road" style="flex:1">
                   <button onclick="locateAddr('dropoff')" style="padding:10px 12px;border-radius:var(--r);border:1.5px solid var(--border);background:#fff;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;transition:all var(--t);color:var(--text-2)" onmouseover="this.style.borderColor='var(--green)'" onmouseout="this.style.borderColor='var(--border)'">📍 Locate</button>
                 </div>
               </div>
@@ -1859,14 +1939,14 @@ input,select,textarea{font-family:inherit}
           <li><a href="#">About My KKR</a></li>
           <li><a href="#">Privacy Policy</a></li>
           <li><a href="#">Terms of Service</a></li>
-          <li><a href="https://wa.me/91XXXXXXXXXX" target="_blank">Help & Support</a></li>
+          <li><a href="https://wa.me/91XXXXXXXXXX" rel="noopener noreferrer" target="_blank">Help & Support</a></li>
         </ul>
       </div>
     </div>
   </div>
   <!-- Bottom bar — green background with tan text -->
   <div class="footer-bottom">
-    <div class="footer-copy">© 2025 My KKR · Kurukshetra, Haryana · <a href="https://mykkr.in">mykkr.in</a></div>
+    <div class="footer-copy">© 2025 My KKR · Kurukshetra, Haryana · <a href="https://mykkr.in" rel="noopener noreferrer">mykkr.in</a></div>
     <div class="footer-disclaimer">My KKR is a connector platform. All transactions solely between buyers and sellers.</div>
   </div>
 </footer>
@@ -2226,17 +2306,31 @@ function selectPwCat(el){
   el.classList.add('active')
 }
 // Content scanner — blocks phone/email/social
-const PHONE_RE=/(\+91|0)?[\s\-]?[6-9]\d{9}/
-const EMAIL_RE=/[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}/
-const SOCIAL_RE=/@[a-zA-Z0-9_]{2,}|wa\.me|whatsapp|instagram|facebook|youtube/i
+// Content scanner — blocks contact info in public posts
+const PHONE_RE=/(\+91|0)?[\s\-\.]?[6-9]\d{4}[\s\-\.]?\d{5}/g
+const EMAIL_RE=/[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}/g
+const SOCIAL_RE=/@[a-zA-Z0-9_.]{2,}|wa\.me|whatsapp|instagram\.com|facebook\.com|youtube\.com|t\.me|telegram|twitter|snapchat/gi
+const URL_RE=/https?:\/\/[^\s]+/gi
 function checkContent(el){
   const warn=el.parentElement.querySelector('.pw-warn')
   if(!warn) return
-  const blocked=PHONE_RE.test(el.value)||EMAIL_RE.test(el.value)||SOCIAL_RE.test(el.value)
-  if(blocked){
-    el.value=el.value.replace(PHONE_RE,'[contact removed]').replace(EMAIL_RE,'[email removed]').replace(SOCIAL_RE,'[handle removed]')
+  let val = el.value
+  const hadPhone = PHONE_RE.test(val)
+  const hadEmail = EMAIL_RE.test(val)
+  const hadSocial = SOCIAL_RE.test(val)
+  const hadURL = URL_RE.test(val)
+  if(hadPhone || hadEmail || hadSocial || hadURL){
+    val = val.replace(PHONE_RE,'[phone removed]')
+    val = val.replace(EMAIL_RE,'[email removed]')
+    val = val.replace(SOCIAL_RE,'[handle removed]')
+    val = val.replace(URL_RE,'[link removed]')
+    el.value = val
     warn.classList.add('show')
-    setTimeout(()=>warn.classList.remove('show'),4000)
+    // Log what was blocked (for admin monitoring in production)
+    const blocked = [hadPhone&&'phone',hadEmail&&'email',hadSocial&&'social',hadURL&&'URL'].filter(Boolean)
+    console.warn('[My KKR] Contact info blocked from post description:', blocked.join(', '))
+  } else {
+    warn.classList.remove('show')
   }
 }
 function submitPost(){
@@ -2391,16 +2485,30 @@ document.querySelectorAll('.rd-vehicle').forEach(card => {
 })
 
 function submitRideRequest() {
-  const name = document.getElementById('rdName')?.value.trim()
-  const phone = document.getElementById('rdPhone')?.value.trim()
-  const pickup = document.getElementById('rdPickup')?.value.trim()
-  const dropoff = document.getElementById('rdDropoff')?.value.trim()
+  const nameRaw = document.getElementById('rdName')?.value.trim()
+  const phoneRaw = document.getElementById('rdPhone')?.value.trim()
+  const pickup = sanitise(document.getElementById('rdPickup')?.value.trim() || '')
+  const dropoff = sanitise(document.getElementById('rdDropoff')?.value.trim() || '')
   const consent = document.getElementById('rdConsent')?.checked
 
-  if (!name) { alert('Please enter your name'); return }
-  if (!phone || phone.length < 10) { alert('Please enter a valid phone number'); return }
-  if (!pickup) { alert('Please enter a pickup location'); return }
-  if (!dropoff) { alert('Please enter a drop-off location'); return }
+  // Sanitise inputs
+  const name = sanitise(nameRaw)
+  const phone = sanitise(phoneRaw)
+
+  // Validate
+  if (!name || name.length < 2) { alert('Please enter your full name'); return }
+  if (name.length > 80) { alert('Name is too long'); return }
+
+  // Phone validation — must be Indian mobile: 10 digits starting with 6-9
+  const phoneClean = phone.replace(/[\s\-\+91]/g, '')
+  if (!/^[6-9]\d{9}$/.test(phoneClean)) {
+    alert('Please enter a valid Indian mobile number (10 digits starting with 6-9)')
+    return
+  }
+
+  if (!pickup || pickup.length < 3) { alert('Please enter a pickup location'); return }
+  if (!dropoff || dropoff.length < 3) { alert('Please enter a drop-off location'); return }
+  if (pickup === dropoff) { alert('Pickup and drop-off cannot be the same location'); return }
   if (!consent) { alert('Please agree to the privacy terms to continue'); return }
 
   const btn = document.getElementById('rdSubmitBtn')
@@ -2442,6 +2550,78 @@ function resetRides() {
   document.getElementById('rdMapTip').textContent = '📍 Select locations above to see the route'
   setMode('ride')
 }
+
+
+// ══ INPUT SANITISATION — strip HTML/script from all user inputs ══
+function sanitise(str) {
+  if (!str) return ''
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#x27;')
+    .replace(/\//g, '&#x2F;')
+    .trim()
+}
+// Sanitise all form inputs on submit
+function sanitiseForm(formInputIds) {
+  const result = {}
+  formInputIds.forEach(id => {
+    const el = document.getElementById(id)
+    if (el) result[id] = sanitise(el.value)
+  })
+  return result
+}
+// Prevent paste of scripts into description fields
+document.addEventListener('paste', function(e) {
+  const target = e.target
+  if (target.tagName === 'TEXTAREA' || target.tagName === 'INPUT') {
+    const pasted = (e.clipboardData || window.clipboardData).getData('text')
+    if (/<script|javascript:|on\w+=/i.test(pasted)) {
+      e.preventDefault()
+      target.style.borderColor = 'var(--red)'
+      setTimeout(() => target.style.borderColor = '', 2000)
+    }
+  }
+})
+
+
+function showForgotOTP() {
+  const phone = document.getElementById('custPhone')?.value.trim()
+  if (!phone || phone.length < 10) {
+    alert('Enter your registered mobile number above, then click this link.')
+    return
+  }
+  const phoneClean = phone.replace(/[\s\-\+91]/g, '')
+  if (!/^[6-9]\d{9}$/.test(phoneClean)) {
+    alert('Please enter a valid 10-digit Indian mobile number first.')
+    return
+  }
+  sendOTP('cust')
+  alert('A new OTP has been sent to +91' + phoneClean + '. Check your SMS.')
+}
+// Session timeout warning — 30 minute inactivity (frontend signal only, backend enforces)
+let _sessionTimer = null
+let _sessionWarned = false
+function resetSessionTimer() {
+  clearTimeout(_sessionTimer)
+  _sessionWarned = false
+  _sessionTimer = setTimeout(() => {
+    if (!_sessionWarned) {
+      _sessionWarned = true
+      const banner = document.createElement('div')
+      banner.id = 'session-warn'
+      banner.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:9999;background:#b45309;color:#fff;padding:12px 16px;font-size:13px;font-weight:600;text-align:center;display:flex;justify-content:space-between;align-items:center'
+      banner.innerHTML = '<span>⚠️ Your session will expire in 5 minutes due to inactivity.</span><button onclick="document.getElementById('session-warn').remove();resetSessionTimer()" style="background:rgba(255,255,255,0.2);border:none;color:#fff;padding:5px 12px;border-radius:6px;cursor:pointer;font-weight:700">Stay signed in</button>'
+      document.body.prepend(banner)
+    }
+  }, 25 * 60 * 1000) // warn at 25 minutes
+}
+['click','keydown','scroll','touchstart'].forEach(e => {
+  document.addEventListener(e, resetSessionTimer, {passive:true})
+})
+resetSessionTimer()
 
 </script>
 </body>
