@@ -584,6 +584,105 @@ input,select,textarea{font-family:inherit}
   .pw-row,.rf-row,.fb-row{grid-template-columns:1fr}
   .hero h1{letter-spacing:-1px}
 }
+
+/* ══ RIDES & DELIVERY ══ */
+.rd-hero{background:linear-gradient(160deg,#0f2d1a 0%,#1a4a2a 50%,#0d3322 100%);padding:32px 22px;position:relative;overflow:hidden}
+.rd-hero::before{content:'';position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at 30% 50%,rgba(22,163,74,0.15) 0%,transparent 55%)}
+.rd-eyebrow{font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:rgba(134,239,172,0.8);margin-bottom:8px}
+.rd-title{font-size:clamp(22px,4vw,36px);font-weight:800;color:#fff;letter-spacing:-1px;line-height:1.15;margin-bottom:8px}
+.rd-sub{font-size:13px;color:rgba(255,255,255,0.45);line-height:1.7;max-width:520px;margin-bottom:20px}
+.rd-stats{display:flex;gap:10px;flex-wrap:wrap}
+.rd-stat{background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.1);border-radius:var(--r-lg);padding:10px 15px;text-align:center}
+.rd-stat-num{font-size:17px;font-weight:800;color:#86efac}
+.rd-stat-lbl{font-size:10px;color:rgba(255,255,255,0.4);margin-top:2px}
+
+/* Mode selector — Ride vs Deliver */
+.rd-mode-sel{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px}
+.rd-mode-card{
+  border:2px solid var(--border);border-radius:var(--r-xl);padding:18px;
+  cursor:pointer;transition:all var(--t);background:#fff;text-align:center;
+}
+.rd-mode-card:hover{border-color:var(--green);transform:translateY(-1px)}
+.rd-mode-card.active{border-color:var(--green);background:var(--green-l)}
+.rd-mode-icon{font-size:36px;margin-bottom:8px}
+.rd-mode-label{font-size:14px;font-weight:700;color:var(--night-d);margin-bottom:3px}
+.rd-mode-desc{font-size:11px;color:var(--text-3);line-height:1.5}
+
+/* Step form */
+.rd-form{background:#fff;border-radius:var(--r-2xl);padding:22px;box-shadow:var(--shadow-md);border:1px solid var(--border)}
+.rd-form-title{font-size:16px;font-weight:700;color:var(--night-d);margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.rd-step{margin-bottom:18px;padding-bottom:18px;border-bottom:1px solid var(--border)}
+.rd-step:last-of-type{border-bottom:none;margin-bottom:0;padding-bottom:0}
+.rd-step-lbl{font-size:10px;font-weight:700;color:var(--text-3);text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px;display:flex;align-items:center;gap:7px}
+.rd-step-num{width:18px;height:18px;border-radius:50%;background:var(--green);color:#fff;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.rd-input,.rd-select{width:100%;padding:10px 12px;border-radius:var(--r);border:1.5px solid var(--border);font-size:13px;color:var(--text);background:#fff;outline:none;transition:border-color var(--t);-webkit-appearance:none}
+.rd-input:focus,.rd-select:focus{border-color:var(--green)}
+.rd-input::placeholder{color:var(--text-4)}
+.rd-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+
+/* Vehicle cards */
+.rd-vehicles{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:9px;margin-bottom:4px}
+.rd-vehicle{border:2px solid var(--border);border-radius:var(--r-lg);padding:12px 8px;cursor:pointer;text-align:center;transition:all var(--t);background:#fff}
+.rd-vehicle:hover{border-color:var(--green)}
+.rd-vehicle.active{border-color:var(--green);background:var(--green-l)}
+.rd-vehicle-icon{font-size:28px;margin-bottom:5px}
+.rd-vehicle-name{font-size:11px;font-weight:600;color:var(--night-d);margin-bottom:2px}
+.rd-vehicle-cap{font-size:10px;color:var(--text-3)}
+.rd-vehicle-price{font-size:10px;font-weight:600;color:var(--green);margin-top:3px}
+
+/* Map */
+.rd-map-wrap{border:1px solid var(--border);border-radius:var(--r-xl);overflow:hidden;position:relative;margin-top:8px}
+.rd-map-wrap iframe{width:100%;height:280px;border:none;display:block}
+.rd-map-tip{position:absolute;top:8px;left:50%;transform:translateX(-50%);background:rgba(15,45,26,0.88);color:#fff;font-size:11px;font-weight:600;padding:5px 12px;border-radius:99px;pointer-events:none;white-space:nowrap}
+
+/* Fare estimate */
+.rd-estimate{background:var(--green-l);border:1px solid rgba(22,163,74,0.2);border-radius:var(--r-lg);padding:14px;margin-bottom:14px;display:none}
+.rd-estimate.show{display:block}
+.rd-estimate-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px}
+.rd-estimate-label{font-size:12px;color:var(--text-3)}
+.rd-estimate-val{font-size:12px;font-weight:700;color:var(--night-d)}
+.rd-estimate-total{font-size:16px;font-weight:800;color:var(--green);margin-top:6px;padding-top:6px;border-top:1px solid rgba(22,163,74,0.2)}
+
+/* Privacy notice */
+.rd-privacy{background:var(--night-l);border:1px solid rgba(45,84,94,0.15);border-radius:var(--r-lg);padding:12px;margin-bottom:14px;font-size:12px;color:var(--night-d);display:flex;gap:8px;align-items:flex-start}
+
+/* Submit */
+.rd-submit{width:100%;padding:13px;border-radius:var(--r-lg);background:var(--green);color:#fff;font-size:14px;font-weight:700;border:none;cursor:pointer;transition:background var(--t)}
+.rd-submit:hover{background:var(--green-d)}
+.rd-submit:disabled{opacity:.5;cursor:not-allowed}
+
+/* Success state */
+.rd-success{background:#fff;border:2px solid var(--green);border-radius:var(--r-2xl);padding:32px;text-align:center;box-shadow:var(--shadow-md);display:none}
+.rd-success.show{display:block}
+.rd-success-icon{font-size:56px;margin-bottom:14px}
+.rd-success-title{font-size:20px;font-weight:800;color:var(--green);letter-spacing:-.5px;margin-bottom:8px}
+.rd-success-sub{font-size:14px;color:var(--text-3);line-height:1.65;margin-bottom:20px}
+.rd-job-ref{font-size:22px;font-weight:800;color:var(--night-d);letter-spacing:2px;background:var(--bg);padding:10px 20px;border-radius:var(--r-lg);display:inline-block;margin-bottom:16px;font-family:monospace}
+.rd-status-track{background:var(--bg);border-radius:var(--r-xl);padding:16px;margin-bottom:16px;text-align:left}
+.rd-status-item{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px;color:var(--text-2)}
+.rd-status-item:last-child{border-bottom:none}
+.rd-status-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.rd-status-dot.done{background:var(--green)}
+.rd-status-dot.pending{background:var(--border-d)}
+.rd-status-dot.waiting{background:var(--amber);animation:pulse 1.5s infinite}
+.rd-new-btn{padding:11px 24px;border-radius:var(--r-lg);background:var(--night-d);color:#fff;font-size:13px;font-weight:700;border:none;cursor:pointer;transition:background var(--t)}
+.rd-new-btn:hover{background:var(--night)}
+
+/* Info cards beside form */
+.rd-info-cards{display:flex;flex-direction:column;gap:14px}
+.rd-info-card{background:#fff;border:1px solid var(--border);border-radius:var(--r-xl);padding:18px;box-shadow:var(--shadow-xs)}
+.rd-info-card-title{font-size:14px;font-weight:700;color:var(--night-d);margin-bottom:10px;display:flex;align-items:center;gap:7px}
+.rd-how-steps{list-style:none}
+.rd-how-step{display:flex;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);font-size:12px;color:var(--text-2);line-height:1.55}
+.rd-how-step:last-child{border-bottom:none}
+.rd-how-num{width:20px;height:20px;border-radius:50%;background:var(--green-l);color:var(--green);font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+.rd-layout{display:grid;grid-template-columns:1fr 280px;gap:20px;align-items:start}
+.rd-privacy-badge{background:#f0fdf4;border:1px solid rgba(22,163,74,0.2);border-radius:var(--r-lg);padding:12px;font-size:12px;color:#166534}
+.rd-privacy-badge strong{display:block;margin-bottom:4px;font-size:13px}
+
+@media(max-width:1024px){.rd-layout{grid-template-columns:1fr}}
+@media(max-width:480px){.rd-row{grid-template-columns:1fr}.rd-vehicles{grid-template-columns:repeat(3,1fr)}}
+
 </style>
 </head>
 <body>
@@ -623,6 +722,7 @@ input,select,textarea{font-family:inherit}
     <div class="sb-item" onclick="nav('shop',[{l:'Home',v:'home'},{l:'Shop',v:'shop'}])"><span class="sb-icon">🛍️</span>Shop</div>
     <div class="sb-item" onclick="nav('food',[{l:'Home',v:'home'},{l:'Food',v:'food'}])"><span class="sb-icon">🍛</span>Food & Dining</div>
     <div class="sb-item" onclick="nav('findbook',[{l:'Home',v:'home'},{l:'Find & Book',v:'findbook'}])"><span class="sb-icon">🗺️</span>Find & Book</div>
+    <div class="sb-item" onclick="nav('rides',[{l:'Home',v:'home'},{l:'Rides & Delivery',v:'rides'}])"><span class="sb-icon">🚗</span>Rides & Delivery<span class="sb-new" style="background:var(--green)">NEW</span></div>
     <div class="sb-item" onclick="nav('post',[{l:'Home',v:'home'},{l:'Post Requirement',v:'post'}])"><span class="sb-icon">📋</span>Post Requirement</div>
   </div>
   <div class="sb-div"></div>
@@ -1375,6 +1475,349 @@ input,select,textarea{font-family:inherit}
   </div>
 </div>
 
+
+<!-- ════ RIDES & DELIVERY VIEW ════ -->
+<div class="view" id="view-rides">
+
+  <!-- Hero -->
+  <div class="rd-hero">
+    <div class="rd-eyebrow">Rides & Delivery · My KKR</div>
+    <div class="rd-title">Go anywhere.<br>Deliver anything.</div>
+    <div class="rd-sub">Book a ride to your destination or send goods across Kurukshetra. Your phone number stays private until a driver accepts your request.</div>
+    <div class="rd-stats">
+      <div class="rd-stat"><div class="rd-stat-num">₹0</div><div class="rd-stat-lbl">Commission</div></div>
+      <div class="rd-stat"><div class="rd-stat-num">Direct</div><div class="rd-stat-lbl">Driver contact</div></div>
+      <div class="rd-stat"><div class="rd-stat-num">Private</div><div class="rd-stat-lbl">Your details</div></div>
+      <div class="rd-stat"><div class="rd-stat-num">Live</div><div class="rd-stat-lbl">Notifications</div></div>
+    </div>
+  </div>
+
+  <div class="section">
+
+    <!-- Success state — shown after submission -->
+    <div class="rd-success" id="rdSuccess">
+      <div class="rd-success-icon">✅</div>
+      <div class="rd-success-title">Request sent to nearby drivers!</div>
+      <div class="rd-success-sub">Your request is being broadcast to verified drivers in Kurukshetra. You'll receive a notification on your phone when a driver accepts.</div>
+      <div class="rd-job-ref" id="rdJobRef">KKR-XXXXXX</div>
+      <div class="rd-status-track">
+        <div class="rd-status-item"><div class="rd-status-dot done"></div><strong>Request created</strong> — broadcasted to nearby drivers</div>
+        <div class="rd-status-item"><div class="rd-status-dot waiting"></div><strong>Waiting for driver acceptance</strong> — usually under 3 minutes</div>
+        <div class="rd-status-item"><div class="rd-status-dot pending"></div>Driver assigned — you'll be notified by SMS/WhatsApp</div>
+        <div class="rd-status-item"><div class="rd-status-dot pending"></div>Driver en route to pickup</div>
+        <div class="rd-status-item"><div class="rd-status-dot pending"></div>Job in progress</div>
+        <div class="rd-status-item"><div class="rd-status-dot pending"></div>Completed</div>
+      </div>
+      <p style="font-size:12px;color:var(--text-3);margin-bottom:16px">Save your reference number. Pay the driver directly in cash or UPI — My KKR takes zero commission.</p>
+      <button class="rd-new-btn" onclick="resetRides()">Make another request</button>
+    </div>
+
+    <!-- Booking form -->
+    <div id="rdFormWrap">
+      <div class="rd-layout">
+
+        <!-- Left — form -->
+        <div>
+          <!-- Mode selector -->
+          <div style="margin-bottom:18px">
+            <div style="font-size:13px;font-weight:700;color:var(--night-d);margin-bottom:12px">What do you need?</div>
+            <div class="rd-mode-sel">
+              <div class="rd-mode-card active" id="mode-ride" onclick="setMode('ride')">
+                <div class="rd-mode-icon">🚗</div>
+                <div class="rd-mode-label">Book a Ride</div>
+                <div class="rd-mode-desc">Travel from A to B — auto, cab, or SUV</div>
+              </div>
+              <div class="rd-mode-card" id="mode-deliver" onclick="setMode('deliver')">
+                <div class="rd-mode-icon">📦</div>
+                <div class="rd-mode-label">Deliver Goods</div>
+                <div class="rd-mode-desc">Send parcels, groceries, furniture, or freight</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Booking form -->
+          <div class="rd-form">
+            <div class="rd-form-title" id="rdFormTitle">🚗 Book a Ride</div>
+
+            <!-- Step 1: Your details -->
+            <div class="rd-step">
+              <div class="rd-step-lbl"><div class="rd-step-num">1</div>Your details</div>
+              <div class="rd-row" style="margin-bottom:10px">
+                <div>
+                  <div style="font-size:10px;font-weight:600;color:var(--text-3);text-transform:uppercase;letter-spacing:.3px;margin-bottom:5px">Your name</div>
+                  <input class="rd-input" type="text" id="rdName" placeholder="Full name" required>
+                </div>
+                <div>
+                  <div style="font-size:10px;font-weight:600;color:var(--text-3);text-transform:uppercase;letter-spacing:.3px;margin-bottom:5px">Phone number</div>
+                  <input class="rd-input" type="tel" id="rdPhone" placeholder="+91 98765 43210" required>
+                </div>
+              </div>
+              <div class="rd-privacy">
+                <span style="font-size:16px;flex-shrink:0">🔒</span>
+                <div><strong style="color:var(--night-d)">Your number stays private.</strong> Drivers only see your pickup area and job description. Your phone number is shared only after a driver is assigned — and only with that driver.</div>
+              </div>
+            </div>
+
+            <!-- Step 2: Pickup & Dropoff -->
+            <div class="rd-step">
+              <div class="rd-step-lbl"><div class="rd-step-num">2</div>Pickup & drop-off locations</div>
+              <div style="margin-bottom:10px">
+                <div style="font-size:10px;font-weight:600;color:var(--text-3);text-transform:uppercase;letter-spacing:.3px;margin-bottom:5px">Pickup location</div>
+                <div style="display:flex;gap:8px">
+                  <input class="rd-input" type="text" id="rdPickup" placeholder="e.g. Sector 13 Market, Thanesar" style="flex:1">
+                  <button onclick="locateAddr('pickup')" style="padding:10px 12px;border-radius:var(--r);border:1.5px solid var(--border);background:#fff;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;transition:all var(--t);color:var(--text-2)" onmouseover="this.style.borderColor='var(--green)'" onmouseout="this.style.borderColor='var(--border)'">📍 Locate</button>
+                </div>
+              </div>
+              <div style="margin-bottom:12px">
+                <div style="font-size:10px;font-weight:600;color:var(--text-3);text-transform:uppercase;letter-spacing:.3px;margin-bottom:5px">Drop-off location</div>
+                <div style="display:flex;gap:8px">
+                  <input class="rd-input" type="text" id="rdDropoff" placeholder="e.g. Brahmsarovar, Pipli Road" style="flex:1">
+                  <button onclick="locateAddr('dropoff')" style="padding:10px 12px;border-radius:var(--r);border:1.5px solid var(--border);background:#fff;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;transition:all var(--t);color:var(--text-2)" onmouseover="this.style.borderColor='var(--green)'" onmouseout="this.style.borderColor='var(--border)'">📍 Locate</button>
+                </div>
+              </div>
+
+              <!-- Or select from dropdown -->
+              <div style="display:flex;gap:8px;align-items:center;margin-bottom:10px">
+                <div style="flex:1;height:1px;background:var(--border)"></div>
+                <span style="font-size:11px;color:var(--text-4);flex-shrink:0">or select known area</span>
+                <div style="flex:1;height:1px;background:var(--border)"></div>
+              </div>
+              <div class="rd-row" style="margin-bottom:10px">
+                <select class="rd-select" id="rdPickupArea" onchange="setPickupFromDropdown(this.value,this.options[this.selectedIndex].text)">
+                  <option value="">Pickup area...</option>
+                  <optgroup label="Tehsils">
+                    <option value="29.9695,76.8783">Thanesar</option>
+                    <option value="29.9833,76.5833">Pehowa</option>
+                    <option value="30.1667,76.8167">Shahabad</option>
+                    <option value="29.9997,77.0425">Ladwa</option>
+                    <option value="29.9200,76.7000">Ismailabad</option>
+                    <option value="30.1500,77.0167">Babain</option>
+                  </optgroup>
+                  <optgroup label="Sectors">
+                    <option value="29.9640,76.8720">Sector 2</option>
+                    <option value="29.9650,76.8740">Sector 3</option>
+                    <option value="29.9670,76.8760">Sector 5</option>
+                    <option value="29.9700,76.8800">Sector 7</option>
+                    <option value="29.9550,76.8900">Sector 13</option>
+                    <option value="29.9580,76.8780">Sector 30</option>
+                    <option value="29.9600,76.8700">Sector 40</option>
+                  </optgroup>
+                  <optgroup label="Localities">
+                    <option value="29.9550,76.8400">Pipli (NH-44)</option>
+                    <option value="29.9737,76.8168">Brahmsarovar</option>
+                    <option value="29.9660,76.8580">Model Town</option>
+                    <option value="29.9620,76.8710">Kalyan Nagar</option>
+                    <option value="29.9630,76.8730">Mohan Nagar</option>
+                    <option value="29.9610,76.8720">Sunder Pur</option>
+                    <option value="29.9640,76.8770">Shyam Colony</option>
+                    <option value="29.9700,76.8650">Dara Kalan</option>
+                    <option value="29.9710,76.8640">Dara Khurd</option>
+                    <option value="29.9550,76.8500">Pipli Road Corridor</option>
+                    <option value="29.9520,76.8860">KU / NIT Area</option>
+                  </optgroup>
+                </select>
+                <select class="rd-select" id="rdDropoffArea" onchange="setDropoffFromDropdown(this.value,this.options[this.selectedIndex].text)">
+                  <option value="">Drop-off area...</option>
+                  <optgroup label="Tehsils">
+                    <option value="29.9695,76.8783">Thanesar</option>
+                    <option value="29.9833,76.5833">Pehowa</option>
+                    <option value="30.1667,76.8167">Shahabad</option>
+                    <option value="29.9997,77.0425">Ladwa</option>
+                    <option value="29.9200,76.7000">Ismailabad</option>
+                    <option value="30.1500,77.0167">Babain</option>
+                  </optgroup>
+                  <optgroup label="Sectors">
+                    <option value="29.9640,76.8720">Sector 2</option>
+                    <option value="29.9650,76.8740">Sector 3</option>
+                    <option value="29.9670,76.8760">Sector 5</option>
+                    <option value="29.9700,76.8800">Sector 7</option>
+                    <option value="29.9550,76.8900">Sector 13</option>
+                    <option value="29.9580,76.8780">Sector 30</option>
+                    <option value="29.9600,76.8700">Sector 40</option>
+                  </optgroup>
+                  <optgroup label="Localities">
+                    <option value="29.9550,76.8400">Pipli (NH-44)</option>
+                    <option value="29.9737,76.8168">Brahmsarovar</option>
+                    <option value="29.9660,76.8580">Model Town</option>
+                    <option value="29.9620,76.8710">Kalyan Nagar</option>
+                    <option value="29.9630,76.8730">Mohan Nagar</option>
+                    <option value="29.9610,76.8720">Sunder Pur</option>
+                    <option value="29.9640,76.8770">Shyam Colony</option>
+                    <option value="29.9700,76.8650">Dara Kalan</option>
+                    <option value="29.9710,76.8640">Dara Khurd</option>
+                    <option value="29.9550,76.8500">Pipli Road Corridor</option>
+                    <option value="29.9520,76.8860">KU / NIT Area</option>
+                  </optgroup>
+                </select>
+              </div>
+
+              <!-- Live map — updates when locations are selected -->
+              <div class="rd-map-wrap">
+                <div class="rd-map-tip" id="rdMapTip">📍 Select locations above to see the route</div>
+                <iframe id="rdMap"
+                  src="https://www.openstreetmap.org/export/embed.html?bbox=76.75%2C29.90%2C76.98%2C30.05&layer=mapnik&marker=29.9695%2C76.8783"
+                  title="Pickup and drop-off map">
+                </iframe>
+              </div>
+              <!-- Route estimate (shown after both locations set) -->
+              <div class="rd-estimate" id="rdEstimate">
+                <div class="rd-estimate-row"><span class="rd-estimate-label">Estimated distance</span><span class="rd-estimate-val" id="rdEstDist">— km</span></div>
+                <div class="rd-estimate-row"><span class="rd-estimate-label">Estimated time</span><span class="rd-estimate-val" id="rdEstTime">— min</span></div>
+                <div class="rd-estimate-row rd-estimate-total"><span>Indicative fare</span><span id="rdEstFare">₹—</span></div>
+                <div style="font-size:10px;color:var(--text-3);margin-top:6px">Actual fare agreed directly with driver. My KKR takes zero commission.</div>
+              </div>
+            </div>
+
+            <!-- Step 3: Vehicle -->
+            <div class="rd-step">
+              <div class="rd-step-lbl"><div class="rd-step-num">3</div>Select vehicle</div>
+              <!-- Ride vehicles -->
+              <div id="rdRideVehicles" class="rd-vehicles">
+                <div class="rd-vehicle active" onclick="selectVehicle(this,'auto',25)">
+                  <div class="rd-vehicle-icon">🛺</div>
+                  <div class="rd-vehicle-name">Auto</div>
+                  <div class="rd-vehicle-cap">1–3 people</div>
+                  <div class="rd-vehicle-price">₹10/km</div>
+                </div>
+                <div class="rd-vehicle" onclick="selectVehicle(this,'sedan',18)">
+                  <div class="rd-vehicle-icon">🚗</div>
+                  <div class="rd-vehicle-name">Cab — Car</div>
+                  <div class="rd-vehicle-cap">1–4 people</div>
+                  <div class="rd-vehicle-price">₹14/km</div>
+                </div>
+                <div class="rd-vehicle" onclick="selectVehicle(this,'suv',22)">
+                  <div class="rd-vehicle-icon">🚙</div>
+                  <div class="rd-vehicle-name">SUV</div>
+                  <div class="rd-vehicle-cap">1–6 people</div>
+                  <div class="rd-vehicle-price">₹18/km</div>
+                </div>
+              </div>
+              <!-- Delivery vehicles -->
+              <div id="rdDeliveryVehicles" class="rd-vehicles" style="display:none">
+                <div class="rd-vehicle active" onclick="selectVehicle(this,'bike',12)">
+                  <div class="rd-vehicle-icon">🏍️</div>
+                  <div class="rd-vehicle-name">Bike</div>
+                  <div class="rd-vehicle-cap">Up to 15 kg</div>
+                  <div class="rd-vehicle-price">₹8/km</div>
+                </div>
+                <div class="rd-vehicle" onclick="selectVehicle(this,'car',16)">
+                  <div class="rd-vehicle-icon">🚗</div>
+                  <div class="rd-vehicle-name">Car</div>
+                  <div class="rd-vehicle-cap">Up to 100 kg</div>
+                  <div class="rd-vehicle-price">₹12/km</div>
+                </div>
+                <div class="rd-vehicle" onclick="selectVehicle(this,'tempo',20)">
+                  <div class="rd-vehicle-icon">🚐</div>
+                  <div class="rd-vehicle-name">Tempo</div>
+                  <div class="rd-vehicle-cap">Up to 1,200 kg</div>
+                  <div class="rd-vehicle-price">₹22/km</div>
+                </div>
+                <div class="rd-vehicle" onclick="selectVehicle(this,'truck',28)">
+                  <div class="rd-vehicle-icon">🚛</div>
+                  <div class="rd-vehicle-name">Truck</div>
+                  <div class="rd-vehicle-cap">Up to 10,000 kg</div>
+                  <div class="rd-vehicle-price">₹45/km</div>
+                </div>
+                <div class="rd-vehicle" onclick="selectVehicle(this,'tractor',30)">
+                  <div class="rd-vehicle-icon">🚜</div>
+                  <div class="rd-vehicle-name">Tractor</div>
+                  <div class="rd-vehicle-cap">Farm / bulk</div>
+                  <div class="rd-vehicle-price">₹35/km</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Step 4: Description + booking type -->
+            <div class="rd-step">
+              <div class="rd-step-lbl"><div class="rd-step-num">4</div>Additional details</div>
+              <div style="margin-bottom:10px">
+                <div style="font-size:10px;font-weight:600;color:var(--text-3);text-transform:uppercase;letter-spacing:.3px;margin-bottom:5px">Description <span id="rdDescLabel">(passengers, destination details)</span></div>
+                <textarea class="rd-input" id="rdDesc" style="min-height:72px;resize:vertical" placeholder="e.g. 2 passengers, going to railway station, need AC"></textarea>
+              </div>
+              <div class="rd-row">
+                <div>
+                  <div style="font-size:10px;font-weight:600;color:var(--text-3);text-transform:uppercase;letter-spacing:.3px;margin-bottom:5px">When?</div>
+                  <select class="rd-select" id="rdWhen">
+                    <option value="now">As soon as possible</option>
+                    <option value="scheduled">Schedule for later</option>
+                  </select>
+                </div>
+                <div id="rdScheduleWrap" style="display:none">
+                  <div style="font-size:10px;font-weight:600;color:var(--text-3);text-transform:uppercase;letter-spacing:.3px;margin-bottom:5px">Date & time</div>
+                  <input class="rd-input" type="datetime-local" id="rdScheduleTime">
+                </div>
+              </div>
+            </div>
+
+            <!-- Privacy reminder + submit -->
+            <div class="rd-privacy" style="margin-bottom:14px">
+              <span style="font-size:16px;flex-shrink:0">📋</span>
+              <div style="font-size:12px;color:var(--night-d)">
+                By submitting, your request is broadcast to nearby verified drivers. Your phone number is shared only after a driver accepts. Pay the driver directly — My KKR takes zero commission ever.
+              </div>
+            </div>
+
+            <div style="margin-bottom:12px">
+              <label style="display:flex;gap:8px;align-items:flex-start;font-size:12px;color:var(--text-3);cursor:pointer">
+                <input type="checkbox" id="rdConsent" style="margin-top:2px;accent-color:var(--green);flex-shrink:0">
+                I agree that my name and phone number may be shared with the assigned driver to fulfil this request.
+              </label>
+            </div>
+
+            <button class="rd-submit" id="rdSubmitBtn" onclick="submitRideRequest()">
+              🚗 Send request to nearby drivers →
+            </button>
+            <div id="rdSubmitStatus" style="text-align:center;font-size:12px;color:var(--text-3);margin-top:8px;display:none"></div>
+          </div>
+        </div>
+
+        <!-- Right — info cards -->
+        <div class="rd-info-cards">
+          <div class="rd-info-card">
+            <div class="rd-info-card-title">🔒 Your privacy</div>
+            <ul class="rd-how-steps">
+              <li class="rd-how-step"><div class="rd-how-num">✓</div>Name shown to drivers only after acceptance</li>
+              <li class="rd-how-step"><div class="rd-how-num">✓</div>Phone number hidden until driver is assigned</li>
+              <li class="rd-how-step"><div class="rd-how-num">✓</div>Drivers see only your pickup area and job type</li>
+              <li class="rd-how-step"><div class="rd-how-num">✓</div>My KKR never stores payment details</li>
+            </ul>
+          </div>
+          <div class="rd-info-card">
+            <div class="rd-info-card-title">⚡ How it works</div>
+            <ul class="rd-how-steps">
+              <li class="rd-how-step"><div class="rd-how-num">1</div>You fill this form and submit</li>
+              <li class="rd-how-step"><div class="rd-how-num">2</div>Request broadcasts to nearby drivers on Telegram</li>
+              <li class="rd-how-step"><div class="rd-how-num">3</div>First driver to accept gets the job</li>
+              <li class="rd-how-step"><div class="rd-how-num">4</div>You get a notification on your phone</li>
+              <li class="rd-how-step"><div class="rd-how-num">5</div>Pay the driver directly — cash or UPI</li>
+            </ul>
+          </div>
+          <div class="rd-info-card">
+            <div class="rd-info-card-title">💰 Pricing guide</div>
+            <div style="font-size:12px;color:var(--text-3);line-height:1.8">
+              <strong style="color:var(--text-2)">Rides</strong><br>
+              Auto: ₹10–12/km<br>
+              Cab (Car): ₹14–16/km<br>
+              SUV: ₹18–22/km<br><br>
+              <strong style="color:var(--text-2)">Deliveries</strong><br>
+              Bike: ₹8–10/km<br>
+              Car: ₹12–15/km<br>
+              Tempo: ₹22–30/km<br>
+              Truck: ₹45–60/km<br><br>
+              <span style="color:var(--text-4);font-size:10px">Indicative only. Agree final price with driver. Minimum ₹30 for any trip.</span>
+            </div>
+          </div>
+          <div class="rd-info-card" style="background:var(--night-l);border-color:rgba(45,84,94,0.2)">
+            <div class="rd-info-card-title" style="color:var(--night-d)">🚀 Are you a driver?</div>
+            <div style="font-size:12px;color:var(--text-3);margin-bottom:12px">Join the My KKR rider network. Receive job requests on Telegram and earn on your own schedule.</div>
+            <button onclick="nav('register',[{l:'Home',v:'home'},{l:'Register Driver',v:'register'}])" style="width:100%;padding:9px;border-radius:var(--r-lg);background:var(--night-d);color:#fff;font-size:12px;font-weight:700;border:none;cursor:pointer">Register as driver →</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 </main>
 </div><!-- end app-body -->
 
@@ -1442,8 +1885,8 @@ input,select,textarea{font-family:inherit}
     <div class="bnav-post-circle">+</div>
     <span class="bnav-post-lbl">Post</span>
   </div>
-  <div class="bnav-item" id="bn-findbook" onclick="nav('findbook',[{l:'Home',v:'home'},{l:'Find & Book',v:'findbook'}]);setBnav('findbook')">
-    <span class="bnav-icon">🗺️</span>Find
+  <div class="bnav-item" id="bn-findbook" onclick="nav('rides',[{l:'Home',v:'home'},{l:'Rides & Delivery',v:'rides'}]);setBnav('findbook')">
+    <span class="bnav-icon">🚗</span>Rides
   </div>
   <div class="bnav-item" id="bn-register" onclick="nav('register',[{l:'Home',v:'home'},{l:'Sign in',v:'register'}]);setBnav('register')">
     <span class="bnav-icon">👤</span>Account
@@ -1460,6 +1903,7 @@ input,select,textarea{font-family:inherit}
     <div class="sb-item" onclick="nav('shop',[{l:'Home',v:'home'},{l:'Shop',v:'shop'}]);closeMob()"><span class="sb-icon">🛍️</span>Shop</div>
     <div class="sb-item" onclick="nav('food',[{l:'Home',v:'home'},{l:'Food',v:'food'}]);closeMob()"><span class="sb-icon">🍛</span>Food & Dining</div>
     <div class="sb-item" onclick="nav('findbook',[{l:'Home',v:'home'},{l:'Find & Book',v:'findbook'}]);closeMob()"><span class="sb-icon">🗺️</span>Find & Book</div>
+    <div class="sb-item" onclick="nav('rides',[{l:'Home',v:'home'},{l:'Rides & Delivery',v:'rides'}]);closeMob()"><span class="sb-icon">🚗</span>Rides & Delivery</div>
     <div class="sb-item" onclick="nav('post',[{l:'Home',v:'home'},{l:'Post Requirement',v:'post'}]);closeMob()"><span class="sb-icon">📋</span>Post Requirement</div>
     <div class="sb-div"></div>
     <div class="sb-item" onclick="nav('about',[{l:'Home',v:'home'},{l:'About KKR',v:'about'}]);closeMob()"><span class="sb-icon">🏛️</span>About Kurukshetra</div>
@@ -1531,7 +1975,7 @@ const SUB_CATS = {
 }
 
 // ══ VIEW SYSTEM ══
-const ALL_VIEWS=['home','services','shop','food','findbook','post','about','pricing','register']
+const ALL_VIEWS=['home','services','shop','food','findbook','post','about','pricing','register','rides']
 function showView(id){
   ALL_VIEWS.forEach(v=>{
     const el=document.getElementById('view-'+v)
@@ -1808,6 +2252,197 @@ function scrollEl(id,amt){const el=document.getElementById(id);if(el) el.scrollB
 window.addEventListener('scroll',()=>{
   document.getElementById('floatUp').classList.toggle('show',window.scrollY>400)
 })
+
+// ══ RIDES & DELIVERY ══
+let rdMode = 'ride'
+let rdPickupCoords = null
+let rdDropoffCoords = null
+let rdVehiclePricePerKm = 10
+let rdVehicleType = 'auto'
+let rdEstKm = 0
+
+function setMode(mode) {
+  rdMode = mode
+  document.getElementById('mode-ride').classList.toggle('active', mode==='ride')
+  document.getElementById('mode-deliver').classList.toggle('active', mode==='deliver')
+  document.getElementById('rdRideVehicles').style.display = mode==='ride' ? 'grid' : 'none'
+  document.getElementById('rdDeliveryVehicles').style.display = mode==='deliver' ? 'grid' : 'none'
+  document.getElementById('rdFormTitle').textContent = mode==='ride' ? '🚗 Book a Ride' : '📦 Deliver Goods'
+  document.getElementById('rdDescLabel').textContent = mode==='ride' ? '(passengers, destination details)' : '(goods type, weight, special handling)'
+  document.getElementById('rdSubmitBtn').textContent = mode==='ride' ? '🚗 Send request to nearby drivers →' : '📦 Send delivery request →'
+  // Reset vehicle selection
+  const cards = document.querySelectorAll('#rd' + (mode==='ride'?'Ride':'Delivery') + 'Vehicles .rd-vehicle')
+  cards.forEach((c,i) => c.classList.toggle('active', i===0))
+  rdVehiclePricePerKm = parseInt(cards[0]?.dataset.price || 10)
+  updateRdEstimate()
+}
+
+function selectVehicle(el, type, priceKm) {
+  el.closest('.rd-vehicles').querySelectorAll('.rd-vehicle').forEach(c => c.classList.remove('active'))
+  el.classList.add('active')
+  rdVehicleType = type
+  rdVehiclePricePerKm = priceKm
+  updateRdEstimate()
+}
+
+function setPickupFromDropdown(coords, label) {
+  if (!coords) return
+  const [lat, lon] = coords.split(',')
+  rdPickupCoords = [parseFloat(lat), parseFloat(lon)]
+  document.getElementById('rdPickup').value = label.split('(')[0].trim()
+  updateRdMap()
+  calcRdRoute()
+}
+
+function setDropoffFromDropdown(coords, label) {
+  if (!coords) return
+  const [lat, lon] = coords.split(',')
+  rdDropoffCoords = [parseFloat(lat), parseFloat(lon)]
+  document.getElementById('rdDropoff').value = label.split('(')[0].trim()
+  updateRdMap()
+  calcRdRoute()
+}
+
+function updateRdMap() {
+  const frame = document.getElementById('rdMap')
+  const tip = document.getElementById('rdMapTip')
+  if (!frame) return
+  if (rdPickupCoords && rdDropoffCoords) {
+    // Show bounding box containing both points
+    const minLat = Math.min(rdPickupCoords[0], rdDropoffCoords[0]) - 0.01
+    const maxLat = Math.max(rdPickupCoords[0], rdDropoffCoords[0]) + 0.01
+    const minLon = Math.min(rdPickupCoords[1], rdDropoffCoords[1]) - 0.01
+    const maxLon = Math.max(rdPickupCoords[1], rdDropoffCoords[1]) + 0.01
+    frame.src = `https://www.openstreetmap.org/export/embed.html?bbox=${minLon}%2C${minLat}%2C${maxLon}%2C${maxLat}&layer=mapnik&marker=${rdPickupCoords[0]}%2C${rdPickupCoords[1]}`
+    if (tip) tip.textContent = '🟢 Pickup · 🔴 Drop-off — route calculated below'
+  } else if (rdPickupCoords) {
+    const [lat, lon] = rdPickupCoords
+    const d = 0.03
+    frame.src = `https://www.openstreetmap.org/export/embed.html?bbox=${lon-d}%2C${lat-d}%2C${lon+d}%2C${lat+d}&layer=mapnik&marker=${lat}%2C${lon}`
+    if (tip) tip.textContent = '🟢 Pickup set — now set drop-off location'
+  }
+}
+
+async function locateAddr(which) {
+  const input = document.getElementById(which === 'pickup' ? 'rdPickup' : 'rdDropoff')
+  const q = (input.value || '').trim()
+  if (!q) { alert('Please enter an address first'); return }
+  try {
+    const url = `https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&q=${encodeURIComponent(q + ' Kurukshetra Haryana India')}`
+    const res = await fetch(url, {headers:{'Accept':'application/json'}})
+    const data = await res.json()
+    if (!data.length) { alert('Address not found. Try a more specific location.'); return }
+    const coords = [parseFloat(data[0].lat), parseFloat(data[0].lon)]
+    if (which === 'pickup') rdPickupCoords = coords
+    else rdDropoffCoords = coords
+    updateRdMap()
+    calcRdRoute()
+  } catch(e) { alert('Could not look up address. Select from the dropdown instead.') }
+}
+
+async function calcRdRoute() {
+  if (!rdPickupCoords || !rdDropoffCoords) return
+  try {
+    // OSRM public demo — replace with self-hosted in production
+    const coords = `${rdPickupCoords[1]},${rdPickupCoords[0]};${rdDropoffCoords[1]},${rdDropoffCoords[0]}`
+    const res = await fetch(`https://router.project-osrm.org/route/v1/driving/${coords}?overview=false`)
+    if (!res.ok) throw new Error()
+    const data = await res.json()
+    if (!data.routes?.length) throw new Error()
+    rdEstKm = data.routes[0].distance / 1000
+    const mins = Math.round(data.routes[0].duration / 60)
+    document.getElementById('rdEstDist').textContent = rdEstKm.toFixed(1) + ' km'
+    document.getElementById('rdEstTime').textContent = mins + ' min'
+    updateRdEstimate()
+    document.getElementById('rdEstimate').classList.add('show')
+  } catch(e) {
+    // Fallback: straight-line estimate
+    if (rdPickupCoords && rdDropoffCoords) {
+      const dlat = rdDropoffCoords[0] - rdPickupCoords[0]
+      const dlon = rdDropoffCoords[1] - rdPickupCoords[1]
+      rdEstKm = Math.sqrt(dlat*dlat + dlon*dlon) * 111 * 1.3 // rough road factor
+      updateRdEstimate()
+      document.getElementById('rdEstimate').classList.add('show')
+      document.getElementById('rdEstDist').textContent = '~' + rdEstKm.toFixed(1) + ' km'
+      document.getElementById('rdEstTime').textContent = '~' + Math.round(rdEstKm * 3) + ' min'
+    }
+  }
+}
+
+function updateRdEstimate() {
+  if (!rdEstKm) return
+  const base = 30
+  const fare = Math.max(base, Math.round(rdEstKm * rdVehiclePricePerKm))
+  document.getElementById('rdEstFare').textContent = '₹' + fare.toLocaleString('en-IN') + ' (indicative)'
+}
+
+document.getElementById('rdWhen')?.addEventListener('change', function() {
+  const wrap = document.getElementById('rdScheduleWrap')
+  if (wrap) wrap.style.display = this.value === 'scheduled' ? 'block' : 'none'
+})
+
+// Add price data attributes to vehicle cards
+document.querySelectorAll('.rd-vehicle').forEach(card => {
+  const priceEl = card.querySelector('.rd-vehicle-price')
+  if (priceEl) {
+    const match = priceEl.textContent.match(/₹(\d+)/)
+    if (match) card.dataset.price = match[1]
+  }
+})
+
+function submitRideRequest() {
+  const name = document.getElementById('rdName')?.value.trim()
+  const phone = document.getElementById('rdPhone')?.value.trim()
+  const pickup = document.getElementById('rdPickup')?.value.trim()
+  const dropoff = document.getElementById('rdDropoff')?.value.trim()
+  const consent = document.getElementById('rdConsent')?.checked
+
+  if (!name) { alert('Please enter your name'); return }
+  if (!phone || phone.length < 10) { alert('Please enter a valid phone number'); return }
+  if (!pickup) { alert('Please enter a pickup location'); return }
+  if (!dropoff) { alert('Please enter a drop-off location'); return }
+  if (!consent) { alert('Please agree to the privacy terms to continue'); return }
+
+  const btn = document.getElementById('rdSubmitBtn')
+  const status = document.getElementById('rdSubmitStatus')
+  btn.disabled = true
+  btn.textContent = 'Sending to nearby drivers...'
+  if (status) { status.style.display = 'block'; status.textContent = 'Broadcasting to nearby verified drivers in Kurukshetra...' }
+
+  // Simulate dispatch (in production this calls your NestJS API → n8n → Telegram broadcast)
+  setTimeout(() => {
+    const ref = 'KKR-' + Math.random().toString(36).substr(2,6).toUpperCase()
+    document.getElementById('rdJobRef').textContent = ref
+    document.getElementById('rdFormWrap').style.display = 'none'
+    document.getElementById('rdSuccess').classList.add('show')
+    window.scrollTo({top:0, behavior:'smooth'})
+  }, 2200)
+}
+
+function resetRides() {
+  rdPickupCoords = null
+  rdDropoffCoords = null
+  rdEstKm = 0
+  document.getElementById('rdSuccess').classList.remove('show')
+  document.getElementById('rdFormWrap').style.display = 'block'
+  document.getElementById('rdName').value = ''
+  document.getElementById('rdPhone').value = ''
+  document.getElementById('rdPickup').value = ''
+  document.getElementById('rdDropoff').value = ''
+  document.getElementById('rdPickupArea').value = ''
+  document.getElementById('rdDropoffArea').value = ''
+  document.getElementById('rdDesc').value = ''
+  document.getElementById('rdConsent').checked = false
+  document.getElementById('rdSubmitBtn').disabled = false
+  document.getElementById('rdSubmitBtn').textContent = '🚗 Send request to nearby drivers →'
+  document.getElementById('rdEstimate').classList.remove('show')
+  document.getElementById('rdSubmitStatus').style.display = 'none'
+  const frame = document.getElementById('rdMap')
+  if (frame) frame.src = 'https://www.openstreetmap.org/export/embed.html?bbox=76.75%2C29.90%2C76.98%2C30.05&layer=mapnik&marker=29.9695%2C76.8783'
+  document.getElementById('rdMapTip').textContent = '📍 Select locations above to see the route'
+  setMode('ride')
+}
+
 </script>
 </body>
 </html>
