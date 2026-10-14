@@ -688,6 +688,12 @@ input,select,textarea{font-family:inherit}
 @media(max-width:1024px){.rd-layout{grid-template-columns:1fr}}
 @media(max-width:480px){.rd-row{grid-template-columns:1fr}.rd-vehicles{grid-template-columns:repeat(3,1fr)}}
 
+
+/* ── CAPTCHA / Turnstile ── */
+.cf-turnstile{margin:10px 0}
+.captcha-error{color:var(--red);font-size:12px;margin-top:4px;display:none}
+.captcha-error.show{display:block}
+
 </style>
 
 <!--
@@ -760,6 +766,145 @@ OPERATIONS
 
 =======================================================
 -->
+  <!-- Cloudflare Turnstile CAPTCHA — free, invisible, no checkbox needed -->
+  <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer>
+// ══ CLOUDFLARE TURNSTILE CAPTCHA ══
+// Validates CAPTCHA token before form submission
+// In production: send cf-turnstile-response token to backend for server-side verification
+// Backend verifies: POST https://challenges.cloudflare.com/turnstile/v0/siteverify
+
+function getTurnstileToken(containerId) {
+  const container = document.getElementById(containerId)
+  if (!container) return null
+  const input = container.querySelector('[name="cf-turnstile-response"]')
+  return input ? input.value : null
+}
+
+function submitBizForm(e) {
+  e.preventDefault()
+  const token = getTurnstileToken('turnstile-biz')
+  const err = document.getElementById('captcha-biz-err')
+  if (!token) {
+    if (err) err.classList.add('show')
+    return false
+  }
+  if (err) err.classList.remove('show')
+  // In production: send token to /api/auth/register with form data
+  // Backend verifies token with Cloudflare before creating account
+  alert('✅ Registration submitted! We will review your business and contact you within 24 hours.')
+  return false
+}
+
+function submitCustForm(e) {
+  e.preventDefault()
+  const token = getTurnstileToken('turnstile-cust')
+  const err = document.getElementById('captcha-cust-err')
+  if (!token) {
+    if (err) err.classList.add('show')
+    return false
+  }
+  if (err) err.classList.remove('show')
+  alert('✅ Account created! Your 7-day free trial has started.')
+  return false
+}
+
+// ══ FILE UPLOAD VALIDATION ══
+// Whitelist: only image types
+// Max size: 5MB per file
+// Max count: 5 files
+// Blocks: .exe, .php, .js, .sh, and all non-image types
+
+const ALLOWED_IMAGE_TYPES = new Set([
+  'image/jpeg',
+  'image/jpg',
+  'image/png',
+  'image/webp',
+  'image/gif',
+])
+const MAX_FILE_SIZE_MB = 5
+const MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024
+const MAX_FILES = 5
+
+// Dangerous file extensions — block even if MIME type looks safe
+const BLOCKED_EXTENSIONS = /\.(exe|php|php3|php4|php5|phtml|sh|bash|py|rb|pl|js|mjs|ts|html|htm|svg|xml|sql|db|env|pem|key|p12|bat|cmd|ps1|vbs|jar|war|class)$/i
+
+function validateFileUpload(input) {
+  const errEl = document.getElementById('file-upload-err')
+  const files = Array.from(input.files)
+  const errors = []
+
+  // Check count
+  if (files.length > MAX_FILES) {
+    errors.push(`Maximum ${MAX_FILES} photos allowed. You selected ${files.length}.`)
+    input.value = ''
+  }
+
+  for (const file of files) {
+    // Check MIME type whitelist
+    if (!ALLOWED_IMAGE_TYPES.has(file.type)) {
+      errors.push(`"${file.name}" is not an allowed file type. Only JPG, PNG, WebP, GIF accepted.`)
+      input.value = ''
+      break
+    }
+
+    // Check file extension (double-check — MIME can be spoofed)
+    if (BLOCKED_EXTENSIONS.test(file.name)) {
+      errors.push(`"${file.name}" has a blocked file extension.`)
+      input.value = ''
+      break
+    }
+
+    // Check file size
+    if (file.size > MAX_FILE_SIZE_BYTES) {
+      const sizeMB = (file.size / 1024 / 1024).toFixed(1)
+      errors.push(`"${file.name}" is ${sizeMB}MB. Maximum allowed is ${MAX_FILE_SIZE_MB}MB.`)
+      input.value = ''
+      break
+    }
+
+    // Check file name for path traversal attempts
+    if (file.name.includes('..') || file.name.includes('/') || file.name.includes('\\')) {
+      errors.push(`"${file.name}" has an invalid filename.`)
+      input.value = ''
+      break
+    }
+  }
+
+  if (errEl) {
+    if (errors.length > 0) {
+      errEl.textContent = errors[0]
+      errEl.classList.add('show')
+    } else {
+      errEl.classList.remove('show')
+      // Show success feedback
+      errEl.style.color = 'var(--green)'
+      errEl.textContent = `${files.length} photo${files.length > 1 ? 's' : ''} ready to upload`
+      errEl.classList.add('show')
+    }
+  }
+
+  // Log blocked attempts (for admin monitoring in production)
+  if (errors.length > 0) {
+    console.warn('[My KKR] File upload blocked:', errors[0])
+  }
+
+  return errors.length === 0
+}
+
+// ══ TURNSTILE: Verify before ride request too ══
+const _origSubmitRide = submitRideRequest
+function submitRideRequest() {
+  const token = getTurnstileToken('turnstile-ride')
+  const err = document.getElementById('captcha-ride-err')
+  if (!token) {
+    if (err) err.classList.add('show')
+    return
+  }
+  if (err) err.classList.remove('show')
+  _origSubmitRide()
+}
+
+</script>
 </head>
 <body>
 <div class="app">
@@ -1499,9 +1644,26 @@ OPERATIONS
             </div>
             <div class="rf-group"><label class="rf-label">Street / Landmark</label><input class="rf-input" type="text" placeholder="e.g. Near Bus Stand, Gandhi Nagar"></div>
           </div>
-          <div class="rf-group"><label class="rf-label">Owner name</label><input class="rf-input" type="text" placeholder="Your full name"></div>
+          <div class="rf-group"><label class="rf-label">Owner name</label><input class="rf-input" type="text" placeholder="Your full name" maxlength="80"></div>
+          <div class="rf-group">
+            <label class="rf-label">Business photos (optional)</label>
+            <input
+              class="rf-input"
+              type="file"
+              id="bizPhotos"
+              accept="image/jpeg,image/png,image/webp"
+              multiple
+              onchange="validateFileUpload(this)"
+              style="padding:8px;cursor:pointer"
+            >
+            <div style="font-size:10px;color:var(--text-3);margin-top:4px">JPG, PNG or WebP only · Max 5MB each · Max 5 photos</div>
+            <div class="captcha-error" id="file-upload-err"></div>
+          </div>
           <div class="rf-check"><input type="checkbox" id="rt-biz"><label for="rt-biz">I agree to the <a href="#">Terms of Service</a>. My KKR is a connector — all transactions are directly between buyers and sellers.</label></div>
-          <button class="rf-submit">List my business — first month free</button>
+          <!-- Cloudflare Turnstile — invisible CAPTCHA -->
+          <div class="cf-turnstile" data-sitekey="0x4AAAAAAA_REPLACE_WITH_YOUR_TURNSTILE_KEY" data-theme="light" id="turnstile-biz"></div>
+          <div class="captcha-error" id="captcha-biz-err">Please complete the security check before submitting.</div>
+          <button class="rf-submit" onclick="return submitBizForm(event)">List my business — first month free</button>
         </div>
 
         <!-- Customer form -->
@@ -1534,7 +1696,9 @@ OPERATIONS
             </div>
           </div>
           <div class="rf-check"><input type="checkbox" id="rt-cust"><label for="rt-cust">I agree to the <a href="#">Terms of Service</a>. All payments are directly with the business — My KKR takes no commission.</label></div>
-          <button class="rf-submit">Start 7-day free trial</button>
+          <div class="cf-turnstile" data-sitekey="0x4AAAAAAA_REPLACE_WITH_YOUR_TURNSTILE_KEY" data-theme="light" id="turnstile-cust"></div>
+          <div class="captcha-error" id="captcha-cust-err">Please complete the security check before submitting.</div>
+          <button class="rf-submit" onclick="return submitCustForm(event)">Start 7-day free trial</button>
           <div class="rf-note">No payment during trial · ₹49+GST after 7 days · Cancel anytime</div>
           <div style="text-align:center;margin-top:10px"><button onclick="showForgotOTP()" style="font-size:12px;color:var(--night);background:none;border:none;cursor:pointer;text-decoration:underline">Forgot your number? Send a new OTP</button></div>
         </div>
@@ -1844,6 +2008,8 @@ OPERATIONS
               </label>
             </div>
 
+            <div class="cf-turnstile" data-sitekey="0x4AAAAAAA_REPLACE_WITH_YOUR_TURNSTILE_KEY" data-theme="light" id="turnstile-ride"></div>
+            <div class="captcha-error" id="captcha-ride-err">Please complete the security check.</div>
             <button class="rd-submit" id="rdSubmitBtn" onclick="submitRideRequest()">
               🚗 Send request to nearby drivers →
             </button>
