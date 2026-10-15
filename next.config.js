@@ -1,22 +1,32 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
 
-  // ── Output mode: standalone for Docker ──
+  // ── Output: standalone for Docker ──
   output: 'standalone',
 
   // ── Compression ──
   compress: true,
 
-  // ── Disable X-Powered-By header (hides Next.js version) ──
+  // ── Hide Next.js version from attackers ──
   poweredByHeader: false,
 
-  // ── Image domains whitelist ──
+  // ── Telemetry off ──
+  // (also set NEXT_TELEMETRY_DISABLED=1 in Coolify env vars)
+
+  // ── Images — updated for Next.js 16 (domains deprecated) ──
   images: {
-    domains: ['storage.googleapis.com'],
-    // Disable image optimization for external images (security)
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'storage.googleapis.com',
+      },
+    ],
     dangerouslyAllowSVG: false,
     contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
   },
+
+  // ── Turbopack (default in Next.js 16) — empty config silences error ──
+  turbopack: {},
 
   // ── Security Headers on every response ──
   async headers() {
@@ -24,36 +34,18 @@ const nextConfig = {
       {
         source: '/(.*)',
         headers: [
-          {
-            key: 'X-Frame-Options',
-            value: 'DENY',
-          },
-          {
-            key: 'X-Content-Type-Options',
-            value: 'nosniff',
-          },
-          {
-            key: 'X-XSS-Protection',
-            value: '1; mode=block',
-          },
-          {
-            key: 'Referrer-Policy',
-            value: 'strict-origin-when-cross-origin',
-          },
-          {
-            key: 'Permissions-Policy',
-            value: 'camera=(), microphone=(), payment=(), usb=()',
-          },
-          {
-            key: 'Strict-Transport-Security',
-            value: 'max-age=31536000; includeSubDomains; preload',
-          },
+          { key: 'X-Frame-Options', value: 'DENY' },
+          { key: 'X-Content-Type-Options', value: 'nosniff' },
+          { key: 'X-XSS-Protection', value: '1; mode=block' },
+          { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
+          { key: 'Permissions-Policy', value: 'camera=(), microphone=(), payment=(), usb=()' },
+          { key: 'Strict-Transport-Security', value: 'max-age=31536000; includeSubDomains; preload' },
         ],
       },
     ]
   },
 
-  // ── Redirects: enforce www → non-www (or vice versa) ──
+  // ── Canonical redirect: www → non-www ──
   async redirects() {
     return [
       {
@@ -65,26 +57,17 @@ const nextConfig = {
     ]
   },
 
-  // ── Webpack: don't expose source maps in production ──
-  webpack: (config, { isServer, dev }) => {
-    if (!dev) {
-      config.devtool = false  // No source maps in production
-    }
-    return config
-  },
-
-  // ── Experimental: strict mode for React ──
+  // ── React strict mode ──
   reactStrictMode: true,
 
-  // ── TypeScript: fail build on type errors ──
+  // ── TypeScript: fail build on errors ──
   typescript: {
     ignoreBuildErrors: false,
   },
 
-  // ── ESLint: fail build on lint errors ──
-  eslint: {
-    ignoreDuringBuilds: false,
-  },
+  // NOTE: 'eslint' config key removed — not supported in Next.js 16
+  // NOTE: 'webpack' config removed — Turbopack is default in Next.js 16
+  // Run: next lint separately if needed
 }
 
 module.exports = nextConfig

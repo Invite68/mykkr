@@ -1,0 +1,8 @@
+# This file tells Coolify/Nixpacks to use our custom Dockerfile
+# If Coolify is set to "Dockerfile" build pack this file is ignored
+# If set to Nixpacks this overrides the auto-detected build
+[phases.build]
+cmds = ["npm ci", "npm run build"]
+
+[start]
+cmd = "npm start"

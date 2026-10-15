@@ -694,6 +694,99 @@ input,select,textarea{font-family:inherit}
 .captcha-error{color:var(--red);font-size:12px;margin-top:4px;display:none}
 .captcha-error.show{display:block}
 
+
+/* ── MEDIA STRIP (10 slots: videos + photos + ads) ── */
+.media-strip{background:#fff;border-bottom:1px solid var(--border);padding:16px 0}
+.media-hdr{display:flex;align-items:center;justify-content:space-between;padding:0 20px;margin-bottom:12px}
+.media-hdr-left{display:flex;align-items:center;gap:10px;font-size:14px;font-weight:700;color:var(--night-d)}
+.media-hdr-right{display:flex;align-items:center;gap:8px}
+.media-track{display:flex;gap:12px;padding:2px 20px;overflow-x:auto;scrollbar-width:none;scroll-behavior:smooth;-webkit-overflow-scrolling:touch}
+.media-track::-webkit-scrollbar{display:none}
+/* Video card */
+.media-card{flex-shrink:0;width:260px;border-radius:var(--r-xl);overflow:hidden;border:1px solid var(--border);box-shadow:var(--shadow-sm);background:#fff;cursor:pointer;transition:all var(--t)}
+.media-card:hover{transform:translateY(-2px);box-shadow:var(--shadow-md)}
+.media-card-video{width:100%;aspect-ratio:16/9;position:relative;background:#000;overflow:hidden}
+.media-card-video iframe{position:absolute;top:0;left:0;width:100%;height:100%;border:none}
+/* Photo card */
+.media-card-photo{width:100%;aspect-ratio:16/9;object-fit:cover;display:block}
+/* Promoted ad badge */
+.media-ad-badge{position:absolute;top:8px;left:8px;background:var(--tan);color:var(--night-d);font-size:10px;font-weight:700;padding:3px 8px;border-radius:99px;letter-spacing:.3px;z-index:2}
+/* Placeholder */
+.media-placeholder{width:100%;aspect-ratio:16/9;background:linear-gradient(135deg,var(--night-l),#d8e8ea);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;position:relative}
+.media-ph-icon{font-size:24px;opacity:.3}
+.media-ph-text{font-size:10px;color:var(--text-4);text-align:center;padding:0 12px;line-height:1.5}
+.media-card-body{padding:10px 13px}
+.media-card-tag{font-size:10px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--tan-d);margin-bottom:3px}
+.media-card-title{font-size:12px;font-weight:600;color:var(--night-d);line-height:1.4}
+.media-card-time{font-size:10px;color:var(--text-4);margin-top:2px}
+/* Nav buttons */
+.media-nav-btn{width:28px;height:28px;border-radius:50%;border:1.5px solid var(--border);background:#fff;color:var(--text-3);font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all var(--t);flex-shrink:0}
+.media-nav-btn:hover{background:var(--night-d);color:#fff;border-color:var(--night-d)}
+
+/* ── MAP IMPROVEMENTS ── */
+/* Hide OpenStreetMap donate button via CSS overlay */
+.map-osm-wrapper{position:relative;border-radius:var(--r-xl);overflow:hidden;border:1px solid var(--border)}
+.map-osm-wrapper iframe{width:100%;border:none;display:block}
+/* Overlay that covers the OSM bottom-right donate button */
+.map-donate-blocker{position:absolute;bottom:0;right:0;width:120px;height:36px;background:var(--white);z-index:10;pointer-events:none}
+/* Custom pin display */
+.map-pins-display{display:flex;gap:10px;margin-top:10px;flex-wrap:wrap}
+.map-pin-label{display:flex;align-items:center;gap:7px;padding:7px 12px;border-radius:var(--r-lg);border:1.5px solid;font-size:12px;font-weight:600;flex:1;min-width:130px}
+.map-pin-label.pin-a{border-color:rgba(22,163,74,0.3);background:var(--green-l);color:var(--green-d)}
+.map-pin-label.pin-b{border-color:rgba(220,38,38,0.3);background:var(--red-l);color:var(--red)}
+.map-pin-dot{width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0;color:#fff}
+.map-pin-dot.a{background:var(--green)}
+.map-pin-dot.b{background:var(--red)}
+.map-pin-addr{font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+/* Open in Maps button */
+.open-in-maps-btn{
+  width:100%;padding:11px;border-radius:var(--r-lg);
+  background:var(--night-d);color:#fff;
+  font-size:13px;font-weight:700;border:none;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  transition:background var(--t);margin-top:10px;
+  display:none;
+}
+.open-in-maps-btn.show{display:flex}
+.open-in-maps-btn:hover{background:var(--night)}
+/* Maps picker modal */
+.maps-modal{position:fixed;inset:0;z-index:2000;background:rgba(17,24,39,.5);backdrop-filter:blur(4px);display:none;align-items:flex-end;justify-content:center;padding:0}
+.maps-modal.open{display:flex}
+.maps-sheet{background:#fff;border-radius:var(--r-2xl) var(--r-2xl) 0 0;padding:20px;width:100%;max-width:480px;box-shadow:var(--shadow-lg)}
+.maps-sheet-title{font-size:15px;font-weight:700;color:var(--night-d);margin-bottom:4px;text-align:center}
+.maps-sheet-sub{font-size:12px;color:var(--text-3);text-align:center;margin-bottom:18px}
+.maps-options{display:flex;flex-direction:column;gap:8px;margin-bottom:12px}
+.maps-option{display:flex;align-items:center;gap:12px;padding:13px 16px;border-radius:var(--r-xl);border:1.5px solid var(--border);background:#fff;cursor:pointer;transition:all var(--t);font-size:14px;font-weight:600;color:var(--night-d)}
+.maps-option:hover{border-color:var(--night);background:var(--night-l)}
+.maps-option-icon{font-size:24px;flex-shrink:0}
+.maps-cancel{width:100%;padding:12px;border-radius:var(--r-xl);background:var(--bg);color:var(--text-3);font-size:14px;font-weight:600;border:none;cursor:pointer;transition:all var(--t)}
+.maps-cancel:hover{background:var(--border)}
+
+/* ── ADMIN DELIVERY PRICING ── */
+.admin-panel-modal{position:fixed;inset:0;z-index:3000;background:rgba(17,24,39,.6);backdrop-filter:blur(6px);display:none;align-items:center;justify-content:center;padding:20px}
+.admin-panel-modal.open{display:flex}
+.admin-panel-box{background:#fff;border-radius:var(--r-2xl);padding:28px;width:100%;max-width:520px;max-height:90vh;overflow-y:auto;box-shadow:var(--shadow-lg)}
+.admin-panel-title{font-size:18px;font-weight:800;color:var(--night-d);letter-spacing:-.4px;margin-bottom:4px}
+.admin-panel-sub{font-size:13px;color:var(--text-3);margin-bottom:20px}
+.admin-section-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--text-3);margin-bottom:10px;margin-top:20px}
+.admin-rate-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.admin-rate-card{border:1.5px solid var(--border);border-radius:var(--r-lg);padding:14px;background:var(--bg)}
+.admin-rate-icon{font-size:24px;margin-bottom:6px}
+.admin-rate-name{font-size:13px;font-weight:700;color:var(--night-d);margin-bottom:2px}
+.admin-rate-cap{font-size:11px;color:var(--text-3);margin-bottom:8px}
+.admin-rate-input-wrap{display:flex;align-items:center;gap:5px;background:#fff;border:1.5px solid var(--border);border-radius:var(--r);padding:5px 10px;transition:border-color var(--t)}
+.admin-rate-input-wrap:focus-within{border-color:var(--night)}
+.admin-rate-prefix{font-size:13px;font-weight:700;color:var(--text-3)}
+.admin-rate-input{flex:1;border:none;outline:none;font-size:14px;font-weight:700;color:var(--night-d);width:60px;background:transparent}
+.admin-rate-suffix{font-size:11px;color:var(--text-3)}
+.admin-save-btn{width:100%;padding:12px;border-radius:var(--r-lg);background:var(--night-d);color:#fff;font-size:14px;font-weight:700;border:none;cursor:pointer;transition:background var(--t);margin-top:18px}
+.admin-save-btn:hover{background:var(--night)}
+.admin-save-success{display:none;margin-top:10px;background:var(--green-l);border:1px solid rgba(22,163,74,.2);border-radius:var(--r-lg);padding:10px;font-size:13px;font-weight:600;color:var(--green-d);text-align:center}
+.admin-save-success.show{display:block}
+/* Admin access button — floating bottom left */
+.admin-access-btn{position:fixed;bottom:calc(var(--bnav) + 10px);left:14px;z-index:300;width:36px;height:36px;border-radius:50%;background:var(--night-d);color:#fff;border:none;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;box-shadow:var(--shadow-md);opacity:.6;transition:opacity var(--t)}
+.admin-access-btn:hover{opacity:1}
+
 </style>
 
 <!--
@@ -904,6 +997,189 @@ function submitRideRequest() {
   _origSubmitRide()
 }
 
+
+// ══ MAPS PICKER ══
+let _mapsPickupCoords = null
+let _mapsDropoffCoords = null
+
+function openMapsSheet() {
+  if (!rdPickupCoords || !rdDropoffCoords) {
+    alert('Please set both pickup and drop-off locations first.')
+    return
+  }
+  _mapsPickupCoords = rdPickupCoords
+  _mapsDropoffCoords = rdDropoffCoords
+  const pLabel = document.getElementById('rdPinALabel')?.textContent || 'Pickup'
+  const dLabel = document.getElementById('rdPinBLabel')?.textContent || 'Drop-off'
+  const sub = document.getElementById('mapsSheetRoute')
+  if (sub) sub.textContent = pLabel + ' → ' + dLabel
+  document.getElementById('mapsModal')?.classList.add('open')
+  document.body.style.overflow = 'hidden'
+}
+function closeMapsSheet() {
+  document.getElementById('mapsModal')?.classList.remove('open')
+  document.body.style.overflow = ''
+}
+function openInApp(app) {
+  const [pLat, pLon] = _mapsPickupCoords
+  const [dLat, dLon] = _mapsDropoffCoords
+  const urls = {
+    google: `https://www.google.com/maps/dir/?api=1&origin=${pLat},${pLon}&destination=${dLat},${dLon}&travelmode=driving`,
+    apple:  `maps://maps.apple.com/?saddr=${pLat},${pLon}&daddr=${dLat},${dLon}&dirflg=d`,
+    waze:   `https://waze.com/ul?ll=${dLat},${dLon}&navigate=yes&from=ll.${pLat},${pLon}`,
+    osm:    `https://www.openstreetmap.org/directions?from=${pLat},${pLon}&to=${dLat},${dLon}&engine=fossgis_osrm_car`
+  }
+  closeMapsSheet()
+  window.open(urls[app], '_blank', 'noopener,noreferrer')
+}
+
+// ══ OVERRIDE updateRdMap to also update A/B pins + open-in-maps ══
+const _origUpdateRdMap = updateRdMap
+function updateRdMap() {
+  _origUpdateRdMap()
+
+  const pinsDisplay = document.getElementById('rdPinsDisplay')
+  const openBtn = document.getElementById('openInMapsBtn')
+  const tip = document.getElementById('rdMapTip')
+
+  if (rdPickupCoords && rdDropoffCoords) {
+    // Show A/B pin labels
+    const pickupText = document.getElementById('rdPickup')?.value || `${rdPickupCoords[0].toFixed(4)}°N`
+    const dropoffText = document.getElementById('rdDropoff')?.value || `${rdDropoffCoords[0].toFixed(4)}°N`
+
+    const aLabel = document.getElementById('rdPinALabel')
+    const bLabel = document.getElementById('rdPinBLabel')
+    if (aLabel) aLabel.textContent = pickupText
+    if (bLabel) bLabel.textContent = dropoffText
+
+    if (pinsDisplay) pinsDisplay.style.display = 'flex'
+    if (openBtn) openBtn.classList.add('show')
+    if (tip) tip.style.display = 'none'
+  } else if (rdPickupCoords) {
+    if (pinsDisplay) pinsDisplay.style.display = 'none'
+    if (openBtn) openBtn.classList.remove('show')
+    if (tip) { tip.style.display = 'block'; tip.textContent = '🟢 Pickup set — now set drop-off' }
+  } else {
+    if (pinsDisplay) pinsDisplay.style.display = 'none'
+    if (openBtn) openBtn.classList.remove('show')
+  }
+}
+
+// Also patch setPickupFromDropdown and setDropoffFromDropdown
+// to update pin labels from dropdown text
+const _origSetPickup = setPickupFromDropdown
+function setPickupFromDropdown(coords, label) {
+  _origSetPickup(coords, label)
+  const aLabel = document.getElementById('rdPinALabel')
+  if (aLabel) aLabel.textContent = label.split('(')[0].trim().split('—')[0].trim()
+}
+const _origSetDropoff = setDropoffFromDropdown
+function setDropoffFromDropdown(coords, label) {
+  _origSetDropoff(coords, label)
+  const bLabel = document.getElementById('rdPinBLabel')
+  if (bLabel) bLabel.textContent = label.split('(')[0].trim().split('—')[0].trim()
+}
+
+// ══ ADMIN DELIVERY PRICING ══
+// Rates stored in localStorage — synced to backend when API is built
+const RATE_KEYS = ['auto','sedan','suv','bike','car','tempo','truck','tractor','minimum']
+
+function loadAdminRates() {
+  try {
+    const saved = localStorage.getItem('mykkr_delivery_rates')
+    if (!saved) return
+    const rates = JSON.parse(saved)
+    RATE_KEYS.forEach(key => {
+      const el = document.getElementById('rate_' + key)
+      if (el && rates[key]) el.value = rates[key]
+    })
+    // Apply loaded rates to vehicle cards immediately
+    applyRatesToVehicles(rates)
+  } catch(e) {
+    console.warn('Could not load admin rates:', e)
+  }
+}
+
+function saveAdminRates() {
+  const rates = {}
+  let valid = true
+  RATE_KEYS.forEach(key => {
+    const el = document.getElementById('rate_' + key)
+    if (el) {
+      const val = parseInt(el.value)
+      if (isNaN(val) || val < 1) { valid = false; el.style.borderColor = 'var(--red)'; return }
+      el.style.borderColor = ''
+      rates[key] = val
+    }
+  })
+  if (!valid) { alert('Please enter valid rates for all vehicle types (minimum ₹1).'); return }
+
+  try {
+    localStorage.setItem('mykkr_delivery_rates', JSON.stringify(rates))
+    applyRatesToVehicles(rates)
+    const success = document.getElementById('adminSaveSuccess')
+    if (success) {
+      success.classList.add('show')
+      setTimeout(() => success.classList.remove('show'), 3000)
+    }
+  } catch(e) {
+    alert('Could not save rates. Storage may be unavailable.')
+  }
+}
+
+function applyRatesToVehicles(rates) {
+  // Update displayed prices on ride vehicle cards
+  const vehicleMap = {
+    auto: 0, sedan: 1, suv: 2,
+    bike: 0, car: 1, tempo: 2, truck: 3, tractor: 4
+  }
+  const rideCards = document.querySelectorAll('#rdRideVehicles .rd-vehicle')
+  const deliveryCards = document.querySelectorAll('#rdDeliveryVehicles .rd-vehicle')
+
+  const rideKeys = ['auto','sedan','suv']
+  rideCards.forEach((card, i) => {
+    const key = rideKeys[i]
+    if (rates[key]) {
+      const priceEl = card.querySelector('.rd-vehicle-price')
+      if (priceEl) {
+        priceEl.textContent = '₹' + rates[key] + '/km'
+        card.dataset.price = rates[key]
+      }
+    }
+  })
+
+  const deliveryKeys = ['bike','car','tempo','truck','tractor']
+  deliveryCards.forEach((card, i) => {
+    const key = deliveryKeys[i]
+    if (rates[key]) {
+      const priceEl = card.querySelector('.rd-vehicle-price')
+      if (priceEl) {
+        priceEl.textContent = '₹' + rates[key] + '/km'
+        card.dataset.price = rates[key]
+      }
+    }
+  })
+
+  // Update global price var if a vehicle is currently selected
+  rdVehiclePricePerKm = parseInt(
+    document.querySelector('.rd-vehicle.active')?.dataset.price || rdVehiclePricePerKm
+  )
+  updateRdEstimate()
+}
+
+function openAdmin() {
+  loadAdminRates()
+  document.getElementById('adminModal')?.classList.add('open')
+  document.body.style.overflow = 'hidden'
+}
+function closeAdmin() {
+  document.getElementById('adminModal')?.classList.remove('open')
+  document.body.style.overflow = ''
+}
+
+// Load saved rates on page start
+loadAdminRates()
+
 </script>
 </head>
 <body>
@@ -1006,21 +1282,96 @@ function submitRideRequest() {
     </div>
   </div>
 
-  <!-- City Updates -->
-  <div class="cu-sec" id="cu-section">
-    <div class="cu-hdr">
-      <div class="cu-title-row">City Updates <div class="live-pill"><span class="live-dot"></span>Live</div></div>
-      <div style="display:flex;align-items:center;gap:9px">
-        <div class="cu-nav-row"><button class="cu-nb" onclick="scrollEl('cu-track',-252)">‹</button><button class="cu-nb" onclick="scrollEl('cu-track',252)">›</button></div>
-        <span style="font-size:12px;font-weight:500;color:var(--night);cursor:pointer">All →</span>
+  <!-- MEDIA STRIP — 10 slots: videos + photos + promoted ads -->
+  <div class="media-strip" id="cu-section">
+    <div class="media-hdr">
+      <div class="media-hdr-left">
+        City Updates & Promotions
+        <div class="live-pill"><span class="live-dot"></span>Live</div>
+      </div>
+      <div class="media-hdr-right">
+        <button class="media-nav-btn" onclick="scrollEl('mediaTrack',-272)">‹</button>
+        <button class="media-nav-btn" onclick="scrollEl('mediaTrack',272)">›</button>
+        <span style="font-size:12px;font-weight:500;color:var(--night);cursor:pointer;margin-left:4px">All →</span>
       </div>
     </div>
-    <div class="cu-track" id="cu-track">
-      <div class="cu-card"><div class="cu-vid"><iframe src="https://www.youtube.com/embed/LXb3EKWsInQ?rel=0&modestbranding=1" allowfullscreen allow="accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture"></iframe></div><div class="cu-card-body"><div class="cu-tag">Tourism</div><div class="cu-txt">Brahmsarovar — Sacred Lake of Kurukshetra</div><div class="cu-time">Pinned by admin</div></div></div>
-      <div class="cu-card"><div class="cu-vid"><iframe src="https://www.youtube.com/embed/MBkAV-kp9gA?rel=0&modestbranding=1" allowfullscreen allow="accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture"></iframe></div><div class="cu-card-body"><div class="cu-tag">History</div><div class="cu-txt">Jyotisar — Birthplace of the Bhagavad Gita</div><div class="cu-time">Pinned by admin</div></div></div>
-      <div class="cu-card"><div class="cu-ph"><span class="cu-ph-icon">📺</span><span class="cu-ph-text">Admin pastes YouTube or Instagram link</span></div><div class="cu-card-body"><div class="cu-tag">Update 3</div><div class="cu-txt">City update slot — paste link in admin panel</div><div class="cu-time">Awaiting</div></div></div>
-      <div class="cu-card"><div class="cu-ph"><span class="cu-ph-icon">📺</span><span class="cu-ph-text">Admin pastes YouTube or Instagram link</span></div><div class="cu-card-body"><div class="cu-tag">Update 4</div><div class="cu-txt">City update slot — paste link in admin panel</div><div class="cu-time">Awaiting</div></div></div>
-      <div class="cu-card"><div class="cu-ph"><span class="cu-ph-icon">📺</span><span class="cu-ph-text">Admin pastes YouTube or Instagram link</span></div><div class="cu-card-body"><div class="cu-tag">Update 5</div><div class="cu-txt">City update slot — paste link in admin panel</div><div class="cu-time">Awaiting</div></div></div>
+    <div class="media-track" id="mediaTrack">
+
+      <!-- Slot 1 — YouTube video -->
+      <div class="media-card">
+        <div class="media-card-video">
+          <iframe src="https://www.youtube.com/embed/LXb3EKWsInQ?rel=0&modestbranding=1"
+            allowfullscreen allow="accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture">
+          </iframe>
+        </div>
+        <div class="media-card-body">
+          <div class="media-card-tag">Tourism</div>
+          <div class="media-card-title">Brahmsarovar — Sacred Lake of Kurukshetra</div>
+          <div class="media-card-time">Pinned by admin</div>
+        </div>
+      </div>
+
+      <!-- Slot 2 — YouTube video -->
+      <div class="media-card">
+        <div class="media-card-video">
+          <iframe src="https://www.youtube.com/embed/MBkAV-kp9gA?rel=0&modestbranding=1"
+            allowfullscreen allow="accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture">
+          </iframe>
+        </div>
+        <div class="media-card-body">
+          <div class="media-card-tag">History</div>
+          <div class="media-card-title">Jyotisar — Birthplace of the Bhagavad Gita</div>
+          <div class="media-card-time">Pinned by admin</div>
+        </div>
+      </div>
+
+      <!-- Slot 3 — PROMOTED AD (business pays for this slot) -->
+      <div class="media-card">
+        <div class="media-card-video" style="position:relative">
+          <div class="media-ad-badge">⭐ Promoted</div>
+          <div class="media-placeholder" style="background:linear-gradient(135deg,#fdf4e7,#f5e6cc)">
+            <span style="font-size:36px">🎵</span>
+            <span style="font-size:13px;font-weight:700;color:var(--night-d);text-align:center;padding:0 12px">Sharma Sound & DJ</span>
+            <span style="font-size:11px;color:var(--text-3)">Wedding · Events · Parties</span>
+          </div>
+        </div>
+        <div class="media-card-body">
+          <div class="media-card-tag" style="color:var(--tan-d)">⭐ Promoted Business</div>
+          <div class="media-card-title">Sharma Sound & DJ · Thanesar · ₹4,000/event</div>
+          <div class="media-card-time">Sponsored · Contact on WhatsApp</div>
+        </div>
+      </div>
+
+      <!-- Slots 4–10 — Admin paste slots (video, photo, or ad) -->
+      <div class="media-card">
+        <div class="media-card-video"><div class="media-placeholder"><span class="media-ph-icon">📺</span><span class="media-ph-text">Admin pastes YouTube / Instagram link or uploads photo</span></div></div>
+        <div class="media-card-body"><div class="media-card-tag">Update 4</div><div class="media-card-title">City update — manage in admin panel</div><div class="media-card-time">Awaiting content</div></div>
+      </div>
+      <div class="media-card">
+        <div class="media-card-video"><div class="media-placeholder"><span class="media-ph-icon">📸</span><span class="media-ph-text">Admin uploads photo or pastes video link</span></div></div>
+        <div class="media-card-body"><div class="media-card-tag">Update 5</div><div class="media-card-title">City update — manage in admin panel</div><div class="media-card-time">Awaiting content</div></div>
+      </div>
+      <div class="media-card">
+        <div class="media-card-video" style="position:relative"><div class="media-ad-badge">⭐ Promoted</div><div class="media-placeholder" style="background:linear-gradient(135deg,#f0fdf4,#dcfce7)"><span style="font-size:36px">🍛</span><span style="font-size:13px;font-weight:700;color:var(--night-d);text-align:center;padding:0 12px">Advertise Here</span><span style="font-size:11px;color:var(--text-3)">Reach Kurukshetra customers</span></div></div>
+        <div class="media-card-body"><div class="media-card-tag" style="color:var(--tan-d)">⭐ Ad Slot Available</div><div class="media-card-title">Promote your business here — contact admin</div><div class="media-card-time">₹999/week · ₹2,999/month</div></div>
+      </div>
+      <div class="media-card">
+        <div class="media-card-video"><div class="media-placeholder"><span class="media-ph-icon">📺</span><span class="media-ph-text">Admin pastes YouTube / Instagram link</span></div></div>
+        <div class="media-card-body"><div class="media-card-tag">Update 7</div><div class="media-card-title">City update — manage in admin panel</div><div class="media-card-time">Awaiting content</div></div>
+      </div>
+      <div class="media-card">
+        <div class="media-card-video"><div class="media-placeholder"><span class="media-ph-icon">📸</span><span class="media-ph-text">Admin uploads photo or pastes video link</span></div></div>
+        <div class="media-card-body"><div class="media-card-tag">Update 8</div><div class="media-card-title">City update — manage in admin panel</div><div class="media-card-time">Awaiting content</div></div>
+      </div>
+      <div class="media-card">
+        <div class="media-card-video" style="position:relative"><div class="media-ad-badge">⭐ Promoted</div><div class="media-placeholder" style="background:linear-gradient(135deg,#eff6ff,#dbeafe)"><span style="font-size:36px">💒</span><span style="font-size:13px;font-weight:700;color:var(--night-d);text-align:center;padding:0 12px">Advertise Here</span><span style="font-size:11px;color:var(--text-3)">Premium ad slot</span></div></div>
+        <div class="media-card-body"><div class="media-card-tag" style="color:var(--tan-d)">⭐ Ad Slot Available</div><div class="media-card-title">Premium ad slot — contact admin to book</div><div class="media-card-time">₹999/week · ₹2,999/month</div></div>
+      </div>
+      <div class="media-card">
+        <div class="media-card-video"><div class="media-placeholder"><span class="media-ph-icon">📺</span><span class="media-ph-text">Admin pastes YouTube / Instagram link</span></div></div>
+        <div class="media-card-body"><div class="media-card-tag">Update 10</div><div class="media-card-title">City update — manage in admin panel</div><div class="media-card-time">Awaiting content</div></div>
+      </div>
+
     </div>
   </div>
 
@@ -1895,14 +2246,35 @@ function submitRideRequest() {
                 </select>
               </div>
 
-              <!-- Live map — updates when locations are selected -->
-              <div class="rd-map-wrap">
-                <div class="rd-map-tip" id="rdMapTip">📍 Select locations above to see the route</div>
+              <!-- Live map — donate button hidden, A/B pins shown -->
+              <div class="map-osm-wrapper" style="margin-top:8px">
+                <div class="rd-map-tip" id="rdMapTip"
+                  style="position:absolute;top:8px;left:50%;transform:translateX(-50%);background:rgba(15,45,26,0.88);color:#fff;font-size:11px;font-weight:600;padding:5px 12px;border-radius:99px;z-index:5;white-space:nowrap;pointer-events:none">
+                  📍 Select locations above to see route
+                </div>
                 <iframe id="rdMap"
                   src="https://www.openstreetmap.org/export/embed.html?bbox=76.75%2C29.90%2C76.98%2C30.05&layer=mapnik&marker=29.9695%2C76.8783"
-                  title="Pickup and drop-off map">
+                  title="Pickup and drop-off map"
+                  style="height:280px">
                 </iframe>
+                <!-- Hides OSM donate/attribution bar -->
+                <div class="map-donate-blocker"></div>
               </div>
+              <!-- A + B pin labels — shown when both locations set -->
+              <div class="map-pins-display" id="rdPinsDisplay" style="display:none">
+                <div class="map-pin-label pin-a">
+                  <div class="map-pin-dot a">A</div>
+                  <span class="map-pin-addr" id="rdPinALabel">Pickup</span>
+                </div>
+                <div class="map-pin-label pin-b">
+                  <div class="map-pin-dot b">B</div>
+                  <span class="map-pin-addr" id="rdPinBLabel">Drop-off</span>
+                </div>
+              </div>
+              <!-- Open in Maps -->
+              <button class="open-in-maps-btn" id="openInMapsBtn" onclick="openMapsSheet()">
+                🗺️ Open route in Maps app
+              </button>
               <!-- Route estimate (shown after both locations set) -->
               <div class="rd-estimate" id="rdEstimate">
                 <div class="rd-estimate-row"><span class="rd-estimate-label">Estimated distance</span><span class="rd-estimate-val" id="rdEstDist">— km</span></div>
@@ -2790,5 +3162,157 @@ function resetSessionTimer() {
 resetSessionTimer()
 
 </script>
+
+<!-- MAPS PICKER MODAL -->
+<div class="maps-modal" id="mapsModal" onclick="if(event.target===this)closeMapsSheet()">
+  <div class="maps-sheet">
+    <div class="maps-sheet-title">Open route in Maps</div>
+    <div class="maps-sheet-sub" id="mapsSheetRoute">Route from pickup to drop-off</div>
+    <div class="maps-options">
+      <div class="maps-option" onclick="openInApp('google')">
+        <span class="maps-option-icon">🗺️</span>
+        <div>
+          <div style="font-size:14px;font-weight:700;color:var(--night-d)">Google Maps</div>
+          <div style="font-size:11px;color:var(--text-3)">Turn-by-turn navigation</div>
+        </div>
+      </div>
+      <div class="maps-option" onclick="openInApp('apple')">
+        <span class="maps-option-icon">🍎</span>
+        <div>
+          <div style="font-size:14px;font-weight:700;color:var(--night-d)">Apple Maps</div>
+          <div style="font-size:11px;color:var(--text-3)">For iPhone & iPad</div>
+        </div>
+      </div>
+      <div class="maps-option" onclick="openInApp('waze')">
+        <span class="maps-option-icon">🚗</span>
+        <div>
+          <div style="font-size:14px;font-weight:700;color:var(--night-d)">Waze</div>
+          <div style="font-size:11px;color:var(--text-3)">Live traffic & alerts</div>
+        </div>
+      </div>
+      <div class="maps-option" onclick="openInApp('osm')">
+        <span class="maps-option-icon">🌍</span>
+        <div>
+          <div style="font-size:14px;font-weight:700;color:var(--night-d)">OpenStreetMap</div>
+          <div style="font-size:11px;color:var(--text-3)">Open source maps</div>
+        </div>
+      </div>
+    </div>
+    <button class="maps-cancel" onclick="closeMapsSheet()">Cancel</button>
+  </div>
+</div>
+
+<!-- ADMIN DELIVERY PRICING MODAL -->
+<div class="admin-panel-modal" id="adminModal" onclick="if(event.target===this)closeAdmin()">
+  <div class="admin-panel-box">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+      <div class="admin-panel-title">⚙️ Admin — Delivery Pricing</div>
+      <button onclick="closeAdmin()" style="width:28px;height:28px;border-radius:var(--r);border:1px solid var(--border);background:#fff;color:var(--text-3);cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center">✕</button>
+    </div>
+    <div class="admin-panel-sub">Set per-km rates for each vehicle type. Customers see indicative fares based on these rates.</div>
+
+    <div class="admin-section-title">🚗 Ride Vehicles (₹/km)</div>
+    <div class="admin-rate-grid">
+      <div class="admin-rate-card">
+        <div class="admin-rate-icon">🛺</div>
+        <div class="admin-rate-name">Auto Rickshaw</div>
+        <div class="admin-rate-cap">1–3 passengers</div>
+        <div class="admin-rate-input-wrap">
+          <span class="admin-rate-prefix">₹</span>
+          <input class="admin-rate-input" type="number" id="rate_auto" value="10" min="1" max="999">
+          <span class="admin-rate-suffix">/km</span>
+        </div>
+      </div>
+      <div class="admin-rate-card">
+        <div class="admin-rate-icon">🚗</div>
+        <div class="admin-rate-name">Cab — Car</div>
+        <div class="admin-rate-cap">1–4 passengers</div>
+        <div class="admin-rate-input-wrap">
+          <span class="admin-rate-prefix">₹</span>
+          <input class="admin-rate-input" type="number" id="rate_sedan" value="14" min="1" max="999">
+          <span class="admin-rate-suffix">/km</span>
+        </div>
+      </div>
+      <div class="admin-rate-card">
+        <div class="admin-rate-icon">🚙</div>
+        <div class="admin-rate-name">SUV</div>
+        <div class="admin-rate-cap">1–6 passengers</div>
+        <div class="admin-rate-input-wrap">
+          <span class="admin-rate-prefix">₹</span>
+          <input class="admin-rate-input" type="number" id="rate_suv" value="18" min="1" max="999">
+          <span class="admin-rate-suffix">/km</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="admin-section-title">📦 Delivery Vehicles (₹/km)</div>
+    <div class="admin-rate-grid">
+      <div class="admin-rate-card">
+        <div class="admin-rate-icon">🏍️</div>
+        <div class="admin-rate-name">Bike</div>
+        <div class="admin-rate-cap">Up to 15 kg</div>
+        <div class="admin-rate-input-wrap">
+          <span class="admin-rate-prefix">₹</span>
+          <input class="admin-rate-input" type="number" id="rate_bike" value="8" min="1" max="999">
+          <span class="admin-rate-suffix">/km</span>
+        </div>
+      </div>
+      <div class="admin-rate-card">
+        <div class="admin-rate-icon">🚗</div>
+        <div class="admin-rate-name">Car</div>
+        <div class="admin-rate-cap">Up to 100 kg</div>
+        <div class="admin-rate-input-wrap">
+          <span class="admin-rate-prefix">₹</span>
+          <input class="admin-rate-input" type="number" id="rate_car" value="12" min="1" max="999">
+          <span class="admin-rate-suffix">/km</span>
+        </div>
+      </div>
+      <div class="admin-rate-card">
+        <div class="admin-rate-icon">🚐</div>
+        <div class="admin-rate-name">Tempo</div>
+        <div class="admin-rate-cap">Up to 1,200 kg</div>
+        <div class="admin-rate-input-wrap">
+          <span class="admin-rate-prefix">₹</span>
+          <input class="admin-rate-input" type="number" id="rate_tempo" value="22" min="1" max="999">
+          <span class="admin-rate-suffix">/km</span>
+        </div>
+      </div>
+      <div class="admin-rate-card">
+        <div class="admin-rate-icon">🚛</div>
+        <div class="admin-rate-name">Truck</div>
+        <div class="admin-rate-cap">Up to 10,000 kg</div>
+        <div class="admin-rate-input-wrap">
+          <span class="admin-rate-prefix">₹</span>
+          <input class="admin-rate-input" type="number" id="rate_truck" value="45" min="1" max="999">
+          <span class="admin-rate-suffix">/km</span>
+        </div>
+      </div>
+      <div class="admin-rate-card">
+        <div class="admin-rate-icon">🚜</div>
+        <div class="admin-rate-name">Tractor</div>
+        <div class="admin-rate-cap">Farm / bulk</div>
+        <div class="admin-rate-input-wrap">
+          <span class="admin-rate-prefix">₹</span>
+          <input class="admin-rate-input" type="number" id="rate_tractor" value="35" min="1" max="999">
+          <span class="admin-rate-suffix">/km</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="admin-section-title">💰 Minimum Fare</div>
+    <div class="admin-rate-input-wrap" style="max-width:180px">
+      <span class="admin-rate-prefix">₹</span>
+      <input class="admin-rate-input" type="number" id="rate_minimum" value="30" min="1" max="9999" style="width:80px">
+      <span class="admin-rate-suffix">min fare</span>
+    </div>
+
+    <button class="admin-save-btn" onclick="saveAdminRates()">💾 Save rates</button>
+    <div class="admin-save-success" id="adminSaveSuccess">✅ Rates saved and applied to all fare estimates</div>
+  </div>
+</div>
+
+<!-- Admin access button — bottom left -->
+<button class="admin-access-btn" onclick="openAdmin()" title="Admin pricing panel">⚙️</button>
+
 </body>
 </html>
