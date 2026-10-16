@@ -986,199 +986,10 @@ function validateFileUpload(input) {
 
 // ══ TURNSTILE: Verify before ride request too ══
 const _origSubmitRide = submitRideRequest
-function submitRideRequest() {
-  const token = getTurnstileToken('turnstile-ride')
-  const err = document.getElementById('captcha-ride-err')
-  if (!token) {
-    if (err) err.classList.add('show')
-    return
-  }
-  if (err) err.classList.remove('show')
-  _origSubmitRide()
-}
+// submitRideRequest — defined below with full validation
 
 
-// ══ MAPS PICKER ══
-let _mapsPickupCoords = null
-let _mapsDropoffCoords = null
 
-function openMapsSheet() {
-  if (!rdPickupCoords || !rdDropoffCoords) {
-    alert('Please set both pickup and drop-off locations first.')
-    return
-  }
-  _mapsPickupCoords = rdPickupCoords
-  _mapsDropoffCoords = rdDropoffCoords
-  const pLabel = document.getElementById('rdPinALabel')?.textContent || 'Pickup'
-  const dLabel = document.getElementById('rdPinBLabel')?.textContent || 'Drop-off'
-  const sub = document.getElementById('mapsSheetRoute')
-  if (sub) sub.textContent = pLabel + ' → ' + dLabel
-  document.getElementById('mapsModal')?.classList.add('open')
-  document.body.style.overflow = 'hidden'
-}
-function closeMapsSheet() {
-  document.getElementById('mapsModal')?.classList.remove('open')
-  document.body.style.overflow = ''
-}
-function openInApp(app) {
-  const [pLat, pLon] = _mapsPickupCoords
-  const [dLat, dLon] = _mapsDropoffCoords
-  const urls = {
-    google: `https://www.google.com/maps/dir/?api=1&origin=${pLat},${pLon}&destination=${dLat},${dLon}&travelmode=driving`,
-    apple:  `maps://maps.apple.com/?saddr=${pLat},${pLon}&daddr=${dLat},${dLon}&dirflg=d`,
-    waze:   `https://waze.com/ul?ll=${dLat},${dLon}&navigate=yes&from=ll.${pLat},${pLon}`,
-    osm:    `https://www.openstreetmap.org/directions?from=${pLat},${pLon}&to=${dLat},${dLon}&engine=fossgis_osrm_car`
-  }
-  closeMapsSheet()
-  window.open(urls[app], '_blank', 'noopener,noreferrer')
-}
-
-// ══ OVERRIDE updateRdMap to also update A/B pins + open-in-maps ══
-const _origUpdateRdMap = updateRdMap
-function updateRdMap() {
-  _origUpdateRdMap()
-
-  const pinsDisplay = document.getElementById('rdPinsDisplay')
-  const openBtn = document.getElementById('openInMapsBtn')
-  const tip = document.getElementById('rdMapTip')
-
-  if (rdPickupCoords && rdDropoffCoords) {
-    // Show A/B pin labels
-    const pickupText = document.getElementById('rdPickup')?.value || `${rdPickupCoords[0].toFixed(4)}°N`
-    const dropoffText = document.getElementById('rdDropoff')?.value || `${rdDropoffCoords[0].toFixed(4)}°N`
-
-    const aLabel = document.getElementById('rdPinALabel')
-    const bLabel = document.getElementById('rdPinBLabel')
-    if (aLabel) aLabel.textContent = pickupText
-    if (bLabel) bLabel.textContent = dropoffText
-
-    if (pinsDisplay) pinsDisplay.style.display = 'flex'
-    if (openBtn) openBtn.classList.add('show')
-    if (tip) tip.style.display = 'none'
-  } else if (rdPickupCoords) {
-    if (pinsDisplay) pinsDisplay.style.display = 'none'
-    if (openBtn) openBtn.classList.remove('show')
-    if (tip) { tip.style.display = 'block'; tip.textContent = '🟢 Pickup set — now set drop-off' }
-  } else {
-    if (pinsDisplay) pinsDisplay.style.display = 'none'
-    if (openBtn) openBtn.classList.remove('show')
-  }
-}
-
-// Also patch setPickupFromDropdown and setDropoffFromDropdown
-// to update pin labels from dropdown text
-const _origSetPickup = setPickupFromDropdown
-function setPickupFromDropdown(coords, label) {
-  _origSetPickup(coords, label)
-  const aLabel = document.getElementById('rdPinALabel')
-  if (aLabel) aLabel.textContent = label.split('(')[0].trim().split('—')[0].trim()
-}
-const _origSetDropoff = setDropoffFromDropdown
-function setDropoffFromDropdown(coords, label) {
-  _origSetDropoff(coords, label)
-  const bLabel = document.getElementById('rdPinBLabel')
-  if (bLabel) bLabel.textContent = label.split('(')[0].trim().split('—')[0].trim()
-}
-
-// ══ ADMIN DELIVERY PRICING ══
-// Rates stored in localStorage — synced to backend when API is built
-const RATE_KEYS = ['auto','sedan','suv','bike','car','tempo','truck','tractor','minimum']
-
-function loadAdminRates() {
-  try {
-    const saved = localStorage.getItem('mykkr_delivery_rates')
-    if (!saved) return
-    const rates = JSON.parse(saved)
-    RATE_KEYS.forEach(key => {
-      const el = document.getElementById('rate_' + key)
-      if (el && rates[key]) el.value = rates[key]
-    })
-    // Apply loaded rates to vehicle cards immediately
-    applyRatesToVehicles(rates)
-  } catch(e) {
-    console.warn('Could not load admin rates:', e)
-  }
-}
-
-function saveAdminRates() {
-  const rates = {}
-  let valid = true
-  RATE_KEYS.forEach(key => {
-    const el = document.getElementById('rate_' + key)
-    if (el) {
-      const val = parseInt(el.value)
-      if (isNaN(val) || val < 1) { valid = false; el.style.borderColor = 'var(--red)'; return }
-      el.style.borderColor = ''
-      rates[key] = val
-    }
-  })
-  if (!valid) { alert('Please enter valid rates for all vehicle types (minimum ₹1).'); return }
-
-  try {
-    localStorage.setItem('mykkr_delivery_rates', JSON.stringify(rates))
-    applyRatesToVehicles(rates)
-    const success = document.getElementById('adminSaveSuccess')
-    if (success) {
-      success.classList.add('show')
-      setTimeout(() => success.classList.remove('show'), 3000)
-    }
-  } catch(e) {
-    alert('Could not save rates. Storage may be unavailable.')
-  }
-}
-
-function applyRatesToVehicles(rates) {
-  // Update displayed prices on ride vehicle cards
-  const vehicleMap = {
-    auto: 0, sedan: 1, suv: 2,
-    bike: 0, car: 1, tempo: 2, truck: 3, tractor: 4
-  }
-  const rideCards = document.querySelectorAll('#rdRideVehicles .rd-vehicle')
-  const deliveryCards = document.querySelectorAll('#rdDeliveryVehicles .rd-vehicle')
-
-  const rideKeys = ['auto','sedan','suv']
-  rideCards.forEach((card, i) => {
-    const key = rideKeys[i]
-    if (rates[key]) {
-      const priceEl = card.querySelector('.rd-vehicle-price')
-      if (priceEl) {
-        priceEl.textContent = '₹' + rates[key] + '/km'
-        card.dataset.price = rates[key]
-      }
-    }
-  })
-
-  const deliveryKeys = ['bike','car','tempo','truck','tractor']
-  deliveryCards.forEach((card, i) => {
-    const key = deliveryKeys[i]
-    if (rates[key]) {
-      const priceEl = card.querySelector('.rd-vehicle-price')
-      if (priceEl) {
-        priceEl.textContent = '₹' + rates[key] + '/km'
-        card.dataset.price = rates[key]
-      }
-    }
-  })
-
-  // Update global price var if a vehicle is currently selected
-  rdVehiclePricePerKm = parseInt(
-    document.querySelector('.rd-vehicle.active')?.dataset.price || rdVehiclePricePerKm
-  )
-  updateRdEstimate()
-}
-
-function openAdmin() {
-  loadAdminRates()
-  document.getElementById('adminModal')?.classList.add('open')
-  document.body.style.overflow = 'hidden'
-}
-function closeAdmin() {
-  document.getElementById('adminModal')?.classList.remove('open')
-  document.body.style.overflow = ''
-}
-
-// Load saved rates on page start
-loadAdminRates()
 
 </script>
 </head>
@@ -1496,7 +1307,10 @@ loadAdminRates()
 <!-- ════ FIND & BOOK ════ -->
 <div class="view" id="view-findbook">
   <div class="fb-hero">
+    <div style="display:flex;align-items:center;justify-content:space-between">
     <div class="fb-title">Find & Book</div>
+    <button onclick="openAdmin()" style="display:flex;align-items:center;gap:6px;padding:7px 13px;border-radius:var(--r-lg);background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.2);color:#fff;font-size:12px;font-weight:600;cursor:pointer">⚙️ Rates</button>
+  </div>
     <div class="fb-sub">Search by area, date, and what you need — see who's available instantly</div>
   </div>
   <div class="section">
@@ -2921,8 +2735,12 @@ function setPickupFromDropdown(coords, label) {
   if (!coords) return
   const [lat, lon] = coords.split(',')
   rdPickupCoords = [parseFloat(lat), parseFloat(lon)]
-  document.getElementById('rdPickup').value = label.split('(')[0].trim()
+  const cleanLabel = label.split('(')[0].trim().split('—')[0].trim()
+  document.getElementById('rdPickup').value = cleanLabel
+  const aLbl = document.getElementById('rdPinALabel')
+  if (aLbl) aLbl.textContent = cleanLabel
   updateRdMap()
+  refreshMapPins()
   calcRdRoute()
 }
 
@@ -2930,8 +2748,12 @@ function setDropoffFromDropdown(coords, label) {
   if (!coords) return
   const [lat, lon] = coords.split(',')
   rdDropoffCoords = [parseFloat(lat), parseFloat(lon)]
-  document.getElementById('rdDropoff').value = label.split('(')[0].trim()
+  const cleanLabel = label.split('(')[0].trim().split('—')[0].trim()
+  document.getElementById('rdDropoff').value = cleanLabel
+  const bLbl = document.getElementById('rdPinBLabel')
+  if (bLbl) bLbl.textContent = cleanLabel
   updateRdMap()
+  refreshMapPins()
   calcRdRoute()
 }
 
@@ -3161,6 +2983,145 @@ function resetSessionTimer() {
 })
 resetSessionTimer()
 
+
+
+// ── Refresh A/B pin labels and Open in Maps button ──
+function refreshMapPins() {
+  const pinsDisplay = document.getElementById('rdPinsDisplay')
+  const openBtn = document.getElementById('openInMapsBtn')
+  const tip = document.getElementById('rdMapTip')
+
+  if (rdPickupCoords && rdDropoffCoords) {
+    const pText = document.getElementById('rdPickup')?.value || rdPickupCoords[0].toFixed(4) + '°N'
+    const dText = document.getElementById('rdDropoff')?.value || rdDropoffCoords[0].toFixed(4) + '°N'
+    const aLbl = document.getElementById('rdPinALabel')
+    const bLbl = document.getElementById('rdPinBLabel')
+    if (aLbl) aLbl.textContent = pText
+    if (bLbl) bLbl.textContent = dText
+    if (pinsDisplay) pinsDisplay.style.display = 'flex'
+    if (openBtn) openBtn.classList.add('show')
+    if (tip) tip.style.display = 'none'
+    // Update map to show bounding box of both points
+    const minLat = Math.min(rdPickupCoords[0], rdDropoffCoords[0]) - 0.02
+    const maxLat = Math.max(rdPickupCoords[0], rdDropoffCoords[0]) + 0.02
+    const minLon = Math.min(rdPickupCoords[1], rdDropoffCoords[1]) - 0.02
+    const maxLon = Math.max(rdPickupCoords[1], rdDropoffCoords[1]) + 0.02
+    const frame = document.getElementById('rdMap')
+    if (frame) {
+      frame.src = `https://www.openstreetmap.org/export/embed.html?bbox=${minLon}%2C${minLat}%2C${maxLon}%2C${maxLat}&layer=mapnik&marker=${rdPickupCoords[0]}%2C${rdPickupCoords[1]}`
+    }
+  } else if (rdPickupCoords) {
+    if (pinsDisplay) pinsDisplay.style.display = 'none'
+    if (openBtn) openBtn.classList.remove('show')
+    if (tip) { tip.style.display = 'block'; tip.textContent = '🟢 Pickup set — now set drop-off location' }
+  } else {
+    if (pinsDisplay) pinsDisplay.style.display = 'none'
+    if (openBtn) openBtn.classList.remove('show')
+  }
+}
+
+// ══ MAPS PICKER ══
+let _mapsPickupCoords = null
+let _mapsDropoffCoords = null
+
+function openMapsSheet() {
+  if (!rdPickupCoords || !rdDropoffCoords) {
+    alert('Please set both pickup and drop-off locations first.')
+    return
+  }
+  _mapsPickupCoords = rdPickupCoords
+  _mapsDropoffCoords = rdDropoffCoords
+  const pLabel = document.getElementById('rdPinALabel')?.textContent || 'Pickup'
+  const dLabel = document.getElementById('rdPinBLabel')?.textContent || 'Drop-off'
+  const sub = document.getElementById('mapsSheetRoute')
+  if (sub) sub.textContent = pLabel + ' → ' + dLabel
+  document.getElementById('mapsModal')?.classList.add('open')
+  document.body.style.overflow = 'hidden'
+}
+function closeMapsSheet() {
+  document.getElementById('mapsModal')?.classList.remove('open')
+  document.body.style.overflow = ''
+}
+function openInApp(app) {
+  const [pLat, pLon] = _mapsPickupCoords
+  const [dLat, dLon] = _mapsDropoffCoords
+  const urls = {
+    google: `https://www.google.com/maps/dir/?api=1&origin=${pLat},${pLon}&destination=${dLat},${dLon}&travelmode=driving`,
+    apple:  `maps://maps.apple.com/?saddr=${pLat},${pLon}&daddr=${dLat},${dLon}&dirflg=d`,
+    waze:   `https://waze.com/ul?ll=${dLat},${dLon}&navigate=yes&from=ll.${pLat},${pLon}`,
+    osm:    `https://www.openstreetmap.org/directions?from=${pLat},${pLon}&to=${dLat},${dLon}&engine=fossgis_osrm_car`
+  }
+  closeMapsSheet()
+  window.open(urls[app], '_blank', 'noopener,noreferrer')
+}
+
+// ══ ADMIN DELIVERY PRICING ══
+const RATE_KEYS = ['auto','sedan','suv','bike','car','tempo','truck','tractor','minimum']
+
+function loadAdminRates() {
+  try {
+    const saved = localStorage.getItem('mykkr_delivery_rates')
+    if (!saved) return
+    const rates = JSON.parse(saved)
+    RATE_KEYS.forEach(key => {
+      const el = document.getElementById('rate_' + key)
+      if (el && rates[key]) el.value = rates[key]
+    })
+    applyRatesToVehicles(rates)
+  } catch(e) { console.warn('Could not load admin rates:', e) }
+}
+
+function saveAdminRates() {
+  const rates = {}
+  let valid = true
+  RATE_KEYS.forEach(key => {
+    const el = document.getElementById('rate_' + key)
+    if (el) {
+      const val = parseInt(el.value)
+      if (isNaN(val) || val < 1) { valid = false; el.parentElement.style.borderColor = 'var(--red)'; return }
+      el.parentElement.style.borderColor = ''
+      rates[key] = val
+    }
+  })
+  if (!valid) { alert('Please enter valid rates (minimum ₹1) for all vehicle types.'); return }
+  try {
+    localStorage.setItem('mykkr_delivery_rates', JSON.stringify(rates))
+    applyRatesToVehicles(rates)
+    const success = document.getElementById('adminSaveSuccess')
+    if (success) { success.classList.add('show'); setTimeout(() => success.classList.remove('show'), 3000) }
+  } catch(e) { alert('Could not save. Storage unavailable.') }
+}
+
+function applyRatesToVehicles(rates) {
+  const rideKeys = ['auto','sedan','suv']
+  const deliveryKeys = ['bike','car','tempo','truck','tractor']
+  document.querySelectorAll('#rdRideVehicles .rd-vehicle').forEach((card, i) => {
+    const key = rideKeys[i]; if (!key || !rates[key]) return
+    const el = card.querySelector('.rd-vehicle-price')
+    if (el) { el.textContent = '₹' + rates[key] + '/km'; card.dataset.price = rates[key] }
+  })
+  document.querySelectorAll('#rdDeliveryVehicles .rd-vehicle').forEach((card, i) => {
+    const key = deliveryKeys[i]; if (!key || !rates[key]) return
+    const el = card.querySelector('.rd-vehicle-price')
+    if (el) { el.textContent = '₹' + rates[key] + '/km'; card.dataset.price = rates[key] }
+  })
+  rdVehiclePricePerKm = parseInt(document.querySelector('.rd-vehicle.active')?.dataset.price || rdVehiclePricePerKm)
+  updateRdEstimate()
+}
+
+function openAdmin() {
+  loadAdminRates()
+  document.getElementById('adminModal')?.classList.add('open')
+  document.body.style.overflow = 'hidden'
+}
+function closeAdmin() {
+  document.getElementById('adminModal')?.classList.remove('open')
+  document.body.style.overflow = ''
+}
+
+// Load saved rates on page start
+loadAdminRates()
+
 </script>
 
 <!-- MAPS PICKER MODAL -->
@@ -3311,8 +3272,6 @@ resetSessionTimer()
   </div>
 </div>
 
-<!-- Admin access button — bottom left -->
-<button class="admin-access-btn" onclick="openAdmin()" title="Admin pricing panel">⚙️</button>
 
 </body>
 </html>
