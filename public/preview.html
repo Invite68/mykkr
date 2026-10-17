@@ -1459,6 +1459,7 @@ input,select,textarea{font-family:inherit}
 </div>
 
 <script>
+// ══ All functions attached to window so onclick can always find them ══
 // ══ CATEGORY DATA ══
 const CATS = {
   all:{subs:['All categories','🔧 Services','🏛️ Venues','🛍️ Shopping','🍛 Food','🚗 Transport','🎉 Events']},
@@ -1566,11 +1567,6 @@ function setL2Chip(el) {
   el.classList.add('active')
 }
 
-// Init L2
-renderL2('all', 'homeL2')
-renderL2('all', 'svcL2')
-renderL2('shopping', 'shopL2')
-renderL2('food', 'foodL2')
 
 // ══ FIND & BOOK ══
 function toggleFbChip(el) {
@@ -2082,12 +2078,6 @@ function scrollEl(id, amt) {
   if (el) el.scrollBy({left: amt, behavior: 'smooth'})
 }
 
-// ══ FLOAT UP ══
-window.addEventListener('scroll', function() {
-  const btn = document.getElementById('floatUp')
-  if (btn) btn.classList.toggle('show', window.scrollY > 400)
-})
-
 // ══ SESSION TIMEOUT WARNING ══
 let _sessionTimer = null
 function resetSessionTimer() {
@@ -2104,8 +2094,29 @@ function resetSessionTimer() {
 })
 resetSessionTimer()
 
-// Load admin rates on startup
-loadAdminRates()
+// ══ INIT — runs after DOM is ready ══
+function initApp() {
+  // Init L2 category bars
+  renderL2('all', 'homeL2')
+  renderL2('all', 'svcL2')
+  renderL2('shopping', 'shopL2')
+  renderL2('food', 'foodL2')
+  // Load saved delivery rates
+  loadAdminRates()
+  // Session timer
+  resetSessionTimer()
+  // Scroll up button
+  window.addEventListener('scroll', function() {
+    var btn = document.getElementById('floatUp')
+    if (btn) btn.classList.toggle('show', window.scrollY > 400)
+  })
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initApp)
+} else {
+  initApp()
+}
 </script>
 </body>
 </html>
