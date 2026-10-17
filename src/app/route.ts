@@ -1,65 +1,68 @@
 import { NextResponse } from 'next/server'
 import { readFileSync } from 'fs'
-import { join, resolve, normalize } from 'path'
+import { join, resolve } from 'path'
 
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
 
-// Security headers applied to every response
 const SECURITY_HEADERS = {
   'Content-Type': 'text/html; charset=utf-8',
-  // Prevent clickjacking
   'X-Frame-Options': 'DENY',
-  // Prevent MIME type sniffing
   'X-Content-Type-Options': 'nosniff',
-  // XSS protection (legacy browsers)
   'X-XSS-Protection': '1; mode=block',
-  // Referrer policy
   'Referrer-Policy': 'strict-origin-when-cross-origin',
-  // Permissions policy — block unused browser APIs
-  'Permissions-Policy': 'camera=(), microphone=(), payment=(), geolocation=(self), usb=()',
-  // HSTS — force HTTPS for 1 year
+  'Permissions-Policy': 'camera=(), microphone=(), payment=(), usb=()',
   'Strict-Transport-Security': 'max-age=31536000; includeSubDomains; preload',
-  // Content Security Policy
+  // CSP: carefully tuned — allows YouTube, OSM, Fonts, localStorage, Nominatim, OSRM
   'Content-Security-Policy': [
     "default-src 'self'",
-    "script-src 'self' 'unsafe-inline'",
+    // Scripts: self + inline (our own script block) + Cloudflare Turnstile
+    "script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com",
+    // Styles: self + inline + Google Fonts
     "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
-    "font-src https://fonts.gstatic.com",
+    // Fonts: Google Fonts CDN
+    "font-src 'self' https://fonts.gstatic.com",
+    // Images: self, data URIs, OSM tiles, Nominatim
     "img-src 'self' data: https://*.tile.openstreetmap.org https://nominatim.openstreetmap.org",
-    "frame-src https://www.openstreetmap.org https://www.youtube.com",
-    "connect-src 'self' https://nominatim.openstreetmap.org https://router.project-osrm.org",
+    // Frames: OSM embeds + YouTube embeds
+    "frame-src https://www.openstreetmap.org https://www.youtube.com https://www.youtube-nocookie.com",
+    // Fetch/XHR: Nominatim geocoding + OSRM routing + Google Fonts (CSS fetch)
+    "connect-src 'self' https://nominatim.openstreetmap.org https://router.project-osrm.org https://fonts.googleapis.com",
+    // No base tag hijacking
     "base-uri 'self'",
+    // Forms submit to self only
     "form-action 'self'",
+    // No iframe embedding of our site
     "frame-ancestors 'none'",
+    // Workers: none needed
+    "worker-src 'none'",
+    // Objects: none (no Flash etc)
+    "object-src 'none'",
   ].join('; '),
-  // Cache: no-store for dynamic content
   'Cache-Control': 'no-store, no-cache, must-revalidate',
   'Pragma': 'no-cache',
 }
 
 export async function GET() {
   try {
-    // Hardcoded path — no user input ever touches this, safe from path traversal
     const safePath = join(process.cwd(), 'public', 'preview.html')
-
-    // Verify the resolved path stays within public directory
     const publicDir = resolve(join(process.cwd(), 'public'))
     const resolvedPath = resolve(safePath)
+
+    // Path traversal guard
     if (!resolvedPath.startsWith(publicDir)) {
       return new NextResponse('Not found', { status: 404 })
     }
 
     const html = readFileSync(resolvedPath, 'utf-8')
-
     return new NextResponse(html, { headers: SECURITY_HEADERS })
 
   } catch (error) {
-    // Never expose internal error details to the client
-    console.error('[MyKKR] Failed to serve preview:', error instanceof Error ? error.message : 'Unknown error')
+    // Never expose stack traces or internal details
+    console.error('[MyKKR] Serve error:', error instanceof Error ? error.message : 'Unknown')
     return new NextResponse('Service temporarily unavailable', {
       status: 503,
-      headers: { 'Content-Type': 'text/plain' }
+      headers: { 'Content-Type': 'text/plain; charset=utf-8' }
     })
   }
 }
