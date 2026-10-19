@@ -66,13 +66,9 @@ function Success({ role }: { role: SignupRole }) {
 const OTHER_SLUG = '__other__'
 
 /**
- * Two-tier category picker for business registration.
- *
- * Step 1 — L1 grid: choose a main category (or "Other")
- * Step 2 — L2 chips: choose a subcategory within that group
- *   If "Other" was picked in step 1, a free-text input appears instead.
- *
- * The parent receives { catSlug, subSlug, otherLabel } via onSelect.
+ * Two-tier category picker — simple dropdown style (like V8).
+ * CATEGORY dropdown → SUB-CATEGORY dropdown.
+ * Selecting "Other" in category shows a free-text input.
  */
 function CategoryPicker({
   catSlug,
@@ -88,71 +84,58 @@ function CategoryPicker({
   const activeGroup = CATEGORY_GROUPS.find((g) => g.slug === catSlug) ?? null
   const isOther = catSlug === OTHER_SLUG
 
-  function pickL1(slug: string | null) {
-    onSelect(slug, null, '')
+  function onCatChange(e: React.ChangeEvent<HTMLSelectElement>) {
+    const val = e.target.value
+    if (!val) onSelect(null, null, '')
+    else onSelect(val, null, '')
   }
 
-  function pickL2(sub: string | null) {
-    onSelect(catSlug, sub, otherLabel)
+  function onSubChange(e: React.ChangeEvent<HTMLSelectElement>) {
+    onSelect(catSlug, e.target.value || null, otherLabel)
   }
 
   return (
-    <div className="reg-cat-picker">
-      {/* ── Step 1: L1 category grid ── */}
-      <div className="reg-cat-l1" role="radiogroup" aria-label="Main category">
-        {CATEGORY_GROUPS.map((g) => (
-          <button
-            type="button"
-            key={g.slug}
-            role="radio"
-            aria-checked={catSlug === g.slug}
-            className={`reg-cat-l1-tile${catSlug === g.slug ? ' active' : ''}`}
-            onClick={() => pickL1(g.slug)}
-          >
-            <span className="reg-cat-icon" aria-hidden="true">{g.icon}</span>
-            <span className="reg-cat-name">{g.label}</span>
-          </button>
-        ))}
-        {/* Other tile */}
-        <button
-          type="button"
-          role="radio"
-          aria-checked={isOther}
-          className={`reg-cat-l1-tile${isOther ? ' active' : ''}`}
-          onClick={() => pickL1(OTHER_SLUG)}
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+      {/* Category dropdown */}
+      <div className="field">
+        <label className="label" htmlFor="b-cat">Category</label>
+        <select
+          id="b-cat"
+          className="select"
+          value={catSlug ?? ''}
+          onChange={onCatChange}
         >
-          <span className="reg-cat-icon" aria-hidden="true">➕</span>
-          <span className="reg-cat-name">Other</span>
-        </button>
+          <option value="">Select</option>
+          {CATEGORY_GROUPS.map((g) => (
+            <option key={g.slug} value={g.slug}>{g.icon} {g.label}</option>
+          ))}
+          <option value={OTHER_SLUG}>➕ Other</option>
+        </select>
       </div>
 
-      {/* ── Step 2a: L2 subcategory chips (when a real group is selected) ── */}
+      {/* Sub-category dropdown — only when a real category is picked */}
       {activeGroup && (
-        <div className="reg-cat-l2" role="group" aria-label={`${activeGroup.label} subcategories`}>
-          <div className="muted" style={{ marginBottom: 6, fontSize: 13 }}>
-            Pick the closest subcategory in <strong>{activeGroup.label}</strong>:
-          </div>
-          <div className="chips" style={{ flexWrap: 'wrap', gap: 8 }}>
+        <div className="field">
+          <label className="label" htmlFor="b-sub">Sub-category</label>
+          <select
+            id="b-sub"
+            className="select"
+            value={subSlug ?? ''}
+            onChange={onSubChange}
+          >
+            <option value="">Select</option>
             {activeGroup.subcategories.slice(1).map((s) => (
-              <button
-                type="button"
-                key={s}
-                className={`chip${subSlug === s ? ' active' : ''}`}
-                aria-pressed={subSlug === s}
-                onClick={() => pickL2(s)}
-              >
-                {s}
-              </button>
+              <option key={s} value={s}>{s}</option>
             ))}
-          </div>
+          </select>
         </div>
       )}
 
-      {/* ── Step 2b: Free-text entry when "Other" is selected ── */}
+      {/* Free-text when "Other" is selected */}
       {isOther && (
-        <div className="reg-cat-l2">
+        <div className="field">
           <label className="label" htmlFor="b-other-cat">
-            Describe your category <span className="muted">(e.g. "Book Store", "Yoga Studio")</span>
+            Describe your category <span className="muted">(e.g. &quot;Book Store&quot;, &quot;Yoga Studio&quot;)</span>
           </label>
           <input
             id="b-other-cat"
@@ -226,15 +209,12 @@ function BusinessForm({ onDone }: { onDone: () => void }) {
         <input id="b-name" className="input" maxLength={100} value={f.name} onChange={(e) => up('name')(e.target.value)} placeholder="e.g. Sharma Electricals" />
       </div>
 
-      <fieldset className="field" style={{ border: 'none', padding: 0 }}>
-        <legend className="label" style={{ marginBottom: 8 }}>Business category</legend>
-        <CategoryPicker
-          catSlug={catSlug}
-          subSlug={subSlug}
-          otherLabel={otherLabel}
-          onSelect={handleCategorySelect}
-        />
-      </fieldset>
+      <CategoryPicker
+        catSlug={catSlug}
+        subSlug={subSlug}
+        otherLabel={otherLabel}
+        onSelect={handleCategorySelect}
+      />
 
       <div className="form-row">
         <div className="field">

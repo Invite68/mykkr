@@ -6,6 +6,15 @@ import MediaStrip from '@/components/home/MediaStrip'
 import TrustStrip from '@/components/home/TrustStrip'
 import { PLANS, formatInr } from '@/config/platform'
 
+const HERO_PILLS = [
+  { href: '/', label: '🏠 Home' },
+  { href: '/c/services', label: '🔧 Services' },
+  { href: '/c/shopping', label: '🛍️ Shop' },
+  { href: '/c/food', label: '🍛 Food' },
+  { href: '/rides', label: '🚗 Rides' },
+  { href: '/post', label: '📋 Post' },
+]
+
 export const metadata: Metadata = {
   title: 'My KKR — Kurukshetra Local Marketplace',
   description:
@@ -51,6 +60,12 @@ export default function HomePage() {
               </span>
             ))}
           </p>
+          {/* Quick-nav pill row */}
+          <div className="hero-pills">
+            {HERO_PILLS.map((p) => (
+              <Link key={p.href} href={p.href} className="hero-pill">{p.label}</Link>
+            ))}
+          </div>
         </div>
       </section>
 

@@ -30,9 +30,6 @@ export default function TopNav() {
   return (
     <>
       <header className="topnav">
-        <button className="hamburger" aria-label="Open menu" aria-expanded={drawerOpen} onClick={() => setDrawerOpen(true)}>
-          <span /><span /><span />
-        </button>
         <Logo />
         <div className="topnav-spacer" />
         <div className="topnav-search">
@@ -42,6 +39,9 @@ export default function TopNav() {
           <Link href="/register?role=customer" className="tn-btn ghost">Sign in</Link>
           <Link href="/register?role=business" className="tn-btn primary">List your business</Link>
         </div>
+        <button className="hamburger" aria-label="Open menu" aria-expanded={drawerOpen} onClick={() => setDrawerOpen(true)}>
+          <span /><span /><span />
+        </button>
       </header>
 
       {drawerOpen && (

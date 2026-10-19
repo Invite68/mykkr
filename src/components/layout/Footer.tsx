@@ -1,29 +1,44 @@
 import Link from 'next/link'
-import { CATEGORY_GROUPS } from '@/data/categories'
 import { DISCLAIMER, SITE } from '@/config/platform'
-import { LogoMark } from './Logo'
+import { CircularLogo } from './Logo'
+
+const SOCIAL = [
+  { href: 'https://facebook.com', label: 'Facebook', icon: 'f' },
+  { href: 'https://instagram.com', label: 'Instagram', icon: '📸' },
+  { href: 'https://youtube.com', label: 'YouTube', icon: '▶' },
+  { href: SITE.supportWhatsApp, label: 'WhatsApp', icon: '💬' },
+]
 
 export default function Footer() {
   return (
     <footer className="site-footer">
       <div className="footer-inner">
-        <div>
-          <Link href="/" className="logo">
-            <LogoMark />
-            <span className="logo-name">My KKR</span>
-          </Link>
-          <p className="footer-tagline">Kurukshetra ka apna bazaar. Connecting local businesses with local people — simply and honestly.</p>
-        </div>
-        <div className="footer-cols">
-          <div className="footer-col">
-            <div className="footer-col-title">Categories</div>
-            {CATEGORY_GROUPS.map((g) => (
-              <Link key={g.slug} href={`/c/${g.slug}`}>{g.label}</Link>
+        {/* Brand */}
+        <div className="footer-brand">
+          <div className="footer-logo-row">
+            <span className="footer-logo-circle"><CircularLogo size={36} /></span>
+            <span className="footer-logo-name">My KKR</span>
+          </div>
+          <p className="footer-tagline">
+            Kurukshetra ka apna bazaar.<br />
+            Connecting local businesses with local people &mdash; simply and honestly.
+          </p>
+          <div className="footer-social">
+            {SOCIAL.map((s) => (
+              <a key={s.label} href={s.href} target="_blank" rel="noopener noreferrer" aria-label={s.label} className="footer-social-btn">
+                {s.icon}
+              </a>
             ))}
           </div>
+        </div>
+
+        {/* Links */}
+        <div className="footer-cols">
           <div className="footer-col">
             <div className="footer-col-title">Discover</div>
-            <Link href="/find-book">Find &amp; Book</Link>
+            <Link href="/c/services">Services</Link>
+            <Link href="/c/shopping">Shop</Link>
+            <Link href="/c/food">Food &amp; Dining</Link>
             <Link href="/rides">Rides &amp; Delivery</Link>
             <Link href="/post">Post Requirement</Link>
             <Link href="/about">About Kurukshetra</Link>
@@ -31,7 +46,6 @@ export default function Footer() {
           <div className="footer-col">
             <div className="footer-col-title">Company</div>
             <Link href="/register?role=business">List your business</Link>
-            <Link href="/register?role=driver">Become a driver</Link>
             <Link href="/pricing">Pricing</Link>
             <Link href="/privacy">Privacy Policy</Link>
             <Link href="/terms">Terms of Service</Link>
@@ -39,8 +53,9 @@ export default function Footer() {
           </div>
         </div>
       </div>
+
       <div className="footer-bottom">
-        <span>© {new Date().getFullYear()} My KKR · Kurukshetra, Haryana · mykkr.in</span>
+        <span>&copy; 2025 My KKR &middot; Kurukshetra, Haryana &middot; <a href="https://mykkr.in" className="footer-bottom-link">mykkr.in</a></span>
         <span>{DISCLAIMER}</span>
       </div>
     </footer>
