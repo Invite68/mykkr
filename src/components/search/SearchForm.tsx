@@ -24,7 +24,18 @@ export default function SearchForm({
     return (
       <form onSubmit={submit} role="search">
         <label className="sr-only" htmlFor="nav-search">Search My KKR</label>
-        <input id="nav-search" type="search" value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search shops, services, venues…" maxLength={100} />
+        <div className="search-input-wrap">
+          <input
+            id="nav-search"
+            type="search"
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
+            placeholder="Search shops, services, venues…"
+            maxLength={100}
+            autoComplete="off"
+          />
+          <button type="submit" aria-label="Search">🔍</button>
+        </div>
       </form>
     )
   }
@@ -32,16 +43,18 @@ export default function SearchForm({
   return (
     <form className="search-box" onSubmit={submit} role="search">
       <label className="sr-only" htmlFor={`search-${variant}`}>Search</label>
-      <span aria-hidden="true" style={{ alignSelf: 'center', paddingLeft: 6 }}>🔍</span>
+      <span aria-hidden="true" style={{ alignSelf: 'center', paddingLeft: 10, fontSize: 16 }}>🔍</span>
       <input
         id={`search-${variant}`}
         type="search"
         value={q}
         onChange={(e) => setQ(e.target.value)}
-        placeholder='Try "electrician Model Town" or "banquet"'
+        placeholder='Try "electrician Model Town" or "banquet"…'
         maxLength={100}
+        autoComplete="off"
+        enterKeyHint="search"
       />
-      <button type="submit" className="btn btn-primary">Search</button>
+      <button type="submit">Search</button>
     </form>
   )
 }
