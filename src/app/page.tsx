@@ -5,6 +5,7 @@ import HomeFeed from '@/components/home/HomeFeed'
 import MediaStrip from '@/components/home/MediaStrip'
 import TrustStrip from '@/components/home/TrustStrip'
 import { PLANS, formatInr } from '@/config/platform'
+// HOW_STEPS removed — "Browse / Contact / Pay" cards deleted per design update
 
 const HERO_PILLS = [
   { href: '/', label: '🏠 Home' },
@@ -27,12 +28,6 @@ const POPULAR = [
   { q: 'sweets', label: 'Mithai' },
   { q: 'cab', label: 'Cab' },
   { q: 'cleaning', label: 'Cleaning' },
-]
-
-const HOW_STEPS = [
-  { icon: '🔍', title: 'Browse or search', desc: 'Find local businesses by category, area or keyword.' },
-  { icon: '📞', title: 'Contact directly', desc: 'WhatsApp or call the business — no middleman.' },
-  { icon: '💸', title: 'Pay directly', desc: 'UPI, card or cash — 100% goes to the business.' },
 ]
 
 export default function HomePage() {
@@ -68,21 +63,6 @@ export default function HomePage() {
           </div>
         </div>
       </section>
-
-      {/* ── How it works ─────────────────────────────────────────── */}
-      <div className="container">
-        <section className="sec how-strip" aria-label="How My KKR works">
-          {HOW_STEPS.map((s) => (
-            <div className="how-step" key={s.title}>
-              <span className="how-icon" aria-hidden="true">{s.icon}</span>
-              <div>
-                <div className="how-title">{s.title}</div>
-                <div className="how-desc">{s.desc}</div>
-              </div>
-            </div>
-          ))}
-        </section>
-      </div>
 
       {/* ── City updates ─────────────────────────────────────────── */}
       <div className="container">

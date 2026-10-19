@@ -16,7 +16,6 @@ export default function CategoryNav({ filter, onFilter }: CategoryNavProps) {
   const activeGroup = CATEGORY_GROUPS.find((g) => g.slug === filter.catSlug) ?? null
 
   function selectL1(slug: string) {
-    // When clicking "All", clear both
     if (slug === 'all') {
       onFilter({ catSlug: null, subLabel: null })
     } else {
@@ -34,8 +33,8 @@ export default function CategoryNav({ filter, onFilter }: CategoryNavProps) {
 
   return (
     <div className="cat-nav">
-      {/* L1 row */}
-      <div className="cat-l1">
+      {/* L1 horizontal scroll row */}
+      <div className="cat-scroll-row cat-l1-row">
         {ALL_L1_TABS.map((tab) => {
           const isActive =
             tab.slug === 'all'
@@ -53,9 +52,9 @@ export default function CategoryNav({ filter, onFilter }: CategoryNavProps) {
         })}
       </div>
 
-      {/* L2 chips — only shown when a real L1 is selected */}
+      {/* L2 horizontal scroll row — only shown when a real L1 is selected */}
       {activeGroup && (
-        <div className="cat-l2">
+        <div className="cat-scroll-row cat-l2-row">
           {activeGroup.subcategories.map((sub, i) => {
             const isAllChip = i === 0
             const isActive = isAllChip

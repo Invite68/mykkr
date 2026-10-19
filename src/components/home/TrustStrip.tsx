@@ -7,18 +7,22 @@ const ITEMS = [
   { icon: '🚴', title: 'Local delivery', desc: 'Self-delivery, partner driver or pickup' },
 ]
 
+// Duplicate items for seamless infinite scroll
+const DOUBLED = [...ITEMS, ...ITEMS]
+
 export default function TrustStrip() {
   return (
-    <div className="trust-grid">
-      {ITEMS.map((t) => (
-        <div className="trust-item" key={t.title}>
-          <div className="trust-icon" aria-hidden="true">{t.icon}</div>
-          <div>
-            <div className="trust-title">{t.title}</div>
-            <div className="trust-desc">{t.desc}</div>
+    <div className="trust-ticker-wrap" aria-label="Platform features">
+      <div className="trust-ticker">
+        {DOUBLED.map((t, i) => (
+          <div className="trust-chip" key={i}>
+            <span className="trust-chip-icon" aria-hidden="true">{t.icon}</span>
+            <span className="trust-chip-title">{t.title}</span>
+            <span className="trust-chip-sep" aria-hidden="true">&middot;</span>
+            <span className="trust-chip-desc">{t.desc}</span>
           </div>
-        </div>
-      ))}
+        ))}
+      </div>
     </div>
   )
 }
