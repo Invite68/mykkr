@@ -77,13 +77,13 @@ export default function MediaStrip() {
           onClick={() => scroll('prev')}
           aria-label="Scroll left"
           type="button"
-        >&larr;</button>
+        >&#8592;</button>
         <button
           className="media-arrow"
           onClick={() => scroll('next')}
           aria-label="Scroll right"
           type="button"
-        >&rarr;</button>
+        >&#8594;</button>
       </div>
 
       <div

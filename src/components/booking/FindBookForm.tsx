@@ -1,24 +1,19 @@
 'use client'
 
-import { useMemo, useState, type FormEvent } from 'react'
+import { useEffect, useRef, useMemo, useState, type FormEvent } from 'react'
 import AreaSelect from '@/components/ui/AreaSelect'
 import { BusinessGrid } from '@/components/business/BusinessCard'
 import { CATEGORY_GROUPS } from '@/data/categories'
 import { BUSINESSES } from '@/data/businesses'
 import { KKR_CENTER, findArea } from '@/data/areas'
 
-// Bookable categories — services, venues, events + all others
+// All categories for dropdown
 const ALL_CATS = [
   { slug: '', label: 'Any category', icon: '🔍' },
   ...CATEGORY_GROUPS.map((g) => ({ slug: g.slug, label: g.label, icon: g.icon })),
 ]
 
 const SLOTS = ['Any time', 'Morning (8–12)', 'Afternoon (12–4)', 'Evening (4–8)', 'Full day']
-
-const QUICK_PICKS = [
-  '🎉 Wedding event', '🏛️ Venue / Hall', '🎵 DJ & Sound',
-  '🍽️ Catering', '📷 Photography', '🔧 Home repair', '🚗 Transport',
-]
 
 function today(): string {
   const d = new Date()
@@ -30,6 +25,83 @@ function formatDate(iso: string) {
   if (!iso) return ''
   const d = new Date(iso + 'T00:00')
   return d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })
+}
+
+// Mini Leaflet map component (loads lazily, no API key needed)
+function LocationMap({ lat, lon, onPin }: { lat: number; lon: number; onPin: (lat: number, lon: number) => void }) {
+  const mapRef = useRef<HTMLDivElement>(null)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const mapInstance = useRef<any>(null)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const markerRef = useRef<any>(null)
+
+  useEffect(() => {
+    if (typeof window === 'undefined' || !mapRef.current) return
+
+    // Dynamically load Leaflet CSS
+    if (!document.getElementById('leaflet-css')) {
+      const link = document.createElement('link')
+      link.id = 'leaflet-css'
+      link.rel = 'stylesheet'
+      link.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css'
+      document.head.appendChild(link)
+    }
+
+    // Dynamically load Leaflet JS
+    const initMap = async () => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const L = (await import('leaflet' as any)).default ?? (await import('leaflet' as any))
+
+      // Fix default icon path issue with webpack
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      delete (L.Icon.Default.prototype as any)._getIconUrl
+      L.Icon.Default.mergeOptions({
+        iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
+        iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
+        shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+      })
+
+      if (mapInstance.current) {
+        mapInstance.current.setView([lat, lon], 13)
+        markerRef.current?.setLatLng([lat, lon])
+        return
+      }
+
+      const map = L.map(mapRef.current!, { zoomControl: true, scrollWheelZoom: false }).setView([lat, lon], 13)
+      mapInstance.current = map
+
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+        maxZoom: 19,
+      }).addTo(map)
+
+      const marker = L.marker([lat, lon], { draggable: true }).addTo(map)
+      markerRef.current = marker
+
+      marker.on('dragend', () => {
+        const pos = marker.getLatLng()
+        onPin(pos.lat, pos.lng)
+      })
+
+      map.on('click', (e: { latlng: { lat: number; lng: number } }) => {
+        marker.setLatLng([e.latlng.lat, e.latlng.lng])
+        onPin(e.latlng.lat, e.latlng.lng)
+      })
+    }
+
+    initMap()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  // Update map view when coords change externally
+  useEffect(() => {
+    if (mapInstance.current && markerRef.current) {
+      mapInstance.current.setView([lat, lon], 13)
+      markerRef.current.setLatLng([lat, lon])
+    }
+  }, [lat, lon])
+
+  return <div ref={mapRef} className="findbk-map" aria-label="Pin your location on the map" />
 }
 
 export default function FindBookForm({ initialSub = '' }: { initialSub?: string }) {
@@ -58,17 +130,11 @@ export default function FindBookForm({ initialSub = '' }: { initialSub?: string 
     navigator.geolocation.getCurrentPosition(
       (pos) => {
         setCoords({ lat: pos.coords.latitude, lon: pos.coords.longitude })
-        setGeoMsg('Location set — finding businesses nearby…')
+        setGeoMsg('Location set!')
       },
       () => setGeoMsg('Could not get location — pick an area instead.'),
       { enableHighAccuracy: true, timeout: 10000 },
     )
-  }
-
-  function applyQuick(label: string) {
-    // Strip leading emoji + space
-    const clean = label.replace(/^[\p{Emoji}\s]+/u, '').trim()
-    setKeyword(clean)
   }
 
   function onSubmit(e: FormEvent) {
@@ -95,7 +161,6 @@ export default function FindBookForm({ initialSub = '' }: { initialSub?: string 
     }
 
     if (area) {
-      // Sort same-area first
       pool = [...pool].sort((a, b) => Number(b.area === area) - Number(a.area === area))
     }
 
@@ -113,39 +178,16 @@ export default function FindBookForm({ initialSub = '' }: { initialSub?: string 
             <span className="findbk-step-title">WHAT ARE YOU LOOKING FOR?</span>
           </div>
 
-          {/* Quick picks */}
-          <div className="findbk-quick">
-            <button
-              type="button"
-              className={`findbk-chip${!keyword ? ' active' : ''}`}
-              onClick={() => setKeyword('')}
-            >Any service</button>
-            {QUICK_PICKS.map((q) => {
-              const clean = q.replace(/^[\p{Emoji}\s]+/u, '').trim()
-              return (
-                <button
-                  type="button"
-                  key={q}
-                  className={`findbk-chip${keyword === clean ? ' active' : ''}`}
-                  onClick={() => applyQuick(q)}
-                >
-                  {q}
-                </button>
-              )
-            })}
-          </div>
-
           {/* Free-text keyword */}
           <input
             className="input"
             type="text"
-            placeholder="Or describe in detail…"
+            placeholder="e.g. wedding venue, electrician, catering…"
             value={keyword}
             onChange={(e) => setKeyword(e.target.value)}
-            style={{ marginTop: 10 }}
           />
 
-          {/* Category filter */}
+          {/* Category filter — dropdown only, no chips */}
           <select
             className="select"
             value={catSlug}
@@ -164,13 +206,11 @@ export default function FindBookForm({ initialSub = '' }: { initialSub?: string 
             <span className="findbk-num">2</span>
             <span className="findbk-step-title">WHERE IN KURUKSHETRA?</span>
           </div>
+
+          {/* Area dropdown */}
           <AreaSelect id="fb-area" value={area} onChange={onArea} />
-          <input
-            className="input"
-            type="text"
-            placeholder="Or type address"
-            style={{ marginTop: 8 }}
-          />
+
+          {/* GPS button */}
           <button
             type="button"
             className="findbk-geo-btn"
@@ -178,11 +218,20 @@ export default function FindBookForm({ initialSub = '' }: { initialSub?: string 
           >
             📍 Use my current location
           </button>
+
           {geoMsg && (
             <p className={`findbk-geo-msg${geoMsg.startsWith('Location set') ? ' ok' : ''}`} role="status">
               {geoMsg.startsWith('Location set') ? '✓ ' : ''}{geoMsg}
             </p>
           )}
+
+          {/* Live map with draggable pin */}
+          <LocationMap
+            lat={coords.lat}
+            lon={coords.lon}
+            onPin={(lat, lon) => setCoords({ lat, lon })}
+          />
+          <p className="findbk-map-hint">Drag the pin or tap the map to set exact location</p>
         </div>
 
         {/* Step 3: When */}
@@ -226,7 +275,7 @@ export default function FindBookForm({ initialSub = '' }: { initialSub?: string 
               <div className="sec-sub">
                 {formatDate(date)} &middot; {slot}
                 {area ? ` · near ${area}` : ''}
-                {keyword ? ` · &ldquo;${keyword}&rdquo;` : ''}
+                {keyword ? ` · "${keyword}"` : ''}
               </div>
             </div>
           </div>

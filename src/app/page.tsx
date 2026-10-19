@@ -83,9 +83,7 @@ export default function HomePage() {
 
       <div className="container">
         {/* ── Trust strip ──────────────────────────────────────────── */}
-        <section className="sec" aria-label="Why My KKR">
-          <TrustStrip />
-        </section>
+        <TrustStrip />
 
         {/* ── Business CTA ─────────────────────────────────────────── */}
         <section className="sec">
