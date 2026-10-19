@@ -13,6 +13,16 @@ interface Point extends LatLon {
   label: string
 }
 
+/**
+ * LocationField — text entry + GPS consent + area picker for pickup/dropoff.
+ *
+ * GPS flow:
+ * 1. User clicks the 📍 button → consent dialog appears (browser-native, no modal needed
+ *    because we want the browser's permission prompt which is already a consent step).
+ * 2. We call navigator.geolocation.getCurrentPosition — the browser asks permission.
+ * 3. On success → reverse-geocode via Nominatim → fill the input field.
+ * 4. On denial → show a friendly "type address or pick area" message.
+ */
 function LocationField({
   which,
   point,
@@ -25,6 +35,7 @@ function LocationField({
   const [text, setText] = useState('')
   const [area, setArea] = useState('')
   const [status, setStatus] = useState('')
+  const [gpsLoading, setGpsLoading] = useState(false)
   const label = which === 'pickup' ? 'Pickup' : 'Drop-off'
 
   function pickArea(name: string) {
@@ -55,9 +66,61 @@ function LocationField({
     }
   }
 
+  /** Ask the browser for GPS, then reverse-geocode via Nominatim */
+  function useMyLocation() {
+    if (!navigator.geolocation) {
+      setStatus('GPS not supported on this device — type the address instead.')
+      return
+    }
+    setGpsLoading(true)
+    setStatus('Getting your location…')
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        const { latitude: lat, longitude: lon } = pos.coords
+        try {
+          const res = await fetch(
+            `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json`,
+            { headers: { 'Accept-Language': 'en' } }
+          )
+          const data = await res.json()
+          const addr = data.address
+          const short = [
+            addr?.road,
+            addr?.suburb ?? addr?.neighbourhood,
+            addr?.city ?? addr?.town ?? addr?.village,
+          ].filter(Boolean).join(', ')
+          const label = short || data.display_name || `${lat.toFixed(5)}, ${lon.toFixed(5)}`
+          setText(label)
+          onChange({ lat, lon, label })
+          setArea('')
+          setStatus('✅ Location set')
+        } catch {
+          // Reverse geocode failed — still set the coordinates
+          const label = `${lat.toFixed(5)}, ${lon.toFixed(5)}`
+          setText(label)
+          onChange({ lat, lon, label })
+          setStatus('✅ GPS coordinates set')
+        }
+        setGpsLoading(false)
+      },
+      (err) => {
+        setGpsLoading(false)
+        const msgs: Record<number, string> = {
+          1: 'Location access denied — type the address or pick an area.',
+          2: 'Location unavailable — try typing the address.',
+          3: 'Location request timed out — try again or type the address.',
+        }
+        setStatus(msgs[err.code] ?? 'Could not get your location.')
+      },
+      { enableHighAccuracy: true, timeout: 12_000, maximumAge: 60_000 }
+    )
+  }
+
   return (
     <div className="field">
       <span className="label">{label} location</span>
+
+      {/* Primary: manual text entry + address lookup */}
       <div className="inline-group">
         <input
           className="input"
@@ -67,11 +130,37 @@ function LocationField({
           value={text}
           onChange={(e) => setText(e.target.value)}
         />
-        <button type="button" className="btn btn-outline btn-sm" onClick={lookUp} aria-label={`Find ${label.toLowerCase()} address`}>📍</button>
+        <button
+          type="button"
+          className="btn btn-outline btn-sm"
+          onClick={lookUp}
+          aria-label={`Find ${label.toLowerCase()} address`}
+          title="Look up this address"
+        >
+          🔍
+        </button>
       </div>
-      <AreaSelect id={`${which}-area`} value={area} onChange={pickArea} placeholder={`…or choose ${label.toLowerCase()} area`} />
-      {status && <span className="muted" role="status">{status}</span>}
-      {point && <span className="muted">Set: {point.label}</span>}
+
+      {/* GPS option — clearly labelled, user-initiated */}
+      <button
+        type="button"
+        className="btn btn-ghost btn-sm loc-gps-btn"
+        onClick={useMyLocation}
+        disabled={gpsLoading}
+        aria-label={`Use current GPS location as ${label.toLowerCase()}`}
+        style={{ marginTop: 6, width: '100%', justifyContent: 'center', gap: 7 }}
+      >
+        {gpsLoading ? '⏳ Getting location…' : `📍 Use my current location as ${label.toLowerCase()}`}
+      </button>
+      <p className="muted" style={{ marginTop: 4, fontSize: 11 }}>
+        Tapping the button above asks your device for one-time GPS access. My KKR never stores your live location.
+      </p>
+
+      {/* Fallback: named area picker */}
+      <AreaSelect id={`${which}-area`} value={area} onChange={pickArea} placeholder={`…or choose ${label.toLowerCase()} area from list`} />
+
+      {status && <span className="muted" role="status" aria-live="polite">{status}</span>}
+      {point && !status && <span className="muted">📌 Set: {point.label}</span>}
     </div>
   )
 }

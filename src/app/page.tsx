@@ -1,11 +1,9 @@
 import Link from 'next/link'
 import type { Metadata } from 'next'
 import SearchForm from '@/components/search/SearchForm'
-import CategoryGrid from '@/components/home/CategoryGrid'
+import HomeFeed from '@/components/home/HomeFeed'
 import MediaStrip from '@/components/home/MediaStrip'
 import TrustStrip from '@/components/home/TrustStrip'
-import { BusinessGrid } from '@/components/business/BusinessCard'
-import { BUSINESSES } from '@/data/businesses'
 import { PLANS, formatInr } from '@/config/platform'
 
 export const metadata: Metadata = {
@@ -29,11 +27,6 @@ const HOW_STEPS = [
 ]
 
 export default function HomePage() {
-  const featured = BUSINESSES
-    .filter((b) => b.verified)
-    .sort((a, b) => b.rating - a.rating)
-    .slice(0, 8)
-
   return (
     <>
       {/* ── Hero ────────────────────────────────────────────────────── */}
@@ -61,21 +54,8 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* ── How it works ─────────────────────────────────────────── */}
       <div className="container">
-
-        {/* ── Categories — first thing after hero ──────────────────── */}
-        <section className="sec" aria-labelledby="cat-h">
-          <div className="sec-head">
-            <div>
-              <h2 className="sec-title" id="cat-h">Browse categories</h2>
-              <div className="sec-sub">7 categories · goods, services, venues, rides &amp; property</div>
-            </div>
-            <Link href="/categories" className="link">All categories →</Link>
-          </div>
-          <CategoryGrid />
-        </section>
-
-        {/* ── How it works ─────────────────────────────────────────── */}
         <section className="sec how-strip" aria-label="How My KKR works">
           {HOW_STEPS.map((s) => (
             <div className="how-step" key={s.title}>
@@ -87,8 +67,10 @@ export default function HomePage() {
             </div>
           ))}
         </section>
+      </div>
 
-        {/* ── City updates ─────────────────────────────────────────── */}
+      {/* ── City updates ─────────────────────────────────────────── */}
+      <div className="container">
         <section className="sec" aria-labelledby="media-h">
           <div className="sec-head">
             <h2 className="sec-title" id="media-h">City updates &amp; promotions</h2>
@@ -99,19 +81,12 @@ export default function HomePage() {
           </div>
           <MediaStrip />
         </section>
+      </div>
 
-        {/* ── Featured providers ───────────────────────────────────── */}
-        <section className="sec" aria-labelledby="feat-h">
-          <div className="sec-head">
-            <div>
-              <h2 className="sec-title" id="feat-h">Featured providers</h2>
-              <div className="sec-sub">Verified · Highest rated · Kurukshetra district</div>
-            </div>
-            <Link href="/search?q=" className="link">View all →</Link>
-          </div>
-          <BusinessGrid businesses={featured} />
-        </section>
+      {/* ── Reactive two-tier category nav + filtered business grid ── */}
+      <HomeFeed />
 
+      <div className="container">
         {/* ── Trust strip ──────────────────────────────────────────── */}
         <section className="sec" aria-label="Why My KKR">
           <TrustStrip />
@@ -140,7 +115,6 @@ export default function HomePage() {
             </div>
           </div>
         </section>
-
       </div>
     </>
   )

@@ -397,7 +397,153 @@ img, svg { max-width: 100%; display: block; }
 .search-box button:hover { background: linear-gradient(135deg, var(--night) 0%, #3a6672 100%); transform: scale(1.01); }
 
 /* ══════════════════════════════════════════════════════════════════════════
-   CATEGORY TILES
+   LOGO IMAGE (replaces SVG mark when real logo is present)
+   ══════════════════════════════════════════════════════════════════════════ */
+.logo-img {
+  height: 38px !important;
+  width: auto !important;
+  max-width: 140px;
+  object-fit: contain;
+  display: block;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   TWO-TIER CATEGORY NAV
+   L1 = scrollable parent category tabs (sticky, full-width)
+   L2 = subcategory chip strip (shown only when L1 ≠ All)
+   ══════════════════════════════════════════════════════════════════════════ */
+.cat-nav { }
+
+/* L1 row */
+.cat-l1 {
+  background: var(--white);
+  border-bottom: 1px solid var(--border);
+  position: sticky; top: var(--tnav); z-index: 200;
+  overflow: hidden;
+}
+/* fade-out gradient to hint scrollability */
+.cat-l1::after {
+  content: '';
+  position: absolute; top: 0; right: 0; bottom: 0; width: 36px;
+  background: linear-gradient(to right, transparent, var(--white));
+  pointer-events: none; z-index: 1;
+}
+.cat-l1-inner {
+  display: flex;
+  overflow-x: auto;
+  scrollbar-width: none;
+  padding: 0 4px;
+  -webkit-overflow-scrolling: touch;
+}
+.cat-l1-inner::-webkit-scrollbar { display: none; }
+
+.cat-l1-tab {
+  display: flex; align-items: center; gap: 6px;
+  padding: 12px 14px;
+  font-size: 13px; font-weight: 600;
+  color: var(--text-3);
+  background: none; border: none;
+  border-bottom: 2.5px solid transparent;
+  cursor: pointer;
+  white-space: nowrap; flex-shrink: 0;
+  transition: color var(--t), border-color var(--t);
+}
+.cat-l1-tab:hover { color: var(--text-2); }
+.cat-l1-tab.active {
+  color: var(--night-d);
+  border-bottom-color: var(--night-d);
+}
+
+/* L2 row */
+.cat-l2 {
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+  min-height: 46px; position: relative;
+  overflow: hidden;
+}
+.cat-l2::after {
+  content: '';
+  position: absolute; top: 0; right: 0; bottom: 0; width: 36px;
+  background: linear-gradient(to right, transparent, var(--bg));
+  pointer-events: none; z-index: 1;
+}
+.cat-l2-inner {
+  display: flex; gap: 7px;
+  padding: 8px 12px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+.cat-l2-inner::-webkit-scrollbar { display: none; }
+
+.cat-l2-chip {
+  display: flex; align-items: center; gap: 5px;
+  padding: 6px 13px; border-radius: 99px;
+  border: 1.5px solid var(--border);
+  background: var(--white);
+  font-size: 12px; font-weight: 500;
+  color: var(--text-2);
+  white-space: nowrap; flex-shrink: 0;
+  cursor: pointer;
+  transition: all var(--t);
+}
+.cat-l2-chip:hover { border-color: var(--night); color: var(--night); }
+.cat-l2-chip.active {
+  background: var(--night-d); color: var(--white);
+  border-color: var(--night-d);
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   REGISTRATION CATEGORY PICKER
+   Two-tier: L1 tile grid → L2 chip strip (or free-text "Other")
+   ══════════════════════════════════════════════════════════════════════════ */
+.reg-cat-picker { display: flex; flex-direction: column; gap: 14px; }
+
+/* L1 — tile grid */
+.reg-cat-l1 {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+  gap: 10px;
+}
+.reg-cat-l1-tile {
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
+  padding: 12px 8px 10px;
+  border: 2px solid var(--border);
+  border-radius: 10px;
+  background: var(--white);
+  cursor: pointer;
+  transition: border-color .15s, background .15s, transform .1s;
+  text-align: center;
+}
+.reg-cat-l1-tile:hover {
+  border-color: var(--night);
+  background: var(--night-ll);
+  transform: translateY(-2px);
+}
+.reg-cat-l1-tile.active {
+  border-color: var(--night-d);
+  background: var(--night-d);
+  color: var(--white);
+  transform: translateY(-2px);
+}
+.reg-cat-icon { font-size: 22px; line-height: 1; }
+.reg-cat-name { font-size: 12px; font-weight: 600; line-height: 1.3; }
+
+/* L2 — subcategory chips + "Other" text input */
+.reg-cat-l2 {
+  background: var(--night-ll);
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  padding: 14px;
+  animation: fadeDown .18s ease;
+}
+@keyframes fadeDown {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   CATEGORY TILES (legacy — kept for /categories page)
    ══════════════════════════════════════════════════════════════════════════ */
 .cat-grid {
   display: grid; gap: 12px;

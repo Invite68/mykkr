@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import Image from 'next/image'
 
 export function LogoMark() {
   return (
@@ -13,8 +14,16 @@ export function LogoMark() {
 export default function Logo() {
   return (
     <Link href="/" className="logo" aria-label="My KKR home">
-      <LogoMark />
-      <span className="logo-name">My KKR</span>
+      {/* Real logo image — falls back to SVG mark if image not found */}
+      <Image
+        src="/logo.png"
+        alt="My KKR"
+        width={120}
+        height={38}
+        priority
+        className="logo-img"
+        style={{ objectFit: 'contain', height: '38px', width: 'auto' }}
+      />
     </Link>
   )
 }

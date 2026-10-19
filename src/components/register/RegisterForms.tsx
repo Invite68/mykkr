@@ -44,9 +44,9 @@ function Terms({ checked, onChange, children }: { checked: boolean; onChange: (v
 
 function Success({ role }: { role: SignupRole }) {
   const copy: Record<SignupRole, string> = {
-    business: 'Your business profile has been submitted for review. You’ll get an SMS once it’s verified and live.',
+    business: "Your business profile has been submitted for review. You'll get an SMS once it's verified and live.",
     customer: `Your ${PLANS.customer.trialDays}-day free trial is ready to start. Browse and contact any business.`,
-    driver: 'Your driver application has been submitted. We’ll verify your licence and ID, then start sending you jobs.',
+    driver: "Your driver application has been submitted. We'll verify your licence and ID, then start sending you jobs.",
   }
   return (
     <div className="panel" style={{ textAlign: 'center' }} role="status">
@@ -62,9 +62,119 @@ function Success({ role }: { role: SignupRole }) {
 }
 
 /* ── Business ─────────────────────────────────────────── */
+
+const OTHER_SLUG = '__other__'
+
+/**
+ * Two-tier category picker for business registration.
+ *
+ * Step 1 — L1 grid: choose a main category (or "Other")
+ * Step 2 — L2 chips: choose a subcategory within that group
+ *   If "Other" was picked in step 1, a free-text input appears instead.
+ *
+ * The parent receives { catSlug, subSlug, otherLabel } via onSelect.
+ */
+function CategoryPicker({
+  catSlug,
+  subSlug,
+  otherLabel,
+  onSelect,
+}: {
+  catSlug: string | null
+  subSlug: string | null
+  otherLabel: string
+  onSelect: (catSlug: string | null, subSlug: string | null, otherLabel: string) => void
+}) {
+  const activeGroup = CATEGORY_GROUPS.find((g) => g.slug === catSlug) ?? null
+  const isOther = catSlug === OTHER_SLUG
+
+  function pickL1(slug: string | null) {
+    onSelect(slug, null, '')
+  }
+
+  function pickL2(sub: string | null) {
+    onSelect(catSlug, sub, otherLabel)
+  }
+
+  return (
+    <div className="reg-cat-picker">
+      {/* ── Step 1: L1 category grid ── */}
+      <div className="reg-cat-l1" role="radiogroup" aria-label="Main category">
+        {CATEGORY_GROUPS.map((g) => (
+          <button
+            type="button"
+            key={g.slug}
+            role="radio"
+            aria-checked={catSlug === g.slug}
+            className={`reg-cat-l1-tile${catSlug === g.slug ? ' active' : ''}`}
+            onClick={() => pickL1(g.slug)}
+          >
+            <span className="reg-cat-icon" aria-hidden="true">{g.icon}</span>
+            <span className="reg-cat-name">{g.name}</span>
+          </button>
+        ))}
+        {/* Other tile */}
+        <button
+          type="button"
+          role="radio"
+          aria-checked={isOther}
+          className={`reg-cat-l1-tile${isOther ? ' active' : ''}`}
+          onClick={() => pickL1(OTHER_SLUG)}
+        >
+          <span className="reg-cat-icon" aria-hidden="true">➕</span>
+          <span className="reg-cat-name">Other</span>
+        </button>
+      </div>
+
+      {/* ── Step 2a: L2 subcategory chips (when a real group is selected) ── */}
+      {activeGroup && (
+        <div className="reg-cat-l2" role="group" aria-label={`${activeGroup.name} subcategories`}>
+          <div className="muted" style={{ marginBottom: 6, fontSize: 13 }}>
+            Pick the closest subcategory in <strong>{activeGroup.name}</strong>:
+          </div>
+          <div className="chips" style={{ flexWrap: 'wrap', gap: 8 }}>
+            {activeGroup.subcategories.map((s) => (
+              <button
+                type="button"
+                key={s.slug}
+                className={`chip${subSlug === s.slug ? ' active' : ''}`}
+                aria-pressed={subSlug === s.slug}
+                onClick={() => pickL2(s.slug)}
+              >
+                {s.icon} {s.name}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* ── Step 2b: Free-text entry when "Other" is selected ── */}
+      {isOther && (
+        <div className="reg-cat-l2">
+          <label className="label" htmlFor="b-other-cat">
+            Describe your category <span className="muted">(e.g. "Book Store", "Yoga Studio")</span>
+          </label>
+          <input
+            id="b-other-cat"
+            className="input"
+            maxLength={80}
+            placeholder="Type your business category"
+            value={otherLabel}
+            onChange={(e) => onSelect(OTHER_SLUG, null, e.target.value)}
+            autoFocus
+          />
+        </div>
+      )}
+    </div>
+  )
+}
+
 function BusinessForm({ onDone }: { onDone: () => void }) {
   const [f, setF] = useState({ name: '', owner: '', email: '', phone: '', otp: '', area: '', pin: '', street: '', gstin: '', hours: '9:00 AM – 8:00 PM' })
-  const [cats, setCats] = useState<string[]>([])
+  // Category selection: catSlug (L1), subSlug (L2), otherLabel (free text when catSlug === OTHER_SLUG)
+  const [catSlug, setCatSlug] = useState<string | null>(null)
+  const [subSlug, setSubSlug] = useState<string | null>(null)
+  const [otherLabel, setOtherLabel] = useState('')
   const [delivery, setDelivery] = useState<DeliveryOption[]>(['pickup'])
   const [photos, setPhotos] = useState<File[]>([])
   const [photoErr, setPhotoErr] = useState('')
@@ -72,9 +182,12 @@ function BusinessForm({ onDone }: { onDone: () => void }) {
   const [errors, setErrors] = useState<string[]>([])
   const up = (k: keyof typeof f) => (v: string) => setF((s) => ({ ...s, [k]: v }))
 
-  function toggleCat(slug: string) {
-    setCats((c) => (c.includes(slug) ? c.filter((x) => x !== slug) : [...c, slug]))
+  function handleCategorySelect(cs: string | null, ss: string | null, ol: string) {
+    setCatSlug(cs)
+    setSubSlug(ss)
+    setOtherLabel(ol)
   }
+
   function toggleDelivery(d: DeliveryOption) {
     setDelivery((c) => (c.includes(d) ? c.filter((x) => x !== d) : [...c, d]))
   }
@@ -91,13 +204,15 @@ function BusinessForm({ onDone }: { onDone: () => void }) {
     e.preventDefault()
     const errs: string[] = []
     if (f.name.trim().length < 2) errs.push('Enter your business name.')
-    if (!cats.length) errs.push('Pick at least one category.')
+    if (!catSlug) errs.push('Pick a category for your business.')
+    if (catSlug === OTHER_SLUG && otherLabel.trim().length < 2) errs.push('Enter your custom category name.')
+    if (catSlug && catSlug !== OTHER_SLUG && !subSlug) errs.push('Pick a subcategory.')
     if (!EMAIL_RE.test(f.email)) errs.push('Enter a valid email.')
     if (f.otp.length !== 6) errs.push('Verify your WhatsApp number with the 6-digit OTP.')
     if (!f.area) errs.push('Choose your area.')
     if (!isValidPin(f.pin)) errs.push('Enter a valid 6-digit pin code.')
     if (f.gstin && !GSTIN_RE.test(f.gstin.toUpperCase())) errs.push('GSTIN format looks wrong (15 characters).')
-    if (f.owner.trim().length < 2) errs.push('Enter the owner’s name.')
+    if (f.owner.trim().length < 2) errs.push("Enter the owner's name.")
     if (!terms) errs.push('Accept the terms to continue.')
     if (photoErr) errs.push(photoErr)
     setErrors(errs)
@@ -111,22 +226,14 @@ function BusinessForm({ onDone }: { onDone: () => void }) {
         <input id="b-name" className="input" maxLength={100} value={f.name} onChange={(e) => up('name')(e.target.value)} placeholder="e.g. Sharma Electricals" />
       </div>
 
-      <fieldset className="field" style={{ border: 'none' }}>
-        <legend className="label" style={{ marginBottom: 6 }}>Categories (choose all that apply)</legend>
-        <div className="form-grid" style={{ gap: 10 }}>
-          {CATEGORY_GROUPS.map((g) => (
-            <div key={g.slug}>
-              <div className="muted" style={{ fontWeight: 700, marginBottom: 4 }}>{g.icon} {g.name}</div>
-              <div className="chips" style={{ flexWrap: 'wrap' }}>
-                {g.subcategories.map((s) => (
-                  <button type="button" key={s.slug} className={`chip${cats.includes(s.slug) ? ' active' : ''}`} aria-pressed={cats.includes(s.slug)} onClick={() => toggleCat(s.slug)}>
-                    {s.name}
-                  </button>
-                ))}
-              </div>
-            </div>
-          ))}
-        </div>
+      <fieldset className="field" style={{ border: 'none', padding: 0 }}>
+        <legend className="label" style={{ marginBottom: 8 }}>Business category</legend>
+        <CategoryPicker
+          catSlug={catSlug}
+          subSlug={subSlug}
+          otherLabel={otherLabel}
+          onSelect={handleCategorySelect}
+        />
       </fieldset>
 
       <div className="form-row">
