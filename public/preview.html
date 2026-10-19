@@ -1280,7 +1280,7 @@ input,select,textarea{font-family:inherit}
             <div style="font-size:10px;color:var(--text-3);margin-top:4px">JPG, PNG or WebP only · Max 5MB each · Max 5 photos</div>
             <div style="font-size:12px;color:var(--red);margin-top:4px;display:none" id="file-upload-err"></div>
           </div>
-          <div class="rf-check"><input type="checkbox" id="rt-biz"><label for="rt-biz">I agree to the <a href="#">Terms of Service</a>. All transactions are directly between buyers and sellers.</label></div>
+          <div class="rf-check"><input type="checkbox" id="rt-biz"><label for="rt-biz">I agree to the <a href="#" data-ac="42">Terms of Service</a>. All transactions are directly between buyers and sellers.</label></div>
           <button class="rf-submit" data-ac="105">List my business — first month free</button>
         </div>
         <div class="reg-body" id="rform-cust" style="display:none">
@@ -1295,7 +1295,7 @@ input,select,textarea{font-family:inherit}
             <div class="rf-row"><div class="rf-group"><label class="rf-label">Area / Sector</label><select class="rf-select"><option value="">Select</option><optgroup label="Tehsils"><option>Thanesar</option><option>Pehowa</option><option>Ismailabad</option><option>Shahabad</option><option>Ladwa</option><option>Babain</option></optgroup><optgroup label="Sectors"><option>Sector 2</option><option>Sector 3</option><option>Sector 5</option><option>Sector 7</option><option>Sector 13</option><option>Sector 30</option><option>Sector 40</option></optgroup><optgroup label="Localities"><option>Pipli</option><option>Model Town</option><option>KU / NIT Area</option><option>Kalyan Nagar</option><option>Mohan Nagar</option></optgroup></select></div>
             <div class="rf-group"><label class="rf-label">Pin code</label><input class="rf-input" type="text" placeholder="136118" maxlength="6"></div></div>
           </div>
-          <div class="rf-check"><input type="checkbox" id="rt-cust"><label for="rt-cust">I agree to the <a href="#">Terms of Service</a>. All payments are directly with the business.</label></div>
+          <div class="rf-check"><input type="checkbox" id="rt-cust"><label for="rt-cust">I agree to the <a href="#" data-ac="42">Terms of Service</a>. All payments are directly with the business.</label></div>
           <button class="rf-submit" data-ac="106">Start 7-day free trial</button>
           <div class="rf-note">No payment during trial · ₹49+GST after 7 days · Cancel anytime</div>
           <div style="text-align:center;margin-top:10px"><button data-ac="103" style="font-size:12px;color:var(--night);background:none;border:none;cursor:pointer;text-decoration:underline">Forgot / resend OTP</button></div>
@@ -2434,6 +2434,7 @@ document.addEventListener('click', function(e) {
   var el = e.target;
   while (el && el !== document.body) {
     if (el.hasAttribute('data-ac')) {
+      if (el.tagName === 'A' && el.getAttribute('href') === '#') e.preventDefault();
       dispatch(el, +el.getAttribute('data-ac'));
       return;
     }
