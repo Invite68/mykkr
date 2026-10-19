@@ -37,7 +37,7 @@ jobs:
         continue-on-error: true
 
   lint:
-    name: Type Check
+    name: Type check, build & link check
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -48,4 +48,13 @@ jobs:
       - run: npm ci
       - name: TypeScript check
         run: npm run type-check
-        continue-on-error: true
+      - name: Production build
+        run: npm run build
+        env:
+          NEXT_TELEMETRY_DISABLED: 1
+      - name: Crawl every internal link + verify CSP
+        run: |
+          cp -r public .next/standalone/ && cp -r .next/static .next/standalone/.next/
+          PORT=3000 node .next/standalone/server.js &
+          for i in $(seq 1 30); do curl -sf http://localhost:3000/api/health && break; sleep 1; done
+          npm run check-links

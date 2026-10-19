@@ -1,16 +1,15 @@
 # My KKR — Production Dockerfile
-# Next.js 16.4.0 + Turbopack standalone output
-# Build verified: HTTP 200 confirmed locally
+# Next.js 16 App Router (React components) — standalone output
 
 # Stage 1: Install deps
-FROM node:20.18-alpine AS deps
+FROM node:22-alpine AS deps
 RUN apk add --no-cache libc6-compat
 WORKDIR /app
-COPY package.json package-lock.json .npmrc ./
+COPY package.json package-lock.json ./
 RUN npm ci
 
 # Stage 2: Build
-FROM node:20.18-alpine AS builder
+FROM node:22-alpine AS builder
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
@@ -19,7 +18,7 @@ ENV NODE_ENV=production
 RUN npm run build
 
 # Stage 3: Production runner
-FROM node:20.18-alpine AS runner
+FROM node:22-alpine AS runner
 WORKDIR /app
 
 ENV NODE_ENV=production
@@ -43,6 +42,6 @@ EXPOSE 3000
 
 # Health check — wget now available
 HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
-  CMD wget -qO- http://localhost:3000/ > /dev/null || exit 1
+  CMD wget -qO- http://localhost:3000/api/health > /dev/null || exit 1
 
 CMD ["node", "server.js"]

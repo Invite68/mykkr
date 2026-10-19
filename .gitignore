@@ -80,3 +80,6 @@ coverage/
 .turbo
 *.tgz
 *.tar.gz
+
+# TypeScript incremental build
+*.tsbuildinfo

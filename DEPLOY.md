@@ -1,5 +1,8 @@
 # My KKR — Deployment Guide
 
+> **v2 (Oct 2026):** the app is now a component-based Next.js App Router build — see README.md. `public/preview.html` and `src/app/route.ts` were removed; CSP is set in `next.config.js`. Health check: `/api/health`.
+
+
 ## Prerequisites
 - Hostinger VPS KVM-1 (187.126.123.59)
 - Coolify installed and running on :8000
