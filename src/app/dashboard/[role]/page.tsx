@@ -16,7 +16,11 @@ export function generateStaticParams() {
 }
 
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
-  return { title: `${getRole((await params).role)?.name ?? 'Dashboard'} dashboard` }
+  return {
+    title: `${getRole((await params).role)?.name ?? 'Dashboard'} dashboard`,
+    // Dashboards are user-specific — never index in search engines
+    robots: { index: false, follow: false },
+  }
 }
 
 function Kpis({ items }: { items: [string, string][] }) {

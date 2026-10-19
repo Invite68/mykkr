@@ -3,7 +3,11 @@ import type { Metadata } from 'next'
 import Breadcrumbs from '@/components/ui/Breadcrumbs'
 import { ROLES } from '@/config/roles'
 
-export const metadata: Metadata = { title: 'Dashboards' }
+export const metadata: Metadata = {
+  title: 'Dashboards',
+  // Dashboards are user-specific — never index them in search engines
+  robots: { index: false, follow: false },
+}
 
 export default function DashboardIndex() {
   return (

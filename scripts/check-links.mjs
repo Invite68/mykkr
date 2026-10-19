@@ -10,6 +10,7 @@ const seen = new Set()
 const queue = ['/']
 const broken = []
 let cspChecked = false
+let headersChecked = false
 
 function extractLinks(html) {
   const out = []
@@ -39,6 +40,15 @@ while (queue.length) {
     if (csp.includes('unsafe-eval')) broken.push("CSP allows 'unsafe-eval' (run against `npm start`, not `npm run dev`)")
     cspChecked = true
   }
+  if (!headersChecked && (res.headers.get('content-type') || '').includes('text/html')) {
+    // Security header checks (from security checklist)
+    if (!res.headers.get('x-frame-options')) broken.push('Missing X-Frame-Options header')
+    if (!res.headers.get('x-content-type-options')) broken.push('Missing X-Content-Type-Options header')
+    if (!res.headers.get('referrer-policy')) broken.push('Missing Referrer-Policy header')
+    const sts = res.headers.get('strict-transport-security') || ''
+    if (!sts) broken.push('Missing Strict-Transport-Security (HSTS) header')
+    headersChecked = true
+  }
   if (!res.ok) {
     broken.push(`${path} → HTTP ${res.status}`)
     continue
@@ -48,9 +58,19 @@ while (queue.length) {
   }
 }
 
+// Also check robots.txt and sitemap.xml
+for (const path of ['/robots.txt', '/sitemap.xml']) {
+  try {
+    const r = await fetch(base + path)
+    if (!r.ok) broken.push(`${path} → HTTP ${r.status} (robots/sitemap missing)`)
+  } catch (err) {
+    broken.push(`${path} → ${err.message}`)
+  }
+}
+
 console.log(`Checked ${seen.size} internal URLs on ${base}`)
 if (broken.length) {
   console.error('Problems:\n  ' + broken.join('\n  '))
   process.exit(1)
 }
-console.log('All links OK, CSP has no unsafe-eval ✓')
+console.log('All links OK, CSP has no unsafe-eval, security headers present ✓')

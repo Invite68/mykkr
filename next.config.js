@@ -16,9 +16,11 @@ const isDev = process.env.NODE_ENV !== 'production'
 const CSP = [
   "default-src 'self'",
   `script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com${isDev ? " 'unsafe-eval'" : ''}`,
-  "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+  // unpkg.com needed for Leaflet CSS loaded dynamically in FindBookForm LocationMap
+  "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://unpkg.com",
   "font-src 'self' data: https://fonts.gstatic.com",
-  "img-src 'self' data: https://*.tile.openstreetmap.org https://nominatim.openstreetmap.org",
+  // unpkg.com needed for Leaflet default marker icon images
+  "img-src 'self' data: blob: https://*.tile.openstreetmap.org https://nominatim.openstreetmap.org https://unpkg.com",
   "frame-src https://www.openstreetmap.org https://www.youtube-nocookie.com https://challenges.cloudflare.com",
   `connect-src 'self' https://nominatim.openstreetmap.org https://router.project-osrm.org${isDev ? ' ws: wss:' : ''}`,
   "base-uri 'self'",
@@ -40,6 +42,8 @@ const nextConfig = {
   poweredByHeader: false,
   reactStrictMode: true,
   typescript: { ignoreBuildErrors: false },
+  // Disable source maps in production — prevents attackers reading your source via DevTools
+  productionBrowserSourceMaps: false,
 
   images: {
     remotePatterns: [{ protocol: 'https', hostname: 'storage.googleapis.com' }],
@@ -71,6 +75,8 @@ const nextConfig = {
           // COOP: isolates browsing context from cross-origin windows (safe, no iframe impact)
           { key: 'Cross-Origin-Opener-Policy', value: 'same-origin-allow-popups' },
           // NOTE: COEP and CORP are intentionally omitted — they break YouTube / Maps iframes
+          // Blocks Flash / PDF cross-domain policy files (defence-in-depth, no Flash used)
+          { key: 'X-Permitted-Cross-Domain-Policies', value: 'none' },
         ],
       },
       // NOTE: /_next/static cache headers intentionally omitted.
