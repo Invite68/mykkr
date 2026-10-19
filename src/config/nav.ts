@@ -24,7 +24,7 @@ export const NAV_ACCOUNT: NavItem[] = [
 
 export const BOTTOM_NAV: NavItem[] = [
   { href: '/', label: 'Home', icon: '🏠' },
-  { href: '/categories', label: 'Browse', icon: '🔍' },
+  { href: '/find-book', label: 'Find & Book', icon: '📅' },
   { href: '/post', label: 'Post', icon: '+' },
   { href: '/rides', label: 'Rides', icon: '🚗' },
   { href: '/register', label: 'Account', icon: '👤' },

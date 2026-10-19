@@ -28,6 +28,7 @@ export interface Business {
   hours: string
   delivery: DeliveryOption[]
   listings: Listing[]
+  tags?: string[]  // extra keywords for search
 }
 
 export const BUSINESSES: Business[] = [
