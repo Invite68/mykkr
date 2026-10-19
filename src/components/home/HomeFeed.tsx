@@ -1,73 +1,39 @@
 'use client'
 
-/**
- * HomeFeed — client component that owns the reactive category+business state.
- *
- * Rendered below the hero on the home page.
- * CategoryNav drives L1/L2 filter selection.
- * BusinessGrid re-renders showing only matching businesses.
- */
-
-import { useState } from 'react'
-import Link from 'next/link'
-import CategoryNav, { type CategoryFilter } from './CategoryNav'
+import { useState, useMemo } from 'react'
+import CategoryNav, { CategoryFilter } from './CategoryNav'
 import { BusinessGrid } from '@/components/business/BusinessCard'
-import { BUSINESSES, businessesInSub, businessesInSubs } from '@/data/businesses'
-import { CATEGORY_GROUPS } from '@/data/categories'
+import { BUSINESSES } from '@/data/businesses'
 
 export default function HomeFeed() {
-  const [filter, setFilter] = useState<CategoryFilter>({ catSlug: null, subSlug: null })
+  const [filter, setFilter] = useState<CategoryFilter>({
+    catSlug: null,
+    subLabel: null,
+  })
 
-  // Compute filtered businesses
-  const businesses = (() => {
-    if (!filter.catSlug) {
-      // All: show featured (verified) sorted by rating
-      return BUSINESSES.filter((b) => b.verified).sort((a, b) => b.rating - a.rating).slice(0, 8)
-    }
-    const group = CATEGORY_GROUPS.find((g) => g.slug === filter.catSlug)
-    if (!group) return []
+  const filtered = useMemo(() => {
+    // No L1 selected → show all (featured)
+    if (!filter.catSlug) return BUSINESSES
 
-    if (filter.subSlug) {
-      return businessesInSub(filter.subSlug)
-    }
-    // All subcategories in this group
-    return businessesInSubs(group.subcategories.map((s) => s.slug))
-  })()
+    // L1 selected, no L2 → all businesses in that L1
+    const inCat = BUSINESSES.filter((b) => b.cat === filter.catSlug)
+    if (!filter.subLabel) return inCat
 
-  const titleText = (() => {
-    if (!filter.catSlug) return 'Featured providers'
-    const group = CATEGORY_GROUPS.find((g) => g.slug === filter.catSlug)!
-    if (filter.subSlug) {
-      const sub = group.subcategories.find((s) => s.slug === filter.subSlug)
-      return sub ? `${sub.name} businesses` : group.name
-    }
-    return `${group.name} businesses`
-  })()
-
-  const subText = filter.catSlug
-    ? `${businesses.length} listing${businesses.length !== 1 ? 's' : ''} · Kurukshetra district`
-    : 'Verified · Highest rated · Kurukshetra district'
+    // L2 selected → filter by exact sub label
+    return inCat.filter((b) => b.sub === filter.subLabel)
+  }, [filter])
 
   return (
     <>
-      {/* Two-tier category nav */}
       <CategoryNav filter={filter} onFilter={setFilter} />
-
-      {/* Reactive business grid */}
-      <div className="container">
-        <section className="sec" aria-labelledby="feed-h">
-          <div className="sec-head">
-            <div>
-              <h2 className="sec-title" id="feed-h">{titleText}</h2>
-              <div className="sec-sub">{subText}</div>
-            </div>
-            {!filter.catSlug && (
-              <Link href="/search?q=" className="link">View all →</Link>
-            )}
-          </div>
-          <BusinessGrid businesses={businesses} />
-        </section>
-      </div>
+      <BusinessGrid
+        businesses={filtered}
+        emptyMessage={
+          filter.catSlug
+            ? `No businesses listed yet in this category. Be the first to register!`
+            : undefined
+        }
+      />
     </>
   )
 }

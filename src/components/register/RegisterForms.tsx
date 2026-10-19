@@ -110,7 +110,7 @@ function CategoryPicker({
             onClick={() => pickL1(g.slug)}
           >
             <span className="reg-cat-icon" aria-hidden="true">{g.icon}</span>
-            <span className="reg-cat-name">{g.name}</span>
+            <span className="reg-cat-name">{g.label}</span>
           </button>
         ))}
         {/* Other tile */}
@@ -128,20 +128,20 @@ function CategoryPicker({
 
       {/* ── Step 2a: L2 subcategory chips (when a real group is selected) ── */}
       {activeGroup && (
-        <div className="reg-cat-l2" role="group" aria-label={`${activeGroup.name} subcategories`}>
+        <div className="reg-cat-l2" role="group" aria-label={`${activeGroup.label} subcategories`}>
           <div className="muted" style={{ marginBottom: 6, fontSize: 13 }}>
-            Pick the closest subcategory in <strong>{activeGroup.name}</strong>:
+            Pick the closest subcategory in <strong>{activeGroup.label}</strong>:
           </div>
           <div className="chips" style={{ flexWrap: 'wrap', gap: 8 }}>
-            {activeGroup.subcategories.map((s) => (
+            {activeGroup.subcategories.slice(1).map((s) => (
               <button
                 type="button"
-                key={s.slug}
-                className={`chip${subSlug === s.slug ? ' active' : ''}`}
-                aria-pressed={subSlug === s.slug}
-                onClick={() => pickL2(s.slug)}
+                key={s}
+                className={`chip${subSlug === s ? ' active' : ''}`}
+                aria-pressed={subSlug === s}
+                onClick={() => pickL2(s)}
               >
-                {s.icon} {s.name}
+                {s}
               </button>
             ))}
           </div>

@@ -5,7 +5,6 @@ import Breadcrumbs from '@/components/ui/Breadcrumbs'
 import ContactButton from '@/components/business/ContactButton'
 import { Stars } from '@/components/business/BusinessCard'
 import { BUSINESSES, getBusiness } from '@/data/businesses'
-import { findSub } from '@/data/categories'
 import { findArea, osmEmbedUrl } from '@/data/areas'
 import { DELIVERY_LABELS } from '@/types'
 import { DIRECT_PAYMENT_METHODS, DISCLAIMER } from '@/config/platform'
@@ -23,28 +22,19 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
   return { title: b?.name ?? 'Business', description: b?.description }
 }
 
-const LISTING_HEADING = {
-  goods: 'Products',
-  service: 'Services & rates',
-  venue: 'Rooms & packages',
-  ride: 'Vehicles & rates',
-  property: 'Available properties',
-} as const
-
 export default async function BusinessPage({ params }: { params: Params }) {
   const business = getBusiness((await params).slug)
   if (!business) notFound()
-  const found = findSub(business.sub)
-  if (!found) notFound()
-  const { group, sub } = found
   const area = findArea(business.area)
+  const isRide = business.cat === 'transport'
+  const isService = business.cat === 'services'
+  const isVenue = business.cat === 'venues'
 
   return (
     <div className="container">
       <Breadcrumbs
         items={[
-          { href: `/c/${group.slug}`, label: group.name },
-          { href: `/c/${group.slug}/${sub.slug}`, label: sub.name },
+          { href: `/c/${business.cat}`, label: business.cat.charAt(0).toUpperCase() + business.cat.slice(1) },
           { label: business.name },
         ]}
       />
@@ -55,7 +45,7 @@ export default async function BusinessPage({ params }: { params: Params }) {
             <div className="detail-hero">
               <div className="detail-emoji" aria-hidden="true">{business.emoji}</div>
               <div>
-                <div className="biz-cat">{sub.name}</div>
+                <div className="biz-cat">{business.sub}</div>
                 <h1 className="page-title">{business.name}</h1>
                 <div className="biz-meta">
                   <Stars rating={business.rating} />
@@ -68,7 +58,9 @@ export default async function BusinessPage({ params }: { params: Params }) {
           </div>
 
           <div className="panel">
-            <h2 className="panel-title">{LISTING_HEADING[sub.kind]}</h2>
+            <h2 className="panel-title">
+              {isVenue ? 'Rooms & packages' : isService ? 'Services & rates' : isRide ? 'Vehicles & rates' : 'Products & prices'}
+            </h2>
             <table className="list-table">
               <tbody>
                 {business.listings.map((l) => (
@@ -109,14 +101,11 @@ export default async function BusinessPage({ params }: { params: Params }) {
             </dl>
             <div className="form-grid">
               <ContactButton businessName={business.name} label="WhatsApp / call" className="btn btn-accent btn-block" />
-              {sub.bookable && sub.kind !== 'ride' && (
-                <Link href={`/find-book?sub=${sub.slug}&business=${business.slug}`} className="btn btn-primary btn-block">📅 Check availability</Link>
-              )}
-              {sub.kind === 'ride' && (
+              {isRide && (
                 <Link href="/rides" className="btn btn-primary btn-block">🚕 Request a ride</Link>
               )}
-              {sub.kind === 'service' && (
-                <Link href={`/post?sub=${sub.slug}`} className="btn btn-outline btn-block">Ask for a quote</Link>
+              {isService && (
+                <Link href={`/post?cat=${business.cat}`} className="btn btn-outline btn-block">Ask for a quote</Link>
               )}
             </div>
           </div>

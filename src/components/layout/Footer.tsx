@@ -18,7 +18,7 @@ export default function Footer() {
           <div className="footer-col">
             <div className="footer-col-title">Categories</div>
             {CATEGORY_GROUPS.map((g) => (
-              <Link key={g.slug} href={`/c/${g.slug}`}>{g.name}</Link>
+              <Link key={g.slug} href={`/c/${g.slug}`}>{g.label}</Link>
             ))}
           </div>
           <div className="footer-col">

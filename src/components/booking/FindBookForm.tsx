@@ -7,7 +7,11 @@ import { CATEGORY_GROUPS } from '@/data/categories'
 import { BUSINESSES } from '@/data/businesses'
 import { KKR_CENTER, findArea, osmEmbedUrl } from '@/data/areas'
 
-const BOOKABLE = CATEGORY_GROUPS.flatMap((g) => g.subcategories.filter((s) => s.bookable && s.kind !== 'ride'))
+// Bookable = all L2 subcategories from services, venues, events (excluding first "All …" entry)
+const BOOKABLE_CATS = ['services', 'venues', 'events']
+const BOOKABLE: string[] = CATEGORY_GROUPS
+  .filter((g) => BOOKABLE_CATS.includes(g.slug))
+  .flatMap((g) => g.subcategories.slice(1))
 const SLOTS = ['Any time', 'Morning (8–12)', 'Afternoon (12–4)', 'Evening (4–8)', 'Full day']
 
 function today(): string {
@@ -17,7 +21,7 @@ function today(): string {
 }
 
 export default function FindBookForm({ initialSub = '' }: { initialSub?: string }) {
-  const [sub, setSub] = useState(BOOKABLE.some((s) => s.slug === initialSub) ? initialSub : '')
+  const [sub, setSub] = useState(BOOKABLE.includes(initialSub) ? initialSub : '')
   const [area, setArea] = useState('')
   const [coords, setCoords] = useState(KKR_CENTER)
   const [date, setDate] = useState('')
@@ -59,7 +63,7 @@ export default function FindBookForm({ initialSub = '' }: { initialSub?: string 
   }
 
   const results = useMemo(() => {
-    const pool = BUSINESSES.filter((b) => BOOKABLE.some((s) => s.slug === b.sub))
+    const pool = BUSINESSES.filter((b) => BOOKABLE.includes(b.sub))
     let list = sub ? pool.filter((b) => b.sub === sub) : pool
     if (area) {
       // Same-area providers first
@@ -76,8 +80,8 @@ export default function FindBookForm({ initialSub = '' }: { initialSub?: string 
           <div className="chips" style={{ flexWrap: 'wrap' }}>
             <button type="button" className={`chip${!sub ? ' active' : ''}`} onClick={() => setSub('')}>Any bookable service</button>
             {BOOKABLE.map((s) => (
-              <button type="button" key={s.slug} className={`chip${sub === s.slug ? ' active' : ''}`} onClick={() => setSub(s.slug)} aria-pressed={sub === s.slug}>
-                {s.icon} {s.name}
+              <button type="button" key={s} className={`chip${sub === s ? ' active' : ''}`} onClick={() => setSub(s)} aria-pressed={sub === s}>
+                {s}
               </button>
             ))}
           </div>

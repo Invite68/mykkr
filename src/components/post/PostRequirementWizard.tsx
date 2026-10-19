@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { useState } from 'react'
 import AreaSelect from '@/components/ui/AreaSelect'
-import { CATEGORY_GROUPS, findSub } from '@/data/categories'
+import { CATEGORY_GROUPS } from '@/data/categories'
 import { stripContactDetails } from '@/lib/sanitize'
 
 const FLEX = ['This exact date only', '±1–2 days', '±1 week', 'Any date this month']
@@ -23,7 +23,7 @@ interface Draft {
 export default function PostRequirementWizard({ initialSub = '' }: { initialSub?: string }) {
   const [step, setStep] = useState(0)
   const [draft, setDraft] = useState<Draft>({
-    sub: findSub(initialSub) ? initialSub : '',
+    sub: initialSub,
     description: '',
     date: '',
     flexibility: FLEX[0],
@@ -71,7 +71,7 @@ export default function PostRequirementWizard({ initialSub = '' }: { initialSub?
     setStep((s) => Math.max(s - 1, 0))
   }
 
-  const subInfo = findSub(draft.sub)
+  // subInfo removed — draft.sub now stores human-readable category label directly
 
   if (done) {
     return (
@@ -100,8 +100,8 @@ export default function PostRequirementWizard({ initialSub = '' }: { initialSub?
             <select id="pw-sub" className="select" value={draft.sub} onChange={(e) => set('sub', e.target.value)}>
               <option value="">Select a category</option>
               {CATEGORY_GROUPS.map((g) => (
-                <optgroup key={g.slug} label={g.name}>
-                  {g.subcategories.map((s) => <option key={s.slug} value={s.slug}>{s.name}</option>)}
+                <optgroup key={g.slug} label={`${g.icon} ${g.label}`}>
+                  {g.subcategories.slice(1).map((s) => <option key={s} value={s}>{s}</option>)}
                 </optgroup>
               ))}
             </select>
@@ -163,7 +163,7 @@ export default function PostRequirementWizard({ initialSub = '' }: { initialSub?
       {step === 3 && (
         <div className="form-grid">
           <dl className="kv panel" style={{ background: 'var(--bg)' }}>
-            <dt>Category</dt><dd>{subInfo ? `${subInfo.group.name} › ${subInfo.sub.name}` : '—'}</dd>
+            <dt>Category</dt><dd>{draft.sub || '—'}</dd>
             <dt>Description</dt><dd>{draft.description}</dd>
             <dt>When</dt><dd>{draft.date || 'Flexible'} · {draft.flexibility}</dd>
             <dt>Area</dt><dd>{draft.area}</dd>

@@ -1,6 +1,5 @@
 import Link from 'next/link'
 import type { Business } from '@/data/businesses'
-import { findSub } from '@/data/categories'
 import ContactButton from './ContactButton'
 
 export function Stars({ rating }: { rating: number }) {
@@ -14,7 +13,6 @@ export function Stars({ rating }: { rating: number }) {
 }
 
 export default function BusinessCard({ business }: { business: Business }) {
-  const sub = findSub(business.sub)?.sub
   const href = `/business/${business.slug}`
   return (
     <article className="biz-card">
@@ -24,7 +22,7 @@ export default function BusinessCard({ business }: { business: Business }) {
         {business.verified && <span className="badge-verified">✓ Verified</span>}
       </Link>
       <div className="biz-body">
-        <div className="biz-cat">{sub?.name ?? 'Business'}</div>
+        <div className="biz-cat">{business.sub}</div>
         <h3 className="biz-name"><Link href={href}>{business.name}</Link></h3>
         <div className="biz-area">📍 {business.area}</div>
         <div className="biz-meta">
@@ -41,13 +39,23 @@ export default function BusinessCard({ business }: { business: Business }) {
   )
 }
 
-export function BusinessGrid({ businesses }: { businesses: Business[] }) {
+export function BusinessGrid({
+  businesses,
+  emptyMessage,
+}: {
+  businesses: Business[]
+  emptyMessage?: string
+}) {
   if (!businesses.length) {
     return (
       <div className="empty">
         <div className="empty-icon" aria-hidden="true">🏪</div>
-        No businesses listed here yet.{' '}
-        <Link href="/register?role=business" className="link">Be the first to list →</Link>
+        {emptyMessage ?? (
+          <>
+            No businesses listed here yet.{' '}
+            <Link href="/register?role=business" className="link">Be the first to list →</Link>
+          </>
+        )}
       </div>
     )
   }

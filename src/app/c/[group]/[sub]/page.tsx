@@ -2,63 +2,61 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
 import Breadcrumbs from '@/components/ui/Breadcrumbs'
-import SubNav from '@/components/category/SubNav'
-import HowItWorks from '@/components/category/HowItWorks'
 import { BusinessGrid } from '@/components/business/BusinessCard'
-import { CATEGORY_GROUPS, getGroup, getSub } from '@/data/categories'
-import { businessesInSub } from '@/data/businesses'
+import { CATEGORY_GROUPS } from '@/data/categories'
+import { BUSINESSES } from '@/data/businesses'
 
 type Params = Promise<{ group: string; sub: string }>
 
 export const dynamicParams = false
 
 export function generateStaticParams() {
-  return CATEGORY_GROUPS.flatMap((g) => g.subcategories.map((s) => ({ group: g.slug, sub: s.slug })))
+  return CATEGORY_GROUPS.flatMap((g) =>
+    g.subcategories.map((s) => ({
+      group: g.slug,
+      sub: encodeURIComponent(s),
+    }))
+  )
 }
 
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
   const p = await params
-  const sub = getSub(p.group, p.sub)
-  return { title: sub?.name ?? 'Category' }
+  const sub = decodeURIComponent(p.sub)
+  return { title: `${sub} — My KKR` }
 }
 
 export default async function SubCategoryPage({ params }: { params: Params }) {
   const p = await params
-  const group = getGroup(p.group)
-  const sub = getSub(p.group, p.sub)
-  if (!group || !sub) notFound()
+  const group = CATEGORY_GROUPS.find((g) => g.slug === p.group)
+  if (!group) notFound()
 
-  const businesses = businessesInSub(sub.slug)
+  const subLabel = decodeURIComponent(p.sub)
+  if (!group.subcategories.includes(subLabel)) notFound()
+
+  const businesses = BUSINESSES.filter(
+    (b) => b.cat === p.group && b.sub === subLabel
+  )
 
   return (
     <div className="container">
       <Breadcrumbs
         items={[
           { href: '/categories', label: 'Categories' },
-          { href: `/c/${group.slug}`, label: group.name },
-          { label: sub.name },
+          { href: `/c/${group.slug}`, label: group.label },
+          { label: subLabel },
         ]}
       />
-      <h1 className="page-title">{sub.icon} {sub.name}</h1>
+      <h1 className="page-title">{subLabel}</h1>
       <p className="page-sub">
-        {businesses.length} listed in Kurukshetra <span lang="hi">· {sub.nameHi}</span>
+        {businesses.length} listed in Kurukshetra
       </p>
-      <SubNav group={group} activeSub={sub.slug} />
-      <HowItWorks kind={sub.kind} />
 
-      {sub.kind === 'ride' && (
+      {group.slug === 'transport' && (
         <div className="banner banner-ok" style={{ marginTop: 12 }}>
           <span aria-hidden="true">🚕</span>
           <div>
-            Need a cab right now? <Link href="/rides" className="link">Request a ride from nearby drivers →</Link>
-          </div>
-        </div>
-      )}
-      {sub.bookable && sub.kind !== 'ride' && (
-        <div className="banner banner-ok" style={{ marginTop: 12 }}>
-          <span aria-hidden="true">📅</span>
-          <div>
-            Need it on a specific date? <Link href={`/find-book?sub=${sub.slug}`} className="link">Check availability with Find &amp; Book →</Link>
+            Need a ride right now?{' '}
+            <Link href="/rides" className="link">Request from nearby drivers →</Link>
           </div>
         </div>
       )}

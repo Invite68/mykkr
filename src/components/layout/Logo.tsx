@@ -1,6 +1,21 @@
 import Link from 'next/link'
 import Image from 'next/image'
 
+/** Circular logo — used in the top nav (left corner) and About page */
+export function CircularLogo({ size = 40 }: { size?: number }) {
+  return (
+    <Image
+      src="/logo.png"
+      alt="My KKR"
+      width={size}
+      height={size}
+      priority
+      className="logo-circle-img"
+      style={{ width: size, height: size, objectFit: 'cover', borderRadius: '50%', display: 'block' }}
+    />
+  )
+}
+
 export function LogoMark() {
   return (
     <span className="logo-mark" aria-hidden="true">
@@ -14,16 +29,10 @@ export function LogoMark() {
 export default function Logo() {
   return (
     <Link href="/" className="logo" aria-label="My KKR home">
-      {/* Real logo image — falls back to SVG mark if image not found */}
-      <Image
-        src="/logo.png"
-        alt="My KKR"
-        width={120}
-        height={38}
-        priority
-        className="logo-img"
-        style={{ objectFit: 'contain', height: '38px', width: 'auto' }}
-      />
+      <span className="logo-circle">
+        <CircularLogo size={40} />
+      </span>
+      <span className="logo-wordmark">My KKR</span>
     </Link>
   )
 }

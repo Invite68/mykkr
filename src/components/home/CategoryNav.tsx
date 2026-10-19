@@ -1,85 +1,76 @@
 'use client'
 
-/**
- * CategoryNav — Two-tier reactive category filter
- *
- * L1 bar:  horizontal scroll of parent category tabs  (All + 7 groups)
- * L2 strip: subcategory chips — changes when L1 selection changes
- * Emits (catSlug, subSlug) up via onFilter callback so the parent
- * page can filter the business grid reactively.
- */
-
-import { useState } from 'react'
-import { CATEGORY_GROUPS } from '@/data/categories'
+import { CATEGORY_GROUPS, ALL_L1_TABS } from '@/data/categories'
 
 export interface CategoryFilter {
-  catSlug: string | null  // null = "All"
-  subSlug: string | null  // null = "All"
+  catSlug: string | null   // null = "all"
+  subLabel: string | null  // null = "All <cat>" / first chip
 }
 
-interface Props {
+interface CategoryNavProps {
   filter: CategoryFilter
   onFilter: (f: CategoryFilter) => void
 }
 
-export default function CategoryNav({ filter, onFilter }: Props) {
+export default function CategoryNav({ filter, onFilter }: CategoryNavProps) {
   const activeGroup = CATEGORY_GROUPS.find((g) => g.slug === filter.catSlug) ?? null
 
-  function selectL1(catSlug: string | null) {
-    onFilter({ catSlug, subSlug: null })
+  function selectL1(slug: string) {
+    // When clicking "All", clear both
+    if (slug === 'all') {
+      onFilter({ catSlug: null, subLabel: null })
+    } else {
+      onFilter({ catSlug: slug, subLabel: null })
+    }
   }
 
-  function selectL2(subSlug: string | null) {
-    onFilter({ ...filter, subSlug })
+  function selectL2(sub: string, isAll: boolean) {
+    if (isAll) {
+      onFilter({ ...filter, subLabel: null })
+    } else {
+      onFilter({ ...filter, subLabel: sub })
+    }
   }
 
   return (
     <div className="cat-nav">
-      {/* ── L1 — parent categories ────────────────────────────────────── */}
-      <div className="cat-l1" role="tablist" aria-label="Browse by category">
-        <div className="cat-l1-inner">
-          <button
-            role="tab"
-            aria-selected={filter.catSlug === null}
-            className={`cat-l1-tab${filter.catSlug === null ? ' active' : ''}`}
-            onClick={() => selectL1(null)}
-          >
-            🏪 All
-          </button>
-          {CATEGORY_GROUPS.map((g) => (
+      {/* L1 row */}
+      <div className="cat-l1">
+        {ALL_L1_TABS.map((tab) => {
+          const isActive =
+            tab.slug === 'all'
+              ? filter.catSlug === null
+              : filter.catSlug === tab.slug
+          return (
             <button
-              key={g.slug}
-              role="tab"
-              aria-selected={filter.catSlug === g.slug}
-              className={`cat-l1-tab${filter.catSlug === g.slug ? ' active' : ''}`}
-              onClick={() => selectL1(g.slug)}
+              key={tab.slug}
+              className={`cat-l1-tab${isActive ? ' active' : ''}`}
+              onClick={() => selectL1(tab.slug)}
             >
-              {g.icon} {g.name}
+              {tab.label}
             </button>
-          ))}
-        </div>
+          )
+        })}
       </div>
 
-      {/* ── L2 — subcategory chips (only when a group is selected) ─────── */}
+      {/* L2 chips — only shown when a real L1 is selected */}
       {activeGroup && (
-        <div className="cat-l2" role="group" aria-label={`${activeGroup.name} subcategories`}>
-          <div className="cat-l2-inner">
-            <button
-              className={`cat-l2-chip${filter.subSlug === null ? ' active' : ''}`}
-              onClick={() => selectL2(null)}
-            >
-              All
-            </button>
-            {activeGroup.subcategories.map((sub) => (
+        <div className="cat-l2">
+          {activeGroup.subcategories.map((sub, i) => {
+            const isAllChip = i === 0
+            const isActive = isAllChip
+              ? filter.subLabel === null
+              : filter.subLabel === sub
+            return (
               <button
-                key={sub.slug}
-                className={`cat-l2-chip${filter.subSlug === sub.slug ? ' active' : ''}`}
-                onClick={() => selectL2(sub.slug)}
+                key={sub}
+                className={`cat-l2-chip${isActive ? ' active' : ''}`}
+                onClick={() => selectL2(sub, isAllChip)}
               >
-                {sub.icon} {sub.name}
+                {sub}
               </button>
-            ))}
-          </div>
+            )
+          })}
         </div>
       )}
     </div>

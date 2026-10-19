@@ -5,11 +5,11 @@ import type { CategoryGroup } from '@/data/categories'
 export default function SubNav({ group, activeSub }: { group: CategoryGroup; activeSub?: string }) {
   if (group.subcategories.length < 2) return null
   return (
-    <nav className="chips" aria-label={`${group.name} subcategories`} style={{ margin: '14px 0 4px' }}>
+    <nav className="chips" aria-label={`${group.label} subcategories`} style={{ margin: '14px 0 4px' }}>
       <Link href={`/c/${group.slug}`} className={`chip${!activeSub ? ' active' : ''}`}>All</Link>
-      {group.subcategories.map((s) => (
-        <Link key={s.slug} href={`/c/${group.slug}/${s.slug}`} className={`chip${activeSub === s.slug ? ' active' : ''}`}>
-          {s.icon} {s.name}
+      {group.subcategories.slice(1).map((s) => (
+        <Link key={s} href={`/c/${group.slug}/${encodeURIComponent(s)}`} className={`chip${activeSub === s ? ' active' : ''}`}>
+          {s}
         </Link>
       ))}
     </nav>

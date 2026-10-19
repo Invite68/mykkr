@@ -1,20 +1,21 @@
 import { Fragment } from 'react'
 import type { Metadata } from 'next'
 import Breadcrumbs from '@/components/ui/Breadcrumbs'
+import { CircularLogo } from '@/components/layout/Logo'
 
 export const metadata: Metadata = { title: 'About Kurukshetra' }
 
 const PLACES = [
-  { icon: '🌊', name: 'Brahma Sarovar', desc: 'One of Asia’s largest sacred tanks. Lakhs bathe here during solar eclipses.', tag: 'Sacred site' },
+  { icon: '🌊', name: 'Brahma Sarovar', desc: 'One of Asia\'s largest sacred tanks. Lakhs bathe here during solar eclipses.', tag: 'Sacred site' },
   { icon: '🙏', name: 'Jyotisar', desc: 'Where Lord Krishna is believed to have delivered the Bhagavad Gita to Arjuna.', tag: 'Pilgrimage' },
-  { icon: '⚔️', name: 'Kurukshetra Panorama', desc: '360° mural of the Mahabharata war with a science centre.', tag: 'Museum' },
+  { icon: '⚔️', name: 'Kurukshetra Panorama', desc: '360 degree mural of the Mahabharata war with a science centre.', tag: 'Museum' },
   { icon: '🛕', name: 'Sthaneshwar Mahadev', desc: 'Ancient Shiva temple where the Pandavas are said to have prayed.', tag: 'Temple' },
   { icon: '🌺', name: 'Bhadrakali Temple', desc: 'Shakti peeth with huge Navratri celebrations.', tag: 'Temple' },
   { icon: '💧', name: 'Sannihit Sarovar', desc: 'Sacred lake where seven Saraswatis are believed to meet.', tag: 'Sacred site' },
 ]
 
 const TEHSILS = [
-  ['Thanesar', 'Brahmsarovar, Sectors 2–40, Model Town, KU/NIT area, Kalyan Nagar, Mohan Nagar, Shyam Colony, Dara Kalan, Pipli Road'],
+  ['Thanesar', 'Brahmsarovar, Sectors 2-40, Model Town, KU/NIT area, Kalyan Nagar, Mohan Nagar, Shyam Colony, Dara Kalan, Pipli Road'],
   ['Pehowa', 'Saraswati ghats, Prithudaka'],
   ['Ismailabad', 'Ismailabad town, Narkatari'],
   ['Shahabad', 'Shahabad Markanda, Markanda river'],
@@ -35,9 +36,12 @@ export default function AboutPage() {
     <>
       <section className="hero">
         <div className="hero-inner" style={{ textAlign: 'left' }}>
+          <div className="about-logo-circle">
+            <CircularLogo size={96} />
+          </div>
           <span className="hero-badge">Explore Kurukshetra</span>
-          <h1>Kurukshetra — <span>Land of the Gita</span></h1>
-          <p className="hero-sub">One of India’s most sacred cities. Site of the Mahabharata war and birthplace of the Bhagavad Gita.</p>
+          <h1>Kurukshetra &mdash; <span>Land of the Gita</span></h1>
+          <p className="hero-sub">One of India&apos;s most sacred cities. Site of the Mahabharata war and birthplace of the Bhagavad Gita.</p>
           <div className="stat-grid">
             {[['5,000+', 'Years of history'], ['48 Kos', 'Sacred parikrama'], ['6', 'Tehsils'], ['400+', 'Villages']].map(([n, l]) => (
               <div className="stat" key={l}><div className="stat-num">{n}</div><div className="stat-lbl">{l}</div></div>
@@ -56,17 +60,17 @@ export default function AboutPage() {
           <h2 className="panel-title">📋 Quick facts</h2>
           <dl className="kv">
             <dt>Name</dt><dd>Kurukshetra (<span lang="hi">कुरुक्षेत्र</span>)</dd>
-            <dt>Also known as</dt><dd>Dharmakshetra · Land of the Bhagavad Gita</dd>
+            <dt>Also known as</dt><dd>Dharmakshetra &middot; Land of the Bhagavad Gita</dd>
             <dt>State</dt><dd>Haryana, India</dd>
             <dt>Named after</dt><dd>King Kuru, ancestor of the Kauravas and Pandavas</dd>
-            <dt>Railway</dt><dd>Kurukshetra Junction (Delhi–Ambala line)</dd>
+            <dt>Railway</dt><dd>Kurukshetra Junction (Delhi&ndash;Ambala line)</dd>
           </dl>
           <h3 className="panel-title" style={{ marginTop: 18 }}>📜 Timeline</h3>
           <ul className="timeline">
-            <li><strong>c. 1200–900 BCE</strong>Kuru kingdom — Vedic texts compiled in the region.</li>
+            <li><strong>c. 1200&ndash;900 BCE</strong>Kuru kingdom &mdash; Vedic texts compiled in the region.</li>
             <li><strong>7th century CE</strong>Thanesar flourishes under King Harshavardhana; Xuanzang visits.</li>
             <li><strong>Medieval era</strong>Remains a spiritual centre for Hindus, Sikhs and Muslims.</li>
-            <li><strong>1947–present</strong>Major restoration of sacred sites; Haryana’s best-known pilgrimage city.</li>
+            <li><strong>1947&ndash;present</strong>Major restoration of sacred sites; Haryana&apos;s best-known pilgrimage city.</li>
           </ul>
         </section>
 
@@ -96,8 +100,8 @@ export default function AboutPage() {
         <section className="sec panel" id="events">
           <h2 className="panel-title">📅 Events &amp; festivals</h2>
           <ul className="timeline">
-            <li><strong>Gita Jayanti</strong>International Gita Mahotsav — state-level fair with cultural programmes.</li>
-            <li><strong>Somvati Amavasya</strong>New moon on a Monday — lakhs bathe in Brahma Sarovar.</li>
+            <li><strong>Gita Jayanti</strong>International Gita Mahotsav &mdash; state-level fair with cultural programmes.</li>
+            <li><strong>Somvati Amavasya</strong>New moon on a Monday &mdash; lakhs bathe in Brahma Sarovar.</li>
             <li><strong>Solar eclipse</strong>Very large gatherings for the holy dip.</li>
             <li><strong>Navratri</strong>Major celebrations at Bhadrakali Temple.</li>
           </ul>
@@ -106,7 +110,7 @@ export default function AboutPage() {
         <section className="sec panel" id="education">
           <h2 className="panel-title">🎓 Universities &amp; institutions</h2>
           <ul className="timeline">
-            <li><strong>KU</strong>Kurukshetra University — founded 1956.</li>
+            <li><strong>KU</strong>Kurukshetra University &mdash; founded 1956.</li>
             <li><strong>NIT Kurukshetra</strong>National Institute of Technology.</li>
             <li><strong>NID Haryana</strong>National Institute of Design campus.</li>
             <li><strong>SKAU</strong>Shri Krishna AYUSH University.</li>

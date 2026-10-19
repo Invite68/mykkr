@@ -109,6 +109,14 @@ img, svg { max-width: 100%; display: block; }
 
 /* Logo */
 .logo { display: flex; align-items: center; gap: 9px; flex-shrink: 0; }
+.logo-circle {
+  width: 40px; height: 40px; border-radius: 50%; overflow: hidden; flex-shrink: 0;
+  border: 2px solid rgba(225,179,130,.5);
+  box-shadow: 0 2px 8px rgba(18,52,59,.25);
+  background: var(--night-d);
+}
+.logo-circle-img { border-radius: 50%; object-fit: cover; }
+.logo-wordmark { font-size: 17px; font-weight: 800; color: #fff; letter-spacing: -.4px; }
 .logo-mark {
   width: 32px; height: 32px; border-radius: 9px;
   background: linear-gradient(135deg, var(--tan) 0%, var(--tan-d) 100%);
@@ -118,6 +126,13 @@ img, svg { max-width: 100%; display: block; }
 .logo-mark svg { width: 15px; height: 15px; }
 .logo-name { font-size: 17px; font-weight: 800; color: #fff; letter-spacing: -.4px; }
 .logo-suffix { font-weight: 400; opacity: .55; font-size: 13px; margin-left: 1px; }
+
+/* About page circular logo */
+.about-logo-circle {
+  width: 96px; height: 96px; border-radius: 50%; overflow: hidden;
+  border: 3px solid var(--tan); margin: 0 auto 16px;
+  box-shadow: 0 4px 16px rgba(18,52,59,.25);
+}
 
 .topnav-spacer { flex: 1; }
 .topnav-search { flex: 1; max-width: 440px; display: none; }

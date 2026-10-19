@@ -2,11 +2,9 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
 import Breadcrumbs from '@/components/ui/Breadcrumbs'
-import SubNav from '@/components/category/SubNav'
-import HowItWorks from '@/components/category/HowItWorks'
 import { BusinessGrid } from '@/components/business/BusinessCard'
-import { CATEGORY_GROUPS, getGroup } from '@/data/categories'
-import { businessesInSub } from '@/data/businesses'
+import { CATEGORY_GROUPS } from '@/data/categories'
+import { BUSINESSES } from '@/data/businesses'
 
 type Params = Promise<{ group: string }>
 
@@ -17,31 +15,51 @@ export function generateStaticParams() {
 }
 
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
-  const group = getGroup((await params).group)
-  return { title: group?.name ?? 'Category', description: group?.blurb }
+  const slug = (await params).group
+  const group = CATEGORY_GROUPS.find((g) => g.slug === slug)
+  return { title: group ? `${group.label} — My KKR` : 'Category' }
 }
 
 export default async function GroupPage({ params }: { params: Params }) {
-  const group = getGroup((await params).group)
+  const slug = (await params).group
+  const group = CATEGORY_GROUPS.find((g) => g.slug === slug)
   if (!group) notFound()
+
+  const allInGroup = BUSINESSES.filter((b) => b.cat === slug)
 
   return (
     <div className="container">
-      <Breadcrumbs items={[{ href: '/categories', label: 'Categories' }, { label: group.name }]} />
-      <h1 className="page-title">{group.icon} {group.name}</h1>
-      <p className="page-sub">{group.blurb} <span lang="hi">· {group.nameHi}</span></p>
-      <SubNav group={group} />
-      <HowItWorks kind={group.subcategories[0].kind} />
+      <Breadcrumbs items={[{ href: '/categories', label: 'Categories' }, { label: group.label }]} />
+      <h1 className="page-title">{group.icon} {group.label}</h1>
 
-      {group.subcategories.map((sub) => (
-        <section className="sec" key={sub.slug} aria-labelledby={`s-${sub.slug}`}>
-          <div className="sec-head">
-            <h2 className="sec-title" id={`s-${sub.slug}`}>{sub.icon} {sub.name}</h2>
-            <Link href={`/c/${group.slug}/${sub.slug}`} className="link">See all →</Link>
-          </div>
-          <BusinessGrid businesses={businessesInSub(sub.slug)} />
+      {/* Sub-sections per subcategory */}
+      {group.subcategories.slice(1).map((sub) => {
+        const biz = allInGroup.filter((b) => b.sub === sub)
+        if (!biz.length) return null
+        return (
+          <section className="sec" key={sub} aria-labelledby={`s-${sub}`}>
+            <div className="sec-head">
+              <h2 className="sec-title" id={`s-${sub}`}>{sub}</h2>
+            </div>
+            <BusinessGrid businesses={biz} />
+          </section>
+        )
+      })}
+
+      {/* Show all if no sub-category breakdown has results */}
+      {allInGroup.length === 0 && (
+        <section className="sec">
+          <BusinessGrid businesses={[]} />
         </section>
-      ))}
+      )}
+
+      <div className="banner banner-ok" style={{ marginTop: 12 }}>
+        <span aria-hidden="true">🏪</span>
+        <div>
+          Own a business in this category?{' '}
+          <Link href="/register?role=business" className="link">List for free trial →</Link>
+        </div>
+      </div>
     </div>
   )
 }
