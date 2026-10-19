@@ -54,7 +54,9 @@ jobs:
           NEXT_TELEMETRY_DISABLED: 1
       - name: Crawl every internal link + verify CSP
         run: |
-          cp -r public .next/standalone/ && cp -r .next/static .next/standalone/.next/
+          cp -r public .next/standalone/
+          cp -r .next/static .next/standalone/.next/
+          cp -r .next/server .next/standalone/.next/
           PORT=3000 node .next/standalone/server.js &
           for i in $(seq 1 30); do curl -sf http://localhost:3000/api/health && break; sleep 1; done
           npm run check-links

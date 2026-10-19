@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import type { Metadata } from 'next'
 import Breadcrumbs from '@/components/ui/Breadcrumbs'
-import { CATEGORY_GROUPS } from '@/data/categories'
+import { CATEGORY_GROUPS, subSlug } from '@/data/categories'
 import { BUSINESSES } from '@/data/businesses'
 
 export const metadata: Metadata = { title: 'All categories — My KKR' }
@@ -32,7 +32,7 @@ export default function CategoriesPage() {
                 return (
                   <Link
                     key={s}
-                    href={`/c/${g.slug}/${encodeURIComponent(s)}`}
+                    href={`/c/${g.slug}/${subSlug(s)}`}
                     className="subcat-chip"
                   >
                     <span className="subcat-name">{s}</span>

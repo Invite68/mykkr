@@ -119,6 +119,27 @@ export const CATEGORY_GROUPS: CategoryGroup[] = [
   },
 ]
 
+/**
+ * Convert a subcategory display label to a clean URL slug.
+ * Strips leading emoji + whitespace so URLs are ASCII-only and work
+ * reliably in Next.js standalone mode on all filesystems.
+ * e.g. "💇 Grooming" → "Grooming", "All Services" → "All-Services"
+ */
+export function subSlug(label: string): string {
+  return label
+    .replace(/^[\p{Emoji_Presentation}\p{Extended_Pictographic}‍️⃣·\s]+/gu, '')
+    .trim()
+    .replace(/\s+/g, '-')
+    .replace(/&/g, 'and')
+    .replace(/[^\w-]/g, '')
+    || label.replace(/\s+/g, '-')
+}
+
+/** Reverse: find the subcategory label from a URL slug */
+export function subFromSlug(group: CategoryGroup, slug: string): string | undefined {
+  return group.subcategories.find((s) => subSlug(s) === slug)
+}
+
 // All L1 slugs including 'all' for the nav
 export const ALL_L1_TABS = [
   { slug: 'all', label: '⊕ All', icon: '⊕' },
