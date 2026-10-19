@@ -27,7 +27,11 @@ const CSP = [
   "worker-src 'none'",
   "object-src 'none'",
   "manifest-src 'self'",
-  "upgrade-insecure-requests",
+  // "upgrade-insecure-requests" — intentionally omitted:
+  // The Coolify preview runs on plain HTTP. This directive would cause the
+  // browser to upgrade /_next/static/*.css requests to HTTPS, which the
+  // container doesn't serve → CSS silently 404s → page renders unstyled.
+  // Re-enable ONLY after the domain has a valid TLS cert (mykkr.in + Cloudflare).
 ].join('; ')
 
 const nextConfig = {
@@ -69,13 +73,12 @@ const nextConfig = {
           // NOTE: COEP and CORP are intentionally omitted — they break YouTube / Maps iframes
         ],
       },
-      // Cache Next.js static assets aggressively
-      {
-        source: '/_next/static/(.*)',
-        headers: [
-          { key: 'Cache-Control', value: 'public, max-age=31536000, immutable' },
-        ],
-      },
+      // NOTE: /_next/static cache headers intentionally omitted.
+      // Next.js sets "public, max-age=31536000, immutable" automatically on
+      // content-hashed static chunks. A custom override here triggers a Next.js
+      // warning ("can break development behavior") and caused stale CSS caching
+      // on the Coolify preview. Let Next.js manage its own static asset cache.
+
       // No-cache for API routes
       {
         source: '/api/(.*)',
