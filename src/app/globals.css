@@ -510,8 +510,8 @@ img, svg { max-width: 100%; display: block; }
 
 .cat-l1-tab {
   display: flex; align-items: center; gap: 6px;
-  padding: 12px 12px;
-  font-size: 13px; font-weight: 600;
+  padding: 10px 12px;
+  font-size: 12.5px; font-weight: 600;
   color: var(--text-3);
   background: none; border: none;
   border-bottom: 2.5px solid transparent;
@@ -519,10 +519,20 @@ img, svg { max-width: 100%; display: block; }
   white-space: nowrap; flex-shrink: 0;
   transition: color var(--t), border-color var(--t);
 }
+/* L1 icon — sand-toned in rest state, teal when active */
+.cat-l1-icon {
+  color: var(--tan);
+  transition: color var(--t);
+  flex-shrink: 0;
+}
 .cat-l1-tab:hover { color: var(--text-2); }
+.cat-l1-tab:hover .cat-l1-icon { color: var(--night); }
 .cat-l1-tab.active {
   color: var(--night-d);
   border-bottom-color: var(--night-d);
+}
+.cat-l1-tab.active .cat-l1-icon {
+  color: var(--night-d);
 }
 
 /* L2 row */
@@ -547,11 +557,15 @@ img, svg { max-width: 100%; display: block; }
   cursor: pointer;
   transition: all var(--t);
 }
+/* L2 icon — inherits chip colour */
+.cat-l2-chip svg { flex-shrink: 0; opacity: 0.7; }
 .cat-l2-chip:hover { border-color: var(--night); color: var(--night); }
+.cat-l2-chip:hover svg { opacity: 1; }
 .cat-l2-chip.active {
   background: var(--night-d); color: var(--white);
   border-color: var(--night-d);
 }
+.cat-l2-chip.active svg { opacity: 1; }
 
 /* ══════════════════════════════════════════════════════════════════════════
    REGISTRATION CATEGORY PICKER
@@ -622,7 +636,21 @@ img, svg { max-width: 100%; display: block; }
   border-color: var(--tan);
   transform: translateY(-2px);
 }
-.cat-tile-icon { font-size: 30px; }
+/* Sand circle with teal icon — replaces raw emoji */
+.cat-tile-icon-wrap {
+  display: flex; align-items: center; justify-content: center;
+  width: 52px; height: 52px; border-radius: 14px;
+  background: var(--tan-l);
+  color: var(--night-d);
+  flex-shrink: 0;
+  transition: background var(--t), color var(--t);
+}
+.cat-tile:hover .cat-tile-icon-wrap {
+  background: var(--night-d);
+  color: var(--white);
+}
+/* Legacy emoji icon — hidden (kept so old code doesn't break) */
+.cat-tile-icon { display: none; }
 .cat-tile-name { font-size: 14px; font-weight: 700; color: var(--night-d); line-height: 1.3; }
 .cat-tile-hi { font-size: 11.5px; color: var(--text-3); }
 .cat-tile-count { font-size: 11px; color: var(--night); font-weight: 600; margin-top: auto; padding-top: 4px; }
@@ -1156,8 +1184,14 @@ a.media-ph-cta:hover { background: rgba(18,52,59,.16); }
 .subcat-scroll::-webkit-scrollbar { display: none; }
 .subcat-chip { display: flex; align-items: center; gap: 6px; padding: 7px 13px; border-radius: 99px; border: 1.5px solid var(--border); background: var(--white); text-decoration: none; white-space: nowrap; flex-shrink: 0; transition: all var(--t); }
 .subcat-chip:hover { border-color: var(--night); box-shadow: var(--shadow-xs); }
+.subcat-chip-icon { display: flex; align-items: center; color: var(--night-d); opacity: 0.6; flex-shrink: 0; }
+.subcat-chip:hover .subcat-chip-icon { opacity: 1; }
 .subcat-name { font-size: 13px; font-weight: 600; color: var(--night-d); }
 .subcat-count { font-size: 11px; font-weight: 700; color: #fff; background: var(--night-d); padding: 1px 7px; border-radius: 99px; }
+
+/* Section title icon — small Lucide icon beside the heading */
+.sec-title-icon { display: inline-flex; align-items: center; vertical-align: middle;
+  margin-right: 6px; color: var(--night-d); opacity: 0.7; position: relative; top: -1px; }
 
 /* Section count badge */
 .sec-count { font-size: 11px; font-weight: 700; color: var(--text-3); background: var(--border); padding: 2px 8px; border-radius: 99px; }
