@@ -61,39 +61,9 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ── How it works strip ─────────────────────────────────────── */}
       <div className="container">
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-            gap: 12,
-            marginTop: 24,
-          }}
-        >
-          {HOW_STEPS.map((s) => (
-            <div
-              key={s.title}
-              style={{
-                background: 'var(--white)',
-                border: '1.5px solid var(--border)',
-                borderRadius: 'var(--r-xl)',
-                padding: '16px 18px',
-                display: 'flex',
-                gap: 12,
-                alignItems: 'flex-start',
-              }}
-            >
-              <span style={{ fontSize: 22, flexShrink: 0 }} aria-hidden="true">{s.icon}</span>
-              <div>
-                <div style={{ fontWeight: 700, fontSize: 13, color: 'var(--night-d)' }}>{s.title}</div>
-                <div style={{ fontSize: 12, color: 'var(--text-3)', marginTop: 2 }}>{s.desc}</div>
-              </div>
-            </div>
-          ))}
-        </div>
 
-        {/* ── Categories ──────────────────────────────────────────── */}
+        {/* ── Categories — first thing after hero ──────────────────── */}
         <section className="sec" aria-labelledby="cat-h">
           <div className="sec-head">
             <div>
@@ -105,10 +75,27 @@ export default function HomePage() {
           <CategoryGrid />
         </section>
 
+        {/* ── How it works ─────────────────────────────────────────── */}
+        <section className="sec how-strip" aria-label="How My KKR works">
+          {HOW_STEPS.map((s) => (
+            <div className="how-step" key={s.title}>
+              <span className="how-icon" aria-hidden="true">{s.icon}</span>
+              <div>
+                <div className="how-title">{s.title}</div>
+                <div className="how-desc">{s.desc}</div>
+              </div>
+            </div>
+          ))}
+        </section>
+
         {/* ── City updates ─────────────────────────────────────────── */}
         <section className="sec" aria-labelledby="media-h">
           <div className="sec-head">
             <h2 className="sec-title" id="media-h">City updates &amp; promotions</h2>
+            <span className="live-pill">
+              <span className="live-dot" aria-hidden="true" />
+              Live
+            </span>
           </div>
           <MediaStrip />
         </section>
@@ -132,39 +119,28 @@ export default function HomePage() {
 
         {/* ── Business CTA ─────────────────────────────────────────── */}
         <section className="sec">
-          <div
-            style={{
-              background: 'linear-gradient(135deg, var(--night-d) 0%, var(--night) 100%)',
-              borderRadius: 'var(--r-2xl)',
-              padding: '28px 24px',
-              color: '#fff',
-              display: 'grid',
-              gap: 16,
-            }}
-          >
+          <div className="biz-cta-block">
             <div>
-              <div style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.8px', color: 'var(--tan)', marginBottom: 8 }}>
-                For business owners
-              </div>
-              <h2 style={{ fontSize: 20, fontWeight: 800, letterSpacing: '-.4px', marginBottom: 6 }}>
-                Own a business in Kurukshetra?
-              </h2>
-              <p style={{ fontSize: 13, color: 'rgba(255,255,255,.72)', lineHeight: 1.6, maxWidth: 560 }}>
+              <div className="biz-cta-eyebrow">For business owners</div>
+              <h2 className="biz-cta-heading">Own a business in Kurukshetra?</h2>
+              <p className="biz-cta-body">
                 Go fully online in under 5 minutes for{' '}
-                <strong style={{ color: 'var(--tan)' }}>{formatInr(PLANS.business.priceInr)} + GST/month</strong>.
-                Unlimited listings — goods, services, venues &amp; property. Zero commission on every sale — ever.
+                <strong>{formatInr(PLANS.business.priceInr)} + GST/month</strong>.
+                Unlimited listings — goods, services, venues &amp; property.
+                Zero commission on every sale — ever.
               </p>
             </div>
-            <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+            <div className="biz-cta-actions">
               <Link href="/register?role=business" className="btn btn-accent">
                 List your business →
               </Link>
-              <Link href="/pricing" className="btn btn-ghost" style={{ color: 'rgba(255,255,255,.75)', border: '1px solid rgba(255,255,255,.2)' }}>
+              <Link href="/pricing" className="btn btn-ghost-light">
                 See pricing
               </Link>
             </div>
           </div>
         </section>
+
       </div>
     </>
   )
