@@ -7,6 +7,8 @@ import { PLANS, PLATFORM_COMMISSION_RATE, formatInr, withGst } from '@/config/pl
 import { CATEGORY_GROUPS } from '@/data/categories'
 import { BUSINESSES } from '@/data/businesses'
 
+import JobBoardWrapper from '@/components/driver/JobBoardWrapper'
+
 type Params = Promise<{ role: string }>
 
 export const dynamicParams = false
@@ -102,13 +104,11 @@ function DriverDash() {
     <>
       <Kpis items={[['Jobs today', '6'], ['Earnings today', '₹1,140'], ['Rating', '4.8 ★'], ['Commission', '₹0']]} />
       <div className="panel" style={{ marginTop: 14 }}>
-        <h2 className="panel-title">Available jobs near you</h2>
-        <Table head={['Job', 'Pickup area', 'Type', 'Est. fare']} rows={[
-          ['KKR-P4TZ', 'Sector 13', 'Bike delivery · 3 km', '₹30'],
-          ['KKR-W8RN', 'Pipli', 'Tempo · 11 km', '₹242'],
-          ['KKR-C2JD', 'Model Town', 'Bike delivery · 5 km', '₹40'],
-        ]} />
-        <p className="muted" style={{ marginTop: 10 }}>Flow: Accept job → Navigate → Mark picked up → Mark delivered → Photo proof.</p>
+        <h2 className="panel-title">Live Job Board</h2>
+        <p className="muted" style={{ marginBottom: 14, fontSize: 13 }}>
+          New ride/delivery requests appear here in real time. Accept atomically — only one driver gets each job.
+        </p>
+        <JobBoardWrapper />
       </div>
     </>
   )
