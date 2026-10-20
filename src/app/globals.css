@@ -1205,3 +1205,85 @@ a.media-ph-cta:hover { background: rgba(18,52,59,.16); }
 .findbk-map-hint {
   font-size: 11.5px; color: var(--text-3); margin-top: 5px; text-align: center;
 }
+
+/* ══════════════════════════════════════════════════════════════════════════
+   DRIVER JOB BOARD — job cards
+   ══════════════════════════════════════════════════════════════════════════ */
+.job-card {
+  background: var(--white);
+  border: 1.5px solid var(--border);
+  border-radius: var(--r-xl);
+  padding: 16px;
+  display: flex; flex-direction: column; gap: 10px;
+  position: relative; overflow: hidden;
+  transition: border-color var(--t), box-shadow var(--t);
+}
+.job-card:not(.job-card--taken):hover { border-color: var(--night); box-shadow: var(--shadow-sm); }
+.job-card--taken  { opacity: 0.55; }
+.job-card--mine   { border-color: #10b981; box-shadow: 0 0 0 3px rgba(16,185,129,.12); }
+
+/* Ribbon badge */
+.job-ribbon {
+  position: absolute; top: 10px; right: 10px;
+  font-size: 11px; font-weight: 800;
+  padding: 3px 9px; border-radius: 99px;
+}
+.job-ribbon--taken { background: #fef2f2; color: #ef4444; }
+.job-ribbon--mine  { background: #dcfce7; color: #15803d; }
+
+/* Header row */
+.job-card-header { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.job-mode-badge  { font-size: 12px; font-weight: 700; color: var(--night-d); }
+.job-time        { font-size: 11px; color: var(--text-3); }
+
+/* Route — A→B */
+.job-route { display: flex; flex-direction: column; gap: 6px; }
+.job-route-point { display: flex; align-items: flex-start; gap: 8px; }
+.job-route-line  { height: 14px; width: 2px; background: var(--border); margin-left: 13px; border-radius: 2px; }
+.job-pin {
+  flex-shrink: 0;
+  width: 22px; height: 22px; border-radius: 50% 50% 50% 0;
+  transform: rotate(-45deg);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 10px; font-weight: 800; color: #fff;
+  box-shadow: 0 1px 4px rgba(0,0,0,.25);
+}
+.job-pin--green { background: #22c55e; }
+.job-pin--red   { background: #ef4444; }
+.job-pin span   { transform: rotate(45deg); }
+.job-route-label { font-size: 13px; font-weight: 600; color: var(--night-d); line-height: 1.4; padding-top: 1px; }
+
+/* Meta chips row */
+.job-meta { display: flex; flex-wrap: wrap; gap: 6px; }
+.job-meta span {
+  font-size: 11.5px; font-weight: 600; color: var(--text-2);
+  background: var(--bg); border-radius: 99px;
+  padding: 3px 9px;
+}
+
+/* Notes */
+.job-notes {
+  font-size: 12.5px; color: var(--text-2);
+  background: var(--tan-ll); border-radius: 8px;
+  padding: 7px 10px; margin: 0;
+}
+
+/* Contact (shown after accept) */
+.job-contact {
+  display: flex; align-items: center; gap: 10px;
+  background: #dcfce7; border-radius: 8px;
+  padding: 10px 12px; font-size: 13px; font-weight: 700; color: #15803d;
+}
+
+/* Error */
+.job-err { font-size: 12px; color: #ef4444; margin: 0; }
+
+/* Actions */
+.job-actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+
+/* ── Tracking page — driver reveal card ──────────────────────────────────── */
+.track-driver-card {
+  display: flex; align-items: center; gap: 14px;
+  background: #dcfce7; border-radius: 12px;
+  padding: 14px 16px; border: 1.5px solid rgba(16,185,129,.25);
+}

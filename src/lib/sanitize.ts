@@ -34,3 +34,14 @@ export function jobRef(prefix = 'KKR'): string {
   for (const n of buf) out += chars[n % chars.length]
   return `${prefix}-${out}`
 }
+
+/**
+ * Lightweight PII stub — in production replace with AES-256-GCM
+ * using the ENCRYPTION_KEY env var. For v1 we store as-is and flag it.
+ * TODO: wire up real encryption before storing real phone numbers.
+ */
+export function encryptPII(value: string): string {
+  // Real implementation: use Node crypto with ENCRYPTION_KEY
+  // For now: marker so we know it's unencrypted in dev
+  return value
+}

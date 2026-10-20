@@ -181,7 +181,9 @@ export default function RideRequestForm() {
   const [scheduledAt, setScheduledAt] = useState('')
   const [consent, setConsent] = useState(false)
   const [errors, setErrors] = useState<string[]>([])
+  const [submitting, setSubmitting] = useState(false)
   const [submittedRef, setSubmittedRef] = useState<string | null>(null)
+  const [submittedJobId, setSubmittedJobId] = useState<string | null>(null)
 
   function switchMode(m: Mode) {
     setMode(m)
@@ -201,7 +203,7 @@ export default function RideRequestForm() {
     return () => ctrl.abort()
   }, [pickup, dropoff])
 
-  function onSubmit(e: FormEvent) {
+  async function onSubmit(e: FormEvent) {
     e.preventDefault()
     const errs: string[] = []
     if (name.trim().length < 2) errs.push('Enter your name.')
@@ -212,9 +214,42 @@ export default function RideRequestForm() {
     if (!consent) errs.push('Tick the consent box so we can share your details with the assigned driver.')
     setErrors(errs)
     if (errs.length) return
-    // TODO(backend): POST /api/jobs → broadcast to drivers. Until then we only confirm locally.
-    setSubmittedRef(jobRef())
-    window.scrollTo({ top: 0, behavior: 'smooth' })
+
+    setSubmitting(true)
+    try {
+      const res = await fetch('/api/jobs', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          mode,
+          name: name.trim(),
+          phone,
+          pickupLabel:   pickup!.label,
+          pickupLat:     pickup!.lat,
+          pickupLon:     pickup!.lon,
+          dropoffLabel:  dropoff!.label,
+          dropoffLat:    dropoff!.lat,
+          dropoffLon:    dropoff!.lon,
+          vehicleId:     vehicleId,
+          distanceKm:    estimate?.km ?? null,
+          fareEstimate:  estimate ? fareFor(estimate.km, vehicle.perKm) * 100 : null, // paise
+          notes:         details.trim() || null,
+          scheduledAt:   when === 'scheduled' ? scheduledAt : null,
+        }),
+      })
+      const json = await res.json() as { job?: { id: string; ref: string }; errors?: string[]; error?: string }
+      if (!res.ok) {
+        setErrors(json.errors ?? [json.error ?? 'Something went wrong. Please try again.'])
+        setSubmitting(false)
+        return
+      }
+      setSubmittedRef(json.job!.ref)
+      setSubmittedJobId(json.job!.id)
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+    } catch {
+      setErrors(['Network error — please check your connection and try again.'])
+      setSubmitting(false)
+    }
   }
 
   function reset() {
@@ -230,17 +265,29 @@ export default function RideRequestForm() {
       <div className="panel" style={{ textAlign: 'center' }} role="status">
         <div style={{ fontSize: 40 }} aria-hidden="true">✅</div>
         <h2 className="page-title" style={{ fontSize: 20 }}>Request sent to nearby drivers</h2>
-        <p className="muted">You’ll be notified when a verified driver accepts.</p>
+        <p className="muted">You'll be notified when a verified driver accepts.</p>
         <p style={{ margin: '12px 0' }}><span className="ref">{submittedRef}</span></p>
+
+        {/* Live tracking link */}
+        {submittedJobId && (
+          <a
+            href={`/track/${submittedRef}`}
+            className="btn btn-primary btn-block"
+            style={{ marginBottom: 12, display: 'flex', justifyContent: 'center', gap: 8 }}
+          >
+            🗺️ Track live on map →
+          </a>
+        )}
+
         <ul className="track">
           <li><span className="dot done" />Request created and broadcast</li>
           <li><span className="dot wait" />Waiting for a driver — usually under 3 minutes</li>
           <li><span className="dot" />Driver assigned — your number is shared</li>
           <li><span className="dot" />Driver en route to pickup</li>
-          <li><span className="dot" />{mode === 'ride' ? 'Ride' : 'Delivery'} completed (photo proof for deliveries)</li>
+          <li><span className="dot" />{mode === 'ride' ? 'Ride' : 'Delivery'} completed</li>
         </ul>
         <p className="muted" style={{ marginBottom: 14 }}>Pay the driver directly — cash or UPI. My KKR takes zero commission.</p>
-        <button className="btn btn-primary" onClick={reset}>Make another request</button>
+        <button className="btn btn-outline btn-sm" onClick={reset}>Make another request</button>
       </div>
     )
   }
@@ -365,7 +412,7 @@ export default function RideRequestForm() {
           </div>
           <label className="check">
             <input type="checkbox" checked={consent} onChange={(e) => setConsent(e.target.checked)} />
-            I agree my name and phone may be shared with the assigned driver. I’ll pay the driver directly.
+            I agree my name and phone may be shared with the assigned driver. I'll pay the driver directly.
           </label>
         </div>
       </div>
@@ -376,8 +423,12 @@ export default function RideRequestForm() {
           <ul style={{ paddingLeft: 16 }}>{errors.map((e) => <li key={e}>{e}</li>)}</ul>
         </div>
       )}
-      <button type="submit" className="btn btn-primary btn-block">
-        {mode === 'ride' ? '🚗 Send ride request' : '📦 Send delivery request'} to nearby drivers →
+      <button type="submit" className="btn btn-primary btn-block" disabled={submitting}>
+        {submitting
+          ? '⏳ Sending…'
+          : mode === 'ride'
+            ? '🚗 Send ride request to nearby drivers →'
+            : '📦 Send delivery request to nearby drivers →'}
       </button>
     </form>
   )
