@@ -7,6 +7,7 @@
 
 import { useEffect, useRef, useState, useCallback } from 'react'
 import type { SafeJob, JobStatus } from '@/lib/job-types'
+import { directionsUrl, fetchRoute } from '@/lib/maps'
 
 // ── Status display config ─────────────────────────────────────────────────────
 const STATUS_META: Record<JobStatus, { label: string; color: string; icon: string; done: boolean }> = {
@@ -26,15 +27,19 @@ function stepIndex(s: JobStatus) {
   return i === -1 ? 0 : i
 }
 
-// ── Map with green/red Leaflet pins ───────────────────────────────────────────
+// ── Map with route polyline + A/B pins ───────────────────────────────────────
 function JobMap({ job }: { job: SafeJob }) {
-  const mapRef = useRef<HTMLDivElement>(null)
+  const mapRef      = useRef<HTMLDivElement>(null)
   const mapInstance = useRef<import('leaflet').Map | null>(null)
+  const routeLine   = useRef<import('leaflet').Polyline | null>(null)
+
+  const from = { lat: job.pickup_lat,  lon: job.pickup_lon,  label: job.pickup_label  }
+  const to   = { lat: job.dropoff_lat, lon: job.dropoff_lon, label: job.dropoff_label }
 
   useEffect(() => {
     if (!mapRef.current || mapInstance.current) return
 
-    import('leaflet').then((L) => {
+    import('leaflet').then(async (L) => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       delete (L.Icon.Default.prototype as any)._getIconUrl
       L.Icon.Default.mergeOptions({
@@ -51,39 +56,67 @@ function JobMap({ job }: { job: SafeJob }) {
         maxZoom: 18,
       }).addTo(map)
 
-      // Green pin — Pickup (A)
-      const greenIcon = L.divIcon({
+      const mkPin = (color: string, letter: string) => L.divIcon({
         className: '',
-        html: `<div style="width:32px;height:40px;background:#22c55e;border:3px solid #fff;border-radius:50% 50% 50% 0;transform:rotate(-45deg);box-shadow:0 2px 8px rgba(0,0,0,.35)"><div style="transform:rotate(45deg);width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff">A</div></div>`,
+        html: `<div style="width:32px;height:40px;background:${color};border:3px solid #fff;border-radius:50% 50% 50% 0;transform:rotate(-45deg);box-shadow:0 2px 8px rgba(0,0,0,.35)"><div style="transform:rotate(45deg);width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff">${letter}</div></div>`,
         iconSize: [32, 40], iconAnchor: [16, 40], popupAnchor: [0, -42],
       })
 
-      // Red pin — Drop-off (B)
-      const redIcon = L.divIcon({
-        className: '',
-        html: `<div style="width:32px;height:40px;background:#ef4444;border:3px solid #fff;border-radius:50% 50% 50% 0;transform:rotate(-45deg);box-shadow:0 2px 8px rgba(0,0,0,.35)"><div style="transform:rotate(45deg);width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff">B</div></div>`,
-        iconSize: [32, 40], iconAnchor: [16, 40], popupAnchor: [0, -42],
-      })
+      const pickupLatLng:  [number, number] = [from.lat, from.lon]
+      const dropoffLatLng: [number, number] = [to.lat,   to.lon  ]
 
-      const pickupLatLng:  [number, number] = [job.pickup_lat,  job.pickup_lon]
-      const dropoffLatLng: [number, number] = [job.dropoff_lat, job.dropoff_lon]
+      L.marker(pickupLatLng,  { icon: mkPin('#22c55e', 'A') }).addTo(map).bindPopup(`<strong>🟢 Pickup</strong><br>${from.label}`)
+      L.marker(dropoffLatLng, { icon: mkPin('#ef4444', 'B') }).addTo(map).bindPopup(`<strong>🔴 Drop-off</strong><br>${to.label}`)
 
-      L.marker(pickupLatLng,  { icon: greenIcon }).addTo(map).bindPopup(`<strong>🟢 Pickup</strong><br>${job.pickup_label}`)
-      L.marker(dropoffLatLng, { icon: redIcon   }).addTo(map).bindPopup(`<strong>🔴 Drop-off</strong><br>${job.dropoff_label}`)
+      // Straight fallback line immediately so map isn't empty while route loads
+      const straight = L.polyline([pickupLatLng, dropoffLatLng], {
+        color: '#3b82f6', weight: 3, opacity: 0.4, dashArray: '8 6',
+      }).addTo(map)
+      map.fitBounds([pickupLatLng, dropoffLatLng], { padding: [50, 50], maxZoom: 15 })
 
-      map.fitBounds([pickupLatLng, dropoffLatLng], { padding: [40, 40], maxZoom: 15 })
+      // Fetch OSRM driving route and replace straight line
+      try {
+        const coords = await fetchRoute(from, to)
+        if (coords.length > 1 && mapInstance.current) {
+          straight.remove()
+          routeLine.current = L.polyline(coords, {
+            color: '#1d4ed8', weight: 5, opacity: 0.85,
+          }).addTo(map)
+          map.fitBounds(routeLine.current.getBounds(), { padding: [50, 50], maxZoom: 15 })
+        }
+      } catch { /* keep straight dashed line */ }
     })
 
     return () => { mapInstance.current?.remove(); mapInstance.current = null }
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
+  const openInMaps = () => {
+    window.open(directionsUrl(from, to), '_blank', 'noopener,noreferrer')
+  }
+
   return (
     <div style={{ position: 'relative' }}>
-      <div ref={mapRef} style={{ height: 280, borderRadius: 12, overflow: 'hidden', border: '1.5px solid var(--border)' }} />
-      <div style={{ position: 'absolute', bottom: 10, left: 10, background: 'white', borderRadius: 8, padding: '6px 10px', fontSize: 12, fontWeight: 600, display: 'flex', gap: 10, boxShadow: '0 2px 8px rgba(0,0,0,.15)', zIndex: 1000 }}>
+      <div ref={mapRef} style={{ height: 300, borderRadius: 12, overflow: 'hidden', border: '1.5px solid var(--border)' }} />
+
+      {/* Legend */}
+      <div style={{ position: 'absolute', bottom: 48, left: 10, background: 'white', borderRadius: 8, padding: '5px 10px', fontSize: 12, fontWeight: 600, display: 'flex', gap: 10, boxShadow: '0 2px 8px rgba(0,0,0,.15)', zIndex: 1000 }}>
         <span style={{ color: '#22c55e' }}>● A Pickup</span>
         <span style={{ color: '#ef4444' }}>● B Drop-off</span>
       </div>
+
+      {/* Open in Maps button */}
+      <button
+        onClick={openInMaps}
+        style={{
+          position: 'absolute', bottom: 10, left: 10, zIndex: 1000,
+          background: '#1d4ed8', color: '#fff', border: 'none', borderRadius: 8,
+          padding: '7px 14px', fontSize: 12, fontWeight: 700, cursor: 'pointer',
+          display: 'flex', alignItems: 'center', gap: 6,
+          boxShadow: '0 2px 8px rgba(0,0,0,.25)',
+        }}
+      >
+        🗺️ Open in Maps
+      </button>
     </div>
   )
 }

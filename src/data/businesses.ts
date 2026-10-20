@@ -12,6 +12,13 @@ export interface Listing {
   note?: string
 }
 
+export interface Review {
+  author: string
+  rating: number
+  date: string    // e.g. "2 weeks ago"
+  text: string
+}
+
 export interface Business {
   slug: string
   name: string
@@ -28,7 +35,16 @@ export interface Business {
   hours: string
   delivery: DeliveryOption[]
   listings: Listing[]
-  tags?: string[]  // extra keywords for search
+  tags?: string[]       // extra keywords for search
+  // ── rich profile fields ──
+  lat?: number          // GPS latitude (for map pin + directions)
+  lon?: number          // GPS longitude
+  phone?: string        // display phone (not stored in jobs)
+  website?: string
+  photos?: string[]     // up to 5 public image URLs (or placeholder keys)
+  highlights?: string[] // e.g. ['Home delivery', 'UPI accepted', 'GST invoice']
+  sampleReviews?: Review[]
+  hasShop?: boolean     // true = this business has a /shop/[slug] storefront
 }
 
 export const BUSINESSES: Business[] = [
@@ -37,9 +53,19 @@ export const BUSINESSES: Business[] = [
     slug: 'sharma-kirana-store', name: 'Sharma Kirana Store', cat: 'shopping', sub: 'Grocery & Supplies',
     area: 'Gandhi Nagar', emoji: '🛒',
     rating: 4.6, reviews: 41, priceRange: 'MRP & below', verified: true, available: 'Open now',
-    description: 'Neighbourhood kirana with atta, dal, rice, oil, household and daily needs. Same-day delivery nearby.',
+    description: 'Neighbourhood kirana with atta, dal, rice, oil, household and daily needs. Same-day delivery nearby. We carry 500+ SKUs and take WhatsApp orders with delivery within 2 hours.',
     hours: '7:00 AM – 10:00 PM', delivery: ['self', 'driver', 'pickup'],
     listings: [{ name: 'Aashirvaad Atta 10 kg', price: '₹460' }, { name: 'Toor Dal 1 kg', price: '₹165' }, { name: 'Mustard Oil 1 L', price: '₹175' }],
+    lat: 29.9641, lon: 76.8712,
+    phone: '+91 98765 43210',
+    highlights: ['Same-day delivery', 'UPI / Cash accepted', 'Home delivery ≤ 5 km', 'WhatsApp orders'],
+    hasShop: true,
+    photos: ['grocery-1', 'grocery-2', 'grocery-3'],
+    sampleReviews: [
+      { author: 'Priya S.', rating: 5, date: '1 week ago', text: 'Always fresh stock and they remember my usual order. Delivery is super fast!' },
+      { author: 'Amit K.', rating: 4, date: '3 weeks ago', text: 'Good prices, MRP or below. Dal and atta quality is excellent.' },
+      { author: 'Sunita R.', rating: 5, date: '1 month ago', text: 'Best kirana in Gandhi Nagar. Sharma ji is very helpful.' },
+    ],
   },
   {
     slug: 'kisaan-sabzi-mandi', name: 'Kisaan Fresh Sabzi', cat: 'food', sub: 'Grocery',
