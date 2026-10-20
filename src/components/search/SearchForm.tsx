@@ -1,7 +1,19 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import { useState, type FormEvent } from 'react'
+import { useState, useEffect, type FormEvent } from 'react'
+
+// Rotating placeholder suggestions — give users ideas, reduces blank-page paralysis
+const PLACEHOLDERS = [
+  'Try "electrician Model Town"…',
+  'Try "banquet hall for 500 guests"…',
+  'Try "fresh sabzi delivery"…',
+  'Try "cab to Chandigarh"…',
+  'Try "painter near me"…',
+  'Try "sweets for Diwali"…',
+  'Try "plumber emergency"…',
+  'Try "office space for rent"…',
+]
 
 export default function SearchForm({
   variant = 'hero',
@@ -12,6 +24,14 @@ export default function SearchForm({
 }) {
   const router = useRouter()
   const [q, setQ] = useState(initialQuery)
+  const [phIdx, setPhIdx] = useState(0)
+
+  // Rotate placeholder every 3.5 s (hero only — doesn't affect other variants)
+  useEffect(() => {
+    if (variant !== 'hero') return
+    const id = setInterval(() => setPhIdx((i) => (i + 1) % PLACEHOLDERS.length), 3500)
+    return () => clearInterval(id)
+  }, [variant])
 
   function submit(e: FormEvent) {
     e.preventDefault()
@@ -43,18 +63,21 @@ export default function SearchForm({
   return (
     <form className="search-box" onSubmit={submit} role="search">
       <label className="sr-only" htmlFor={`search-${variant}`}>Search</label>
-      <span aria-hidden="true" style={{ alignSelf: 'center', paddingLeft: 10, fontSize: 16 }}>🔍</span>
+      <span aria-hidden="true" style={{ alignSelf: 'center', paddingLeft: 14, fontSize: 18, opacity: .55 }}>🔍</span>
       <input
         id={`search-${variant}`}
         type="search"
         value={q}
         onChange={(e) => setQ(e.target.value)}
-        placeholder='Try "electrician Model Town" or "banquet"…'
+        placeholder={variant === 'hero' ? PLACEHOLDERS[phIdx] : 'Search businesses, services, venues…'}
         maxLength={100}
         autoComplete="off"
         enterKeyHint="search"
+        spellCheck={false}
       />
-      <button type="submit">Search</button>
+      <button type="submit" className="search-submit-btn">
+        Search
+      </button>
     </form>
   )
 }

@@ -4,16 +4,18 @@ import SearchForm from '@/components/search/SearchForm'
 import HomeFeed from '@/components/home/HomeFeed'
 import MediaStrip from '@/components/home/MediaStrip'
 import TrustStrip from '@/components/home/TrustStrip'
+import SocialProofBar from '@/components/home/SocialProofBar'
+import QuickCategoryGrid from '@/components/home/QuickCategoryGrid'
+import { BUSINESSES } from '@/data/businesses'
 import { PLANS, formatInr } from '@/config/platform'
-// HOW_STEPS removed — "Browse / Contact / Pay" cards deleted per design update
 
 const HERO_PILLS = [
-  { href: '/', label: '🏠 Home' },
   { href: '/c/services', label: '🔧 Services' },
   { href: '/c/shopping', label: '🛍️ Shop' },
-  { href: '/c/food', label: '🍛 Food' },
-  { href: '/rides', label: '🚗 Rides' },
-  { href: '/post', label: '📋 Post' },
+  { href: '/c/food', label: '🍛 Food & Sweets' },
+  { href: '/rides', label: '🚗 Rides & Cabs' },
+  { href: '/find-book', label: '📋 Post a Task' },
+  { href: '/c/venues', label: '🏛️ Venues' },
 ]
 
 export const metadata: Metadata = {
@@ -27,8 +29,15 @@ const POPULAR = [
   { q: 'banquet hall', label: 'Marriage hall' },
   { q: 'sweets', label: 'Mithai' },
   { q: 'cab', label: 'Cab' },
-  { q: 'cleaning', label: 'Cleaning' },
+  { q: 'plumber', label: 'Plumber' },
 ]
+
+// Live stats derived from actual data
+const totalBusinesses = BUSINESSES.length
+const verifiedCount = BUSINESSES.filter(b => b.verified).length
+const avgRating = (
+  BUSINESSES.reduce((s, b) => s + b.rating, 0) / BUSINESSES.length
+).toFixed(1)
 
 export default function HomePage() {
   return (
@@ -61,8 +70,35 @@ export default function HomePage() {
               <Link key={p.href} href={p.href} className="hero-pill">{p.label}</Link>
             ))}
           </div>
+
+          {/* Social proof micro-stats */}
+          <div className="hero-stats">
+            <span className="hero-stat">
+              <strong>{totalBusinesses}+</strong> businesses
+            </span>
+            <span className="hero-stat-sep" aria-hidden="true">·</span>
+            <span className="hero-stat">
+              <strong>{verifiedCount}</strong> verified
+            </span>
+            <span className="hero-stat-sep" aria-hidden="true">·</span>
+            <span className="hero-stat">
+              <strong>★ {avgRating}</strong> avg rating
+            </span>
+            <span className="hero-stat-sep" aria-hidden="true">·</span>
+            <span className="hero-stat">
+              <strong>₹0</strong> commission
+            </span>
+          </div>
         </div>
       </section>
+
+      {/* ── Social proof scrolling bar ────────────────────────────── */}
+      <SocialProofBar />
+
+      {/* ── Quick category grid ──────────────────────────────────── */}
+      <div className="container" style={{ paddingBottom: 0 }}>
+        <QuickCategoryGrid />
+      </div>
 
       {/* ── City updates ─────────────────────────────────────────── */}
       <div className="container">
@@ -97,10 +133,13 @@ export default function HomePage() {
                 Unlimited listings — goods, services, venues &amp; property.
                 Zero commission on every sale — ever.
               </p>
+              <p className="biz-cta-proof">
+                Less than printing 100 flyers. Your shop runs 24 hours a day.
+              </p>
             </div>
             <div className="biz-cta-actions">
-              <Link href="/register?role=business" className="btn btn-accent">
-                List your business →
+              <Link href="/register?role=business" className="btn btn-accent btn-lg">
+                List your business free →
               </Link>
               <Link href="/pricing" className="btn btn-ghost-light">
                 See pricing
