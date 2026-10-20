@@ -1,24 +1,23 @@
 'use client'
 
 /**
- * Driver Job Board — real-time feed of open jobs.
+ * Driver Job Board — real-time feed of open jobs via Server-Sent Events.
  *
  * Lifecycle:
- *   1. Loads open jobs on mount via Supabase query
- *   2. Subscribes to Supabase Realtime for:
- *      INSERT → new job appears on board
- *      UPDATE → job taken (status changed) → remove from board OR update state
+ *   1. Connects to GET /api/jobs/stream (SSE)
+ *   2. Receives initial snapshot of open jobs + live updates
  *   3. Driver taps Accept → POST /api/jobs/[id]/accept (atomic)
- *      → 200: show "You got it!" + contact details
- *      → 409: someone else grabbed it first → job card greys out
+ *      → 200: job is yours
+ *      → 409: race lost — someone else accepted first
  *   4. Driver can cancel accepted job → job goes back live for others
+ *
+ * No Supabase, no external deps — pure browser EventSource API.
  */
 
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { supabase } from '@/lib/supabase'
-import type { Job } from '@/lib/supabase-types'
+import type { SafeJob, JobEvent } from '@/lib/job-types'
 
-// ── Simulated driver session (replace with real Firebase auth) ────────────
+// ── Simulated driver session (replace with real Firebase auth) ────────────────
 const MOCK_DRIVER = {
   id:      'driver-demo-001',
   name:    'Demo Driver',
@@ -26,22 +25,22 @@ const MOCK_DRIVER = {
   vehicle: 'Auto Rickshaw',
 }
 
-// ── Relative time helper ───────────────────────────────────────────────────
+// ── Relative time helper ──────────────────────────────────────────────────────
 function relTime(iso: string) {
   const secs = Math.floor((Date.now() - new Date(iso).getTime()) / 1000)
-  if (secs < 60)  return `${secs}s ago`
+  if (secs < 60)   return `${secs}s ago`
   if (secs < 3600) return `${Math.floor(secs / 60)}m ago`
   return `${Math.floor(secs / 3600)}h ago`
 }
 
-// ── Single job card ────────────────────────────────────────────────────────
+// ── Single job card ───────────────────────────────────────────────────────────
 function JobCard({
   job,
   onAccept,
   onCancel,
   myAccepted,
 }: {
-  job: Job
+  job: SafeJob
   onAccept: (id: string) => Promise<void>
   onCancel: (id: string) => Promise<void>
   myAccepted: boolean
@@ -50,9 +49,11 @@ function JobCard({
     myAccepted ? 'mine' : 'idle'
   )
   const [err, setErr] = useState('')
-  const fare = job.fare_estimate ? `₹${Math.round(job.fare_estimate / 100).toLocaleString('en-IN')}` : null
+  const fare = job.fare_estimate
+    ? `₹${Math.round(job.fare_estimate / 100).toLocaleString('en-IN')}`
+    : null
 
-  // If another driver takes it while we're watching
+  // Reflect status changes pushed via SSE
   useEffect(() => {
     if (job.status !== 'open' && state === 'idle') setState('taken')
   }, [job.status, state])
@@ -67,7 +68,7 @@ function JobCard({
       const msg = e instanceof Error ? e.message : String(e)
       if (msg === 'ALREADY_ACCEPTED') {
         setState('taken')
-        setErr('A different driver accepted this just now.')
+        setErr('Another driver accepted this just now.')
       } else {
         setState('idle')
         setErr('Could not accept — please try again.')
@@ -80,26 +81,27 @@ function JobCard({
     setState('cancelling')
     try {
       await onCancel(job.id)
-      setState('idle') // card will be removed by Realtime subscription
+      setState('idle')
     } catch {
       setState('mine')
       setErr('Could not cancel — please try again.')
     }
   }
 
-  const taken       = state === 'taken'
-  const mine        = state === 'mine' || state === 'cancelling'
-  const cancelling  = state === 'cancelling'
-  const busy        = state === 'accepting' || state === 'cancelling'
+  const taken      = state === 'taken'
+  const mine       = state === 'mine' || state === 'cancelling'
+  const cancelling = state === 'cancelling'
+  const busy       = state === 'accepting' || state === 'cancelling'
 
   return (
     <div className={`job-card${taken ? ' job-card--taken' : mine ? ' job-card--mine' : ''}`}>
-      {/* Status ribbon */}
       {taken && <div className="job-ribbon job-ribbon--taken">✖ Taken</div>}
       {mine  && <div className="job-ribbon job-ribbon--mine">✅ Your job</div>}
 
       <div className="job-card-header">
-        <span className="job-mode-badge">{job.mode === 'ride' ? '🚗 Ride' : '📦 Delivery'}</span>
+        <span className="job-mode-badge">
+          {job.mode === 'ride' ? '🚗 Ride' : '📦 Delivery'}
+        </span>
         <span className="job-time">{relTime(job.created_at)}</span>
       </div>
 
@@ -116,37 +118,35 @@ function JobCard({
         </div>
       </div>
 
-      {/* Meta row */}
+      {/* Meta */}
       <div className="job-meta">
         {job.distance_km && <span>📏 ~{job.distance_km.toFixed(1)} km</span>}
         {fare             && <span>💰 {fare} est.</span>}
         <span>🚗 {job.vehicle_id}</span>
-        {job.scheduled_at && <span>🕐 {new Date(job.scheduled_at).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}</span>}
+        {job.scheduled_at && (
+          <span>🕐 {new Date(job.scheduled_at).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}</span>
+        )}
       </div>
 
-      {/* Notes */}
       {job.notes && <p className="job-notes">{job.notes}</p>}
 
-      {/* Customer contact — only shown after acceptance */}
+      {/* Customer contact — only visible to the driver who accepted */}
       {mine && (
         <div className="job-contact">
           <strong>👤 {job.customer_name}</strong>
-          <a href={`tel:${job.customer_phone}`} className="btn btn-sm btn-outline" style={{ marginLeft: 'auto' }}>
-            📞 Call rider
-          </a>
+          {job.driver_phone && (
+            <a href={`tel:${job.driver_phone}`} className="btn btn-sm btn-outline" style={{ marginLeft: 'auto' }}>
+              📞 Call rider
+            </a>
+          )}
         </div>
       )}
 
       {err && <p className="job-err">{err}</p>}
 
-      {/* Action buttons */}
       <div className="job-actions">
         {!taken && !mine && (
-          <button
-            className="btn btn-primary btn-block"
-            disabled={busy}
-            onClick={handleAccept}
-          >
+          <button className="btn btn-primary btn-block" disabled={busy} onClick={handleAccept}>
             {state === 'accepting' ? '⏳ Accepting…' : '✅ Accept job'}
           </button>
         )}
@@ -165,63 +165,68 @@ function JobCard({
             </button>
           </>
         )}
-        {taken && <p className="muted" style={{ fontSize: 12, textAlign: 'center' }}>This job was taken by another driver.</p>}
+        {taken && (
+          <p className="muted" style={{ fontSize: 12, textAlign: 'center' }}>
+            Taken by another driver.
+          </p>
+        )}
       </div>
     </div>
   )
 }
 
-// ── Main board ─────────────────────────────────────────────────────────────
+// ── Main board ────────────────────────────────────────────────────────────────
 export default function JobBoard() {
-  const [jobs, setJobs]         = useState<Job[]>([])
-  const [loading, setLoading]   = useState(true)
-  const [myJobId, setMyJobId]   = useState<string | null>(null)
-  const myJobIdRef = useRef<string | null>(null)
+  const [jobs, setJobs]       = useState<SafeJob[]>([])
+  const [connected, setConnected] = useState(false)
+  const [myJobId, setMyJobId] = useState<string | null>(null)
+  const esRef = useRef<EventSource | null>(null)
 
-  // ── Load open jobs ───────────────────────────────────────────────────────
+  // ── SSE connection ────────────────────────────────────────────────────────
   useEffect(() => {
-    async function load() {
-      const { data } = await supabase
-        .from('jobs')
-        .select('*')
-        .eq('status', 'open')
-        .order('created_at', { ascending: false })
-        .limit(50)
-      setJobs(data ?? [])
-      setLoading(false)
-    }
-    load()
-  }, [])
+    let retryTimer: ReturnType<typeof setTimeout>
 
-  // ── Supabase Realtime ─────────────────────────────────────────────────────
-  useEffect(() => {
-    const channel = supabase
-      .channel('job-board')
-      .on<Job>(
-        'postgres_changes',
-        { event: 'INSERT', schema: 'public', table: 'jobs' },
-        (payload) => {
-          // New job posted — prepend to board
-          if (payload.new.status === 'open') {
-            setJobs((prev) => [payload.new, ...prev])
+    function connect() {
+      const es = new EventSource('/api/jobs/stream')
+      esRef.current = es
+
+      es.onopen = () => setConnected(true)
+
+      es.onmessage = (e) => {
+        try {
+          const event = JSON.parse(e.data as string) as JobEvent
+          if (event.type === 'ping') return
+
+          if (event.type === 'job_new') {
+            setJobs((prev) => {
+              // Deduplicate — initial snapshot can race with a broadcast
+              if (prev.some((j) => j.id === event.job.id)) return prev
+              return [event.job, ...prev]
+            })
+          } else if (event.type === 'job_updated') {
+            setJobs((prev) =>
+              prev.map((j) => j.id === event.job.id ? { ...j, ...event.job } : j)
+            )
           }
+        } catch {
+          // Malformed event — ignore
         }
-      )
-      .on<Job>(
-        'postgres_changes',
-        { event: 'UPDATE', schema: 'public', table: 'jobs' },
-        (payload) => {
-          const updated = payload.new
-          setJobs((prev) =>
-            prev.map((j) => (j.id === updated.id ? { ...j, ...updated } : j))
-          )
-          // If this driver cancelled and job went back to open — keep visible
-          // If another driver cancelled and job is open again — it stays on board
-        }
-      )
-      .subscribe()
+      }
 
-    return () => { supabase.removeChannel(channel) }
+      es.onerror = () => {
+        setConnected(false)
+        es.close()
+        // Reconnect after 3s
+        retryTimer = setTimeout(connect, 3_000)
+      }
+    }
+
+    connect()
+
+    return () => {
+      clearTimeout(retryTimer)
+      esRef.current?.close()
+    }
   }, [])
 
   // ── Accept ────────────────────────────────────────────────────────────────
@@ -236,12 +241,10 @@ export default function JobBoard() {
         driverVehicle: MOCK_DRIVER.vehicle,
       }),
     })
-    const json = await res.json() as { job?: Job; error?: string; code?: string }
+    const json = await res.json() as { job?: SafeJob; error?: string; code?: string }
     if (res.status === 409) throw new Error('ALREADY_ACCEPTED')
     if (!res.ok) throw new Error(json.error ?? 'accept failed')
-    myJobIdRef.current = jobId
     setMyJobId(jobId)
-    // Update the local job record with driver details
     if (json.job) {
       setJobs((prev) => prev.map((j) => j.id === jobId ? { ...j, ...json.job } : j))
     }
@@ -254,36 +257,30 @@ export default function JobBoard() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ by: 'driver', reason: 'Driver cancelled via job board' }),
     })
-    const json = await res.json() as { job?: Job; error?: string }
+    const json = await res.json() as { job?: SafeJob; error?: string }
     if (!res.ok) throw new Error(json.error ?? 'cancel failed')
-    myJobIdRef.current = null
     setMyJobId(null)
-    // Job goes back to open — update locally
     if (json.job) {
-      setJobs((prev) => prev.map((j) => j.id === jobId ? { ...j, ...json.job, status: 'open', driver_id: null } : j))
+      setJobs((prev) =>
+        prev.map((j) => j.id === jobId ? { ...j, ...json.job, status: 'open', driver_id: null } : j)
+      )
     }
   }, [])
 
-  if (loading) {
-    return (
-      <div className="panel" style={{ textAlign: 'center', padding: 40 }}>
-        <div className="live-dot" style={{ margin: '0 auto 12px' }} />
-        <p className="muted">Loading jobs…</p>
-      </div>
-    )
-  }
-
-  const openJobs = jobs.filter((j) => j.status === 'open' || j.id === myJobId)
+  const visibleJobs = jobs.filter((j) => j.status === 'open' || j.id === myJobId)
 
   return (
     <div>
+      {/* Connection indicator */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
-        <div className="live-dot" />
-        <span style={{ fontWeight: 700, color: '#10b981', fontSize: 13 }}>LIVE JOBS</span>
+        <div className={`live-dot${connected ? '' : ' live-dot--offline'}`} />
+        <span style={{ fontWeight: 700, color: connected ? '#10b981' : '#f59e0b', fontSize: 13 }}>
+          {connected ? 'LIVE JOBS' : 'RECONNECTING…'}
+        </span>
         <span className="muted" style={{ fontSize: 12 }}>— updates in real time</span>
       </div>
 
-      {openJobs.length === 0 ? (
+      {visibleJobs.length === 0 ? (
         <div className="panel" style={{ textAlign: 'center', padding: 40 }}>
           <div style={{ fontSize: 40 }}>🕐</div>
           <p style={{ fontWeight: 700, marginTop: 8 }}>No open jobs right now</p>
@@ -291,7 +288,7 @@ export default function JobBoard() {
         </div>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-          {openJobs.map((job) => (
+          {visibleJobs.map((job) => (
             <JobCard
               key={job.id}
               job={job}

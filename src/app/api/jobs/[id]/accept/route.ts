@@ -1,57 +1,101 @@
 /**
  * POST /api/jobs/[id]/accept
- * Driver atomically accepts an open job.
  *
- * Uses the accept_job() Postgres function which:
- *   - Updates status open→accepted in a single atomic statement
- *   - Returns NULL if another driver already accepted (race condition)
- *   - Only one driver wins, even if 50 hit this endpoint simultaneously
+ * Atomically accept an open job. Uses a single UPDATE with WHERE guard
+ * so only one driver wins even under concurrent requests.
+ *
+ * Body (JSON):
+ *   driverId, driverName, driverPhone, driverVehicle
+ *
+ * Returns:
+ *   200 { job: SafeJob }   — you got it
+ *   409 { error, code: 'ALREADY_ACCEPTED' }  — someone else was faster
+ *   404 — job not found
+ *
+ * Security:
+ *   - driverPhone encrypted before storage
+ *   - Response never returns raw phone numbers
+ *   - TODO: verify driverId against Firebase Auth session
  */
-import { NextResponse } from 'next/server'
-import { getAdminClient } from '@/lib/supabase'
+
+import { NextRequest, NextResponse } from 'next/server'
+import { query } from '@/lib/db'
+import { encryptPII, decryptPII } from '@/lib/encrypt'
+import { broadcast } from '@/lib/job-broadcaster'
+import type { Job, SafeJob } from '@/lib/job-types'
+
+function toSafeJob(job: Job): SafeJob {
+  const { customer_phone, driver_phone, ...rest } = job
+  void customer_phone
+  return {
+    ...rest,
+    // Reveal driver_phone back to the driver who just accepted
+    driver_phone: driver_phone ? decryptPII(driver_phone) : null,
+  }
+}
 
 export async function POST(
-  req: Request,
+  req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id: jobId } = await params
 
-  let body: unknown
-  try { body = await req.json() } catch {
-    return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 })
+  let body: Record<string, unknown>
+  try {
+    body = await req.json() as Record<string, unknown>
+  } catch {
+    return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 })
   }
 
-  const { driverId, driverName, driverPhone, driverVehicle } = body as Record<string, unknown>
-
-  if (!driverId || !driverName || !driverPhone) {
-    return NextResponse.json({ error: 'driverId, driverName, driverPhone required' }, { status: 422 })
+  const { driverId, driverName, driverPhone, driverVehicle } = body
+  if (!driverId || !driverName || !driverPhone || !driverVehicle) {
+    return NextResponse.json({ error: 'Missing driver fields' }, { status: 400 })
   }
 
-  const supabase = getAdminClient()
+  // Encrypt driver phone before storage
+  const encDriverPhone = encryptPII(String(driverPhone))
 
-  // ── Atomic accept via stored procedure ──────────────────────────────────
-  // Returns the updated job row, or null if job was already taken
-  const { data, error } = await supabase
-    .rpc('accept_job', {
-      p_job_id:        jobId,
-      p_driver_id:     String(driverId),
-      p_driver_name:   String(driverName),
-      p_driver_phone:  String(driverPhone),
-      p_driver_vehicle: String(driverVehicle ?? ''),
-    })
-
-  if (error) {
-    console.error('[accept_job rpc]', error)
-    return NextResponse.json({ error: 'Database error' }, { status: 500 })
-  }
-
-  if (!data) {
-    // Job was already accepted by another driver — race condition handled
-    return NextResponse.json(
-      { error: 'Job already taken', code: 'ALREADY_ACCEPTED' },
-      { status: 409 }
+  // ── Atomic accept ────────────────────────────────────────────────────────────
+  // The WHERE clause is the race-condition guard:
+  //   status = 'open' AND driver_id IS NULL
+  // Only one UPDATE can win; the rest get 0 rows back → 409.
+  try {
+    const rows = await query<Job>(
+      `UPDATE jobs SET
+         status        = 'accepted',
+         driver_id     = $1,
+         driver_name   = $2,
+         driver_phone  = $3,
+         driver_vehicle = $4,
+         accepted_at   = NOW(),
+         updated_at    = NOW()
+       WHERE id = $5
+         AND status = 'open'
+         AND driver_id IS NULL
+       RETURNING *`,
+      [driverId, driverName, encDriverPhone, driverVehicle, jobId]
     )
-  }
 
-  return NextResponse.json({ job: data })
+    if (rows.length === 0) {
+      // Either job doesn't exist, or another driver already accepted it
+      const exists = await query('SELECT id FROM jobs WHERE id = $1', [jobId])
+      if (exists.length === 0) {
+        return NextResponse.json({ error: 'Job not found' }, { status: 404 })
+      }
+      return NextResponse.json(
+        { error: 'Job already taken by another driver', code: 'ALREADY_ACCEPTED' },
+        { status: 409 }
+      )
+    }
+
+    const safe = toSafeJob(rows[0])
+
+    // Broadcast update to all driver boards + tracking page pollers
+    broadcast({ type: 'job_updated', job: safe })
+
+    return NextResponse.json({ job: safe })
+  } catch (err) {
+    console.error('[POST /api/jobs/[id]/accept]', err)
+    return NextResponse.json({ error: 'Failed to accept job' }, { status: 500 })
+  }
 }

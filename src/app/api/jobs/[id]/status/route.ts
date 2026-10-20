@@ -1,95 +1,126 @@
 /**
- * GET /api/jobs/[id]/status
- * Public polling endpoint — returns safe subset of job data.
- * Called by the customer tracking page every 5s as fallback
- * (Supabase Realtime is the primary update channel).
+ * GET  /api/jobs/[id]/status   — poll current job state (customer tracking page)
+ * PATCH /api/jobs/[id]/status  — driver advances state through the pipeline
  *
- * Does NOT return customer_phone (PII).
+ * GET response:
+ *   { job: SafeJob } — driver_phone only revealed once status is accepted+
+ *
+ * PATCH body: { status: 'driver_en_route' | 'picked_up' | 'completed' }
+ *   Only forward transitions are allowed (no going back).
+ *
+ * Security:
+ *   - Raw phone numbers never returned
+ *   - driver_phone only revealed when status is accepted/en_route/picked_up
+ *   - TODO: verify driver session before PATCH
  */
-import { NextResponse } from 'next/server'
-import { getAdminClient } from '@/lib/supabase'
+
+import { NextRequest, NextResponse } from 'next/server'
+import { query } from '@/lib/db'
+import { decryptPII } from '@/lib/encrypt'
+import { broadcast } from '@/lib/job-broadcaster'
+import type { Job, SafeJob, JobStatus } from '@/lib/job-types'
+import { DRIVER_TRANSITIONS } from '@/lib/job-types'
+
+const SHOW_PHONE_STATUSES: JobStatus[] = ['accepted', 'driver_en_route', 'picked_up']
+
+function toSafeJob(job: Job, revealPhone = false): SafeJob {
+  const { customer_phone, driver_phone, ...rest } = job
+  void customer_phone
+  return {
+    ...rest,
+    driver_phone:
+      revealPhone && driver_phone ? decryptPII(driver_phone) : null,
+  }
+}
+
+// ── GET ───────────────────────────────────────────────────────────────────────
 
 export async function GET(
-  _req: Request,
+  _req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id: jobId } = await params
 
-  const supabase = getAdminClient()
-  const { data, error } = await supabase
-    .from('jobs')
-    .select(`
-      id, ref, mode, status,
-      pickup_label, pickup_lat, pickup_lon,
-      dropoff_label, dropoff_lat, dropoff_lon,
-      vehicle_id, distance_km, fare_estimate,
-      driver_name, driver_phone, driver_vehicle,
-      scheduled_at, created_at, accepted_at, picked_up_at, completed_at, cancelled_at,
-      cancel_by, cancel_reason
-    `)
-    .eq('id', jobId)
-    .single()
+  try {
+    const rows = await query<Job>('SELECT * FROM jobs WHERE id = $1', [jobId])
+    if (rows.length === 0) {
+      return NextResponse.json({ error: 'Job not found' }, { status: 404 })
+    }
 
-  if (error || !data) {
+    const job = rows[0]
+    const revealPhone = SHOW_PHONE_STATUSES.includes(job.status)
+    const safe = toSafeJob(job, revealPhone)
+
+    return NextResponse.json({ job: safe }, {
+      headers: { 'Cache-Control': 'no-store' },
+    })
+  } catch (err) {
+    console.error('[GET /api/jobs/[id]/status]', err)
+    return NextResponse.json({ error: 'Failed to fetch job' }, { status: 500 })
+  }
+}
+
+// ── PATCH ─────────────────────────────────────────────────────────────────────
+
+export async function PATCH(
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const { id: jobId } = await params
+
+  let body: Record<string, unknown>
+  try {
+    body = await req.json() as Record<string, unknown>
+  } catch {
+    return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 })
+  }
+
+  const { status: newStatus } = body
+  if (typeof newStatus !== 'string') {
+    return NextResponse.json({ error: 'status is required' }, { status: 400 })
+  }
+
+  // Verify the requested transition is valid
+  const currentRows = await query<Job>('SELECT status FROM jobs WHERE id = $1', [jobId])
+  if (currentRows.length === 0) {
     return NextResponse.json({ error: 'Job not found' }, { status: 404 })
   }
 
-  // Only expose driver phone once job is accepted (not before)
-  const showPhone = data.status === 'accepted' || data.status === 'driver_en_route' || data.status === 'picked_up'
-  const { driver_phone, ...rest } = data
-  const safe = { ...rest, driver_phone: showPhone ? driver_phone : null }
+  const currentStatus = currentRows[0].status
+  const expectedNext = DRIVER_TRANSITIONS[currentStatus]
 
-  return NextResponse.json({ job: safe }, {
-    headers: { 'Cache-Control': 'no-store' },
-  })
-}
-
-/**
- * PATCH /api/jobs/[id]/status
- * Driver advances status: accepted → driver_en_route → picked_up → completed
- */
-export async function PATCH(
-  req: Request,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  const { id: jobId } = await params
-
-  let body: unknown
-  try { body = await req.json() } catch {
-    return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 })
+  if (newStatus !== expectedNext) {
+    return NextResponse.json(
+      { error: `Cannot transition from "${currentStatus}" to "${newStatus}"` },
+      { status: 409 }
+    )
   }
 
-  const { status, driverId } = body as Record<string, unknown>
-
-  const DRIVER_TRANSITIONS: Record<string, string[]> = {
-    driver_en_route: ['accepted'],
-    picked_up:       ['driver_en_route'],
-    completed:       ['picked_up'],
+  // Build timestamp field for this transition
+  const tsField: Record<string, string> = {
+    driver_en_route: 'accepted_at',  // already set, no new timestamp
+    picked_up:       'picked_up_at',
+    completed:       'completed_at',
   }
+  const tsCol = tsField[newStatus]
 
-  if (!status || !(status as string in DRIVER_TRANSITIONS)) {
-    return NextResponse.json({ error: 'Invalid status transition' }, { status: 422 })
+  try {
+    const rows = await query<Job>(
+      `UPDATE jobs SET
+         status     = $1,
+         ${tsCol ? `${tsCol} = NOW(),` : ''}
+         updated_at = NOW()
+       WHERE id = $2
+       RETURNING *`,
+      [newStatus, jobId]
+    )
+
+    const safe = toSafeJob(rows[0], SHOW_PHONE_STATUSES.includes(rows[0].status))
+    broadcast({ type: 'job_updated', job: safe })
+
+    return NextResponse.json({ job: safe })
+  } catch (err) {
+    console.error('[PATCH /api/jobs/[id]/status]', err)
+    return NextResponse.json({ error: 'Failed to update job status' }, { status: 500 })
   }
-
-  const allowedFrom = DRIVER_TRANSITIONS[status as string]
-  const supabase = getAdminClient()
-
-  const updatePayload: Record<string, string> = { status: status as string }
-  if (status === 'picked_up') updatePayload.picked_up_at = new Date().toISOString()
-  if (status === 'completed') updatePayload.completed_at = new Date().toISOString()
-
-  const { data, error } = await supabase
-    .from('jobs')
-    .update(updatePayload)
-    .eq('id', jobId)
-    .eq('driver_id', String(driverId ?? ''))
-    .in('status', allowedFrom)
-    .select()
-    .single()
-
-  if (error || !data) {
-    return NextResponse.json({ error: 'Transition not allowed or job not found' }, { status: 409 })
-  }
-
-  return NextResponse.json({ job: data })
 }

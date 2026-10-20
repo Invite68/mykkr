@@ -1,47 +1,82 @@
 /**
- * Strip contact details from public requirement posts so users can't bypass
- * the subscription by posting phone numbers, emails, handles or links.
+ * Input sanitization helpers — server and client safe.
+ *
+ * Rules:
+ *   - Strip contact details (phone/UPI/email) from free-text fields
+ *     so users can't bypass the platform's connector model.
+ *   - All functions are pure and have no side effects.
  */
-const PHONE = /(\+91|0)?[\s\-.]?[6-9]\d{4}[\s\-.]?\d{5}/g
-const EMAIL = /[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}/g
-const URL = /https?:\/\/[^\s]+/gi
-const SOCIAL = /@[a-zA-Z0-9_.]{2,}|wa\.me|whatsapp|instagram\.com|facebook\.com|t\.me/gi
 
+// Patterns that look like contact details
+const CONTACT_PATTERNS = [
+  /\b\d{10,}\b/g,                                          // 10+ digit phone numbers
+  /[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/g,    // email addresses
+  /\b[A-Za-z0-9]{3,}\.[A-Za-z0-9]{3,}@[a-z]+\b/g,       // UPI handles
+  /(https?:\/\/[^\s]+)/g,                                  // URLs
+  /\bwa\.me\/[^\s]+/gi,                                    // WhatsApp links
+  /\bt\.me\/[^\s]+/gi,                                     // Telegram links
+]
+
+/**
+ * Strip contact details from a free-text field.
+ * Returns { value: cleaned string, removed: true if anything was stripped }.
+ * Used in: job notes, service descriptions, task posts.
+ */
 export function stripContactDetails(text: string): { value: string; removed: boolean } {
-  let value = text
-    .replace(PHONE, '[phone removed]')
-    .replace(EMAIL, '[email removed]')
-    .replace(URL, '[link removed]')
-  value = value.replace(SOCIAL, '[handle removed]')
-  return { value, removed: value !== text }
-}
-
-const INDIAN_MOBILE = /^(\+91[\s-]?)?[6-9]\d{9}$/
-
-export function isValidIndianMobile(phone: string): boolean {
-  return INDIAN_MOBILE.test(phone.replace(/[\s-]/g, '').replace(/^\+91/, '+91'))
-}
-
-export function isValidPin(pin: string): boolean {
-  return /^1\d{5}$/.test(pin) // Haryana pin codes start with 1
-}
-
-export function jobRef(prefix = 'KKR'): string {
-  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'
-  let out = ''
-  const buf = new Uint32Array(6)
-  crypto.getRandomValues(buf)
-  for (const n of buf) out += chars[n % chars.length]
-  return `${prefix}-${out}`
+  let result = text
+  let removed = false
+  for (const pattern of CONTACT_PATTERNS) {
+    const next = result.replace(pattern, '[contact removed]')
+    if (next !== result) removed = true
+    result = next
+  }
+  return { value: result.trim(), removed }
 }
 
 /**
- * Lightweight PII stub — in production replace with AES-256-GCM
- * using the ENCRYPTION_KEY env var. For v1 we store as-is and flag it.
- * TODO: wire up real encryption before storing real phone numbers.
+ * Sanitize a display name — trim whitespace, collapse multiple spaces.
  */
-export function encryptPII(value: string): string {
-  // Real implementation: use Node crypto with ENCRYPTION_KEY
-  // For now: marker so we know it's unencrypted in dev
-  return value
+export function sanitizeName(name: string): string {
+  return name.replace(/\s+/g, ' ').trim()
+}
+
+/**
+ * Normalise an Indian mobile number to 10 digits (strip +91 / 0 prefix).
+ * Returns null if the number looks invalid.
+ */
+export function normalisePhone(raw: string): string | null {
+  const digits = raw.replace(/\D/g, '')
+  if (digits.length === 12 && digits.startsWith('91')) return digits.slice(2)
+  if (digits.length === 11 && digits.startsWith('0'))  return digits.slice(1)
+  if (digits.length === 10) return digits
+  return null
+}
+
+/**
+ * Validate an Indian mobile number (10 digits, starts with 6-9).
+ */
+export function isValidIndianMobile(raw: string): boolean {
+  const normalised = normalisePhone(raw)
+  if (!normalised) return false
+  return /^[6-9]\d{9}$/.test(normalised)
+}
+
+/**
+ * Validate a PIN code (4-6 digits).
+ */
+export function isValidPin(pin: string): boolean {
+  return /^\d{4,6}$/.test(pin.trim())
+}
+
+/**
+ * Generate a human-readable job reference code.
+ * Format: KKR-XXXXXXXX (8 uppercase alphanumeric chars).
+ */
+export function jobRef(): string {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789' // no 0/O/1/I to avoid confusion
+  let result = 'KKR-'
+  for (let i = 0; i < 8; i++) {
+    result += chars[Math.floor(Math.random() * chars.length)]
+  }
+  return result
 }

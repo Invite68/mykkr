@@ -1,0 +1,85 @@
+// ─────────────────────────────────────────────────────────────────────────────
+// MyKKR — Prisma Schema
+// Database: PostgreSQL (self-hosted on Coolify)
+// ─────────────────────────────────────────────────────────────────────────────
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ── Enums ─────────────────────────────────────────────────────────────────────
+
+enum JobStatus {
+  open
+  accepted
+  driver_en_route
+  picked_up
+  completed
+  cancelled_by_rider
+  cancelled_by_driver
+}
+
+enum JobMode {
+  ride
+  deliver
+}
+
+// ── Jobs ──────────────────────────────────────────────────────────────────────
+// One row per ride / delivery request.
+// Customer-to-business payments are DIRECT (UPI/cash/card) — this table
+// records dispatch only, never stores payment details.
+
+model Job {
+  id  String @id @default(uuid())
+  ref String @unique // short human-readable ID shown to users e.g. KKR-A1B2
+
+  mode   JobMode
+  status JobStatus @default(open)
+
+  // ── Customer (PII encrypted at rest via AES-256 — see lib/encrypt.ts) ──
+  customerName  String
+  customerPhone String // encrypted before insert
+
+  // ── Route ──
+  pickupLabel  String
+  pickupLat    Float
+  pickupLon    Float
+  dropoffLabel String
+  dropoffLat   Float
+  dropoffLon   Float
+
+  // ── Job details ──
+  vehicleId     String
+  distanceKm    Float?
+  fareEstimate  Int?   // paise (₹1 = 100 paise) — estimate only, not collected by platform
+  notes         String?
+  scheduledAt   DateTime?
+
+  // ── Driver (null until accepted) ──
+  driverId      String?
+  driverName    String?
+  driverPhone   String? // encrypted before insert
+  driverVehicle String?
+
+  // ── Cancellation ──
+  cancelBy     String?
+  cancelReason String?
+
+  // ── Timestamps ──
+  createdAt   DateTime  @default(now())
+  acceptedAt  DateTime?
+  pickedUpAt  DateTime?
+  completedAt DateTime?
+  cancelledAt DateTime?
+  updatedAt   DateTime  @updatedAt
+
+  @@index([status])
+  @@index([ref])
+  @@index([driverId])
+  @@map("jobs")
+}

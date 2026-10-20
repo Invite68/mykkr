@@ -45,6 +45,9 @@ const nextConfig = {
   // Disable source maps in production — prevents attackers reading your source via DevTools
   productionBrowserSourceMaps: false,
 
+  // pg (node-postgres) is server-only — keep it out of the browser bundle
+  serverExternalPackages: ['pg'],
+
   images: {
     remotePatterns: [{ protocol: 'https', hostname: 'storage.googleapis.com' }],
     dangerouslyAllowSVG: false,
