@@ -1454,3 +1454,170 @@ a.media-ph-cta:hover { background: rgba(18,52,59,.16); }
   background: #dcfce7; border-radius: 12px;
   padding: 14px 16px; border: 1.5px solid rgba(16,185,129,.25);
 }
+
+/* ══════════════════════════════════════════════════════════════════════════
+   REGISTRATION WIZARD — two-phase OTP + profile completion
+   ══════════════════════════════════════════════════════════════════════════ */
+
+/* Progress bar */
+.wizard-progress {
+  margin-bottom: 24px;
+}
+.wizard-progress-track {
+  height: 5px;
+  background: var(--border);
+  border-radius: 99px;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+.wizard-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--night) 0%, var(--tan) 100%);
+  border-radius: 99px;
+  transition: width 0.4s cubic-bezier(.4,0,.2,1);
+}
+.wizard-progress-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12.5px;
+  color: var(--text-3);
+  font-weight: 600;
+}
+
+/* Step heading */
+.step-heading {
+  font-size: 17px;
+  font-weight: 800;
+  color: var(--night-d);
+  margin-bottom: 18px;
+  letter-spacing: -.2px;
+}
+
+/* Required asterisk */
+.req { color: #ef4444; }
+
+/* Wizard action row (back + next) */
+.wizard-actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin-top: 4px;
+}
+.wizard-next-btn {
+  flex: 1;
+}
+
+/* Phase 1 role card */
+.wizard-role-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  background: var(--bg);
+  border: 1.5px solid var(--border);
+  border-radius: 12px;
+  padding: 12px 14px;
+}
+.wizard-role-icon {
+  font-size: 24px;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+/* Phone prefix */
+.input-prefix {
+  display: inline-flex;
+  align-items: center;
+  padding: 0 10px;
+  height: 44px;
+  background: var(--bg);
+  border: 1.5px solid var(--border);
+  border-right: none;
+  border-radius: var(--r) 0 0 var(--r);
+  font-size: 14px;
+  color: var(--text-2);
+  font-weight: 600;
+  white-space: nowrap;
+}
+.input-prefix + .input {
+  border-radius: 0;
+}
+
+/* OTP input — centred large digits */
+.otp-input {
+  letter-spacing: 6px;
+  text-align: center;
+  font-size: 20px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Map hint row */
+.wizard-map-hint {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  background: var(--tan-ll);
+  border-radius: 8px;
+  padding: 9px 12px;
+  font-size: 12.5px;
+}
+
+/* Review summary table */
+.wizard-review {
+  background: var(--bg);
+  border: 1.5px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  margin-bottom: 16px;
+}
+.wizard-review-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 14px;
+  font-size: 13.5px;
+  border-bottom: 1px solid var(--border);
+}
+.wizard-review-row:last-child { border-bottom: none; }
+.wizard-review-label {
+  color: var(--text-3);
+  font-weight: 600;
+  flex-shrink: 0;
+  min-width: 80px;
+}
+.wizard-review-value {
+  color: var(--night-d);
+  font-weight: 700;
+  text-align: right;
+  word-break: break-word;
+}
+
+/* Plan pricing box */
+.wizard-plan-box {
+  background: linear-gradient(135deg, var(--night) 0%, var(--night-d) 100%);
+  color: #fff;
+  border-radius: 14px;
+  padding: 18px 20px;
+  margin-bottom: 16px;
+  text-align: center;
+}
+.wizard-plan-name {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  opacity: .7;
+  margin-bottom: 4px;
+}
+.wizard-plan-price {
+  font-size: 32px;
+  font-weight: 900;
+  color: var(--tan);
+  line-height: 1.1;
+}
+.wizard-plan-period {
+  font-size: 13px;
+  font-weight: 600;
+  color: rgba(255,255,255,.65);
+  margin-left: 4px;
+}
