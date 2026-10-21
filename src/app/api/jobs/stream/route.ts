@@ -19,6 +19,7 @@
 import { NextRequest } from 'next/server'
 import { subscribe } from '@/lib/job-broadcaster'
 import { query } from '@/lib/db'
+import { verifyStreamToken } from '@/lib/stream-token'
 import type { Job, SafeJob, JobEvent } from '@/lib/job-types'
 
 export const dynamic = 'force-dynamic'
@@ -36,7 +37,30 @@ function encodeEvent(event: JobEvent): string {
   return `data: ${JSON.stringify(event)}\n\n`
 }
 
-export async function GET(_req: NextRequest) {
+export async function GET(req: NextRequest) {
+  // ── Auth via short-lived stream token (?token=...) ─────────────────────────
+  // EventSource doesn't support Authorization headers, so we use a signed
+  // query-param token issued by POST /api/jobs/stream-token.
+  const { searchParams } = new URL(req.url)
+  const tokenParam = searchParams.get('token')
+  try {
+    if (!tokenParam) throw new Error('missing')
+    verifyStreamToken(tokenParam)   // throws if invalid or expired
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err)
+    // Return error as SSE so EventSource onError fires cleanly
+    return new Response(
+      `data: ${JSON.stringify({ type: 'error', code: 'UNAUTHORIZED', message: msg })}\n\n`,
+      {
+        status: 401,
+        headers: {
+          'Content-Type': 'text/event-stream; charset=utf-8',
+          'Cache-Control': 'no-cache, no-transform',
+        },
+      }
+    )
+  }
+
   // Fetch current open jobs to send as initial snapshot
   let initialJobs: SafeJob[] = []
   try {

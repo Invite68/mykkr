@@ -73,3 +73,4 @@ export type JobEvent =
   | { type: 'job_new';     job: SafeJob }
   | { type: 'job_updated'; job: SafeJob }
   | { type: 'ping' }
+  | { type: 'error';       code: string; message: string }

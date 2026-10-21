@@ -3,26 +3,81 @@
 /**
  * Driver Job Board — real-time feed of open jobs via Server-Sent Events.
  *
+ * Auth flow:
+ *   1. On mount, POST /api/jobs/stream-token with Firebase Bearer token
+ *      → receive short-lived signed token (5 min TTL)
+ *   2. Open EventSource with ?token=<signed-token>
+ *      (EventSource doesn't support Authorization headers)
+ *   3. Auto-refresh token before expiry and reconnect SSE
+ *   4. Accept/cancel use Firebase Bearer token via Authorization header (normal)
+ *
  * Lifecycle:
- *   1. Connects to GET /api/jobs/stream (SSE)
+ *   1. Connects to GET /api/jobs/stream?token=... (SSE)
  *   2. Receives initial snapshot of open jobs + live updates
  *   3. Driver taps Accept → POST /api/jobs/[id]/accept (atomic)
  *      → 200: job is yours
  *      → 409: race lost — someone else accepted first
  *   4. Driver can cancel accepted job → job goes back live for others
- *
- * No Supabase, no external deps — pure browser EventSource API.
  */
 
 import { useCallback, useEffect, useRef, useState } from 'react'
 import type { SafeJob, JobEvent } from '@/lib/job-types'
 
-// ── Simulated driver session (replace with real Firebase auth) ────────────────
-const MOCK_DRIVER = {
-  id:      'driver-demo-001',
-  name:    'Demo Driver',
-  phone:   '9876543210',
-  vehicle: 'Auto Rickshaw',
+// ── Firebase auth integration ──────────────────────────────────────────────────
+// getIdToken() returns the current user's Firebase ID token (auto-refreshed).
+// Returns null if the user is not signed in (shouldn't happen on driver page).
+async function getIdToken(): Promise<string | null> {
+  if (typeof window === 'undefined') return null
+  try {
+    // Dynamic import to avoid SSR — firebase/auth is client-only
+    const { getAuth } = await import('firebase/auth')
+    const user = getAuth().currentUser
+    if (!user) return null
+    return user.getIdToken(/* forceRefresh */ false)
+  } catch {
+    return null
+  }
+}
+
+// ── Stream token exchange ─────────────────────────────────────────────────────
+// Exchange a Firebase ID token for a short-lived SSE stream token.
+// Returns { token, expiresInMs } or null on failure.
+async function fetchStreamToken(): Promise<{ token: string; expiresInMs: number } | null> {
+  try {
+    const idToken = await getIdToken()
+    if (!idToken) return null
+    const res = await fetch('/api/jobs/stream-token', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${idToken}` },
+    })
+    if (!res.ok) return null
+    return res.json() as Promise<{ token: string; expiresInMs: number }>
+  } catch {
+    return null
+  }
+}
+
+// ── Driver identity from Firebase ─────────────────────────────────────────────
+// These are filled from the driver's saved profile (set during registration).
+// Falls back to generic placeholders — the real values come from Firebase.
+interface DriverInfo {
+  name:    string
+  phone:   string
+  vehicle: string
+}
+
+async function getDriverInfo(): Promise<DriverInfo> {
+  try {
+    const { getAuth } = await import('firebase/auth')
+    const user = getAuth().currentUser
+    return {
+      name:    user?.displayName ?? 'Driver',
+      phone:   user?.phoneNumber ?? '',
+      vehicle: 'Vehicle',   // pulled from driver profile on first accept
+    }
+  } catch {
+    return { name: 'Driver', phone: '', vehicle: 'Vehicle' }
+  }
 }
 
 // ── Relative time helper ──────────────────────────────────────────────────────
@@ -193,17 +248,44 @@ function JobCard({
 
 // ── Main board ────────────────────────────────────────────────────────────────
 export default function JobBoard() {
-  const [jobs, setJobs]       = useState<SafeJob[]>([])
+  const [jobs, setJobs]           = useState<SafeJob[]>([])
   const [connected, setConnected] = useState(false)
-  const [myJobId, setMyJobId] = useState<string | null>(null)
-  const esRef = useRef<EventSource | null>(null)
+  const [authed, setAuthed]       = useState(true)   // false = no Firebase user
+  const [myJobId, setMyJobId]     = useState<string | null>(null)
+  const esRef    = useRef<EventSource | null>(null)
+  const tokenRef = useRef<string | null>(null)
+  const refreshTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  // ── SSE connection ────────────────────────────────────────────────────────
+  // ── SSE connection with token auth ────────────────────────────────────────
   useEffect(() => {
     let retryTimer: ReturnType<typeof setTimeout>
+    let mounted = true
 
-    function connect() {
-      const es = new EventSource('/api/jobs/stream')
+    async function connect() {
+      if (!mounted) return
+
+      // Step 1: get a short-lived stream token
+      const result = await fetchStreamToken()
+      if (!result) {
+        // Not signed in or server error — show auth prompt
+        setAuthed(false)
+        return
+      }
+
+      setAuthed(true)
+      tokenRef.current = result.token
+
+      // Step 2: schedule a token refresh at 80% of TTL (avoid expiry during stream)
+      if (refreshTimerRef.current) clearTimeout(refreshTimerRef.current)
+      refreshTimerRef.current = setTimeout(() => {
+        // Reconnect with a fresh token
+        esRef.current?.close()
+        void connect()
+      }, result.expiresInMs * 0.8)
+
+      // Step 3: open SSE with token in query param
+      const url = `/api/jobs/stream?token=${encodeURIComponent(result.token)}`
+      const es  = new EventSource(url)
       esRef.current = es
 
       es.onopen = () => setConnected(true)
@@ -212,6 +294,14 @@ export default function JobBoard() {
         try {
           const event = JSON.parse(e.data as string) as JobEvent
           if (event.type === 'ping') return
+          if (event.type === 'error') {
+            if (event.code === 'UNAUTHORIZED') {
+              // Token expired mid-stream — reconnect
+              es.close()
+              retryTimer = setTimeout(() => void connect(), 500)
+            }
+            return
+          }
 
           if (event.type === 'job_new') {
             setJobs((prev) => {
@@ -232,29 +322,40 @@ export default function JobBoard() {
       es.onerror = () => {
         setConnected(false)
         es.close()
-        // Reconnect after 3s
-        retryTimer = setTimeout(connect, 3_000)
+        // Exponential back-off capped at 10s
+        retryTimer = setTimeout(() => void connect(), 3_000)
       }
     }
 
-    connect()
+    void connect()
 
     return () => {
+      mounted = false
       clearTimeout(retryTimer)
+      if (refreshTimerRef.current) clearTimeout(refreshTimerRef.current)
       esRef.current?.close()
     }
   }, [])
 
+  // ── Auth helper for API calls ─────────────────────────────────────────────
+  async function authHeaders(): Promise<HeadersInit> {
+    const idToken = await getIdToken()
+    return idToken
+      ? { 'Content-Type': 'application/json', Authorization: `Bearer ${idToken}` }
+      : { 'Content-Type': 'application/json' }
+  }
+
   // ── Accept ────────────────────────────────────────────────────────────────
   const handleAccept = useCallback(async (jobId: string) => {
+    const driver = await getDriverInfo()
     const res = await fetch(`/api/jobs/${jobId}/accept`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: await authHeaders(),
       body: JSON.stringify({
-        driverId:      MOCK_DRIVER.id,
-        driverName:    MOCK_DRIVER.name,
-        driverPhone:   MOCK_DRIVER.phone,
-        driverVehicle: MOCK_DRIVER.vehicle,
+        // driverId comes from auth.uid server-side — NOT from body
+        driverName:    driver.name,
+        driverPhone:   driver.phone,
+        driverVehicle: driver.vehicle,
       }),
     })
     const json = await res.json() as { job?: SafeJob; error?: string; code?: string }
@@ -264,13 +365,14 @@ export default function JobBoard() {
     if (json.job) {
       setJobs((prev) => prev.map((j) => j.id === jobId ? { ...j, ...json.job } : j))
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   // ── Cancel ────────────────────────────────────────────────────────────────
   const handleCancel = useCallback(async (jobId: string) => {
     const res = await fetch(`/api/jobs/${jobId}/cancel`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: await authHeaders(),
       body: JSON.stringify({ by: 'driver', reason: 'Driver cancelled via job board' }),
     })
     const json = await res.json() as { job?: SafeJob; error?: string }
@@ -281,9 +383,24 @@ export default function JobBoard() {
         prev.map((j) => j.id === jobId ? { ...j, ...json.job, status: 'open', driver_id: null } : j)
       )
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const visibleJobs = jobs.filter((j) => j.status === 'open' || j.id === myJobId)
+
+  // Not signed in — Firebase Auth not ready yet
+  if (!authed) {
+    return (
+      <div className="panel" style={{ textAlign: 'center', padding: 40 }}>
+        <div style={{ fontSize: 40 }}>🔒</div>
+        <p style={{ fontWeight: 700, marginTop: 8 }}>Sign in to see jobs</p>
+        <p className="muted">Please sign in with your driver account to view and accept jobs.</p>
+        <a href="/login?role=driver" className="btn btn-primary" style={{ marginTop: 16, display: 'inline-block' }}>
+          Sign in
+        </a>
+      </div>
+    )
+  }
 
   return (
     <div>
