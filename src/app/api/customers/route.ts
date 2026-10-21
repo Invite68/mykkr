@@ -20,8 +20,12 @@ import { NextRequest, NextResponse } from 'next/server'
 import { requireAuth }               from '@/lib/firebase-admin'
 import { upsertUserOnLogin, toPublicUser } from '@/lib/user-db'
 import { query }                     from '@/lib/db'
+import { apiLimiter, checkLimit }    from '@/lib/rate-limit'
 
 export async function POST(req: NextRequest) {
+  const limited = checkLimit(apiLimiter, req)
+  if (limited) return limited
+
   // ── Auth ─────────────────────────────────────────────────────────────────────
   let auth: { uid: string; phone: string }
   try {

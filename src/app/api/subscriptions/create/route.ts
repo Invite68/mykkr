@@ -17,11 +17,15 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { requireAuth }               from '@/lib/firebase-admin'
+import { apiLimiter, checkLimit }    from '@/lib/rate-limit'
 import { findUserByUid, hasActiveSubscription } from '@/lib/user-db'
 import { createRazorpaySubscription } from '@/lib/razorpay'
 import { query }                     from '@/lib/db'
 
 export async function POST(req: NextRequest) {
+  const limited = checkLimit(apiLimiter, req)
+  if (limited) return limited
+
   // ── Auth ─────────────────────────────────────────────────────────────────────
   let auth: { uid: string; phone: string }
   try {

@@ -24,6 +24,7 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { requireAuth }  from '@/lib/firebase-admin'
+import { apiLimiter, checkLimit } from '@/lib/rate-limit'
 import { upsertUserOnLogin, toPublicUser } from '@/lib/user-db'
 import { encryptPII }   from '@/lib/encrypt'
 import { query }        from '@/lib/db'
@@ -50,6 +51,9 @@ function makeSlug(name: string): string {
 }
 
 export async function POST(req: NextRequest) {
+  const limited = checkLimit(apiLimiter, req)
+  if (limited) return limited
+
   // ── Auth ─────────────────────────────────────────────────────────────────────
   let auth: { uid: string; phone: string }
   try {

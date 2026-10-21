@@ -1,4 +1,17 @@
 /**
+ * GET /api/jobs
+ * List open jobs for the driver board.
+ *
+ * Authorization: Bearer <firebase-id-token>  (driver role)
+ *
+ * Query params:
+ *   mode?   : 'ride' | 'deliver'   (filter by mode)
+ *   limit?  : number               (default 50, max 100)
+ *
+ * Returns: { jobs: SafeJob[] }   — ordered newest first, open only
+ * driver_phone always null in list (not assigned yet)
+ *
+ * ─────────────────────────────────────────────────────────────────────────────
  * POST /api/jobs
  * Create a new ride or delivery job.
  *
@@ -20,10 +33,11 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { requireAuth } from '@/lib/firebase-admin'
-import { query } from '@/lib/db'
-import { encryptPII } from '@/lib/encrypt'
-import { broadcast } from '@/lib/job-broadcaster'
+import { requireAuth }               from '@/lib/firebase-admin'
+import { query }                     from '@/lib/db'
+import { encryptPII }                from '@/lib/encrypt'
+import { broadcast }                 from '@/lib/job-broadcaster'
+import { apiLimiter, readLimiter, checkLimit } from '@/lib/rate-limit'
 import type { Job, SafeJob } from '@/lib/job-types'
 
 // Generate a short human-readable job reference: KKR-XXXX
@@ -43,7 +57,55 @@ function toSafeJob(job: Job): SafeJob {
   }
 }
 
+// ── GET — list open jobs (driver board) ──────────────────────────────────────
+
+export async function GET(req: NextRequest) {
+  const limited = checkLimit(readLimiter, req)
+  if (limited) return limited
+
+  // Auth required — only verified drivers should see the live job feed
+  try {
+    await requireAuth(req)
+  } catch {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
+  const { searchParams } = new URL(req.url)
+  const mode  = searchParams.get('mode')
+  const limit = Math.min(parseInt(searchParams.get('limit') ?? '50', 10) || 50, 100)
+
+  // Validate mode filter if provided
+  if (mode && mode !== 'ride' && mode !== 'deliver') {
+    return NextResponse.json({ error: 'mode must be "ride" or "deliver"' }, { status: 400 })
+  }
+
+  try {
+    const rows = mode
+      ? await query<Job>(
+          `SELECT * FROM jobs WHERE status = 'open' AND mode = $1
+           ORDER BY created_at DESC LIMIT $2`,
+          [mode, limit]
+        )
+      : await query<Job>(
+          `SELECT * FROM jobs WHERE status = 'open'
+           ORDER BY created_at DESC LIMIT $1`,
+          [limit]
+        )
+
+    const jobs: SafeJob[] = rows.map(toSafeJob)
+    return NextResponse.json({ jobs }, { headers: { 'Cache-Control': 'no-store' } })
+  } catch (err) {
+    console.error('[GET /api/jobs]', err)
+    return NextResponse.json({ error: 'Failed to fetch jobs' }, { status: 500 })
+  }
+}
+
+// ── POST — create a new job ───────────────────────────────────────────────────
+
 export async function POST(req: NextRequest) {
+  const limited = checkLimit(apiLimiter, req)
+  if (limited) return limited
+
   // ── Auth ─────────────────────────────────────────────────────────────────────
   try {
     await requireAuth(req)
