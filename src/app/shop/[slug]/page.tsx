@@ -20,21 +20,45 @@ import Link from 'next/link'
 import { BUSINESSES, getBusiness } from '@/data/businesses'
 import type { Business, Listing } from '@/data/businesses'
 import ShopClient from './ShopClient'
+import { query } from '@/lib/db'
 
 const MAX_LISTINGS = 20  // hard cap per business subscription plan
 
 type Params = Promise<{ slug: string }>
 
 // ── Subscription check ────────────────────────────────────────────────────────
-// TODO: replace with real DB query when backend is wired:
-//   const sub = await query('SELECT active, expires_at FROM subscriptions WHERE slug=$1', [slug])
+// Joins business slug → business_profiles → users → subscriptions.
+// Returns true only when the business has an active or trialing subscription.
+// Falls back to false (paywall shown) on any DB error so we never accidentally
+// reveal products when we cannot verify payment status.
 async function checkSubscription(slug: string): Promise<boolean> {
-  // Demo: specific slugs are "active" to show the full storefront
-  const DEMO_ACTIVE = ['sharma-kirana-store', 'brijwasi-sweets', 'hotel-natraj-restaurant']
-  return DEMO_ACTIVE.includes(slug)
+  try {
+    const rows = await query<{ active: boolean }>(
+      `SELECT EXISTS (
+         SELECT 1
+         FROM   subscriptions s
+         JOIN   users u ON u.id = s.user_id
+         JOIN   business_profiles bp ON bp.user_id = u.id
+         WHERE  bp.slug = $1
+           AND  s.plan  = 'business'
+           AND  s.status IN ('active', 'trialing')
+       ) AS active`,
+      [slug]
+    )
+    return rows[0]?.active === true
+  } catch (err) {
+    // On DB error default to locked (safe-fail)
+    console.error('[checkSubscription] DB error — defaulting to locked:', err)
+    return false
+  }
 }
 
-export const dynamicParams = false
+// Dynamic rendering required so the subscription check hits the live DB on
+// every request — we must never serve a cached paywall bypass.
+export const dynamic = 'force-dynamic'
+
+// Keep generateStaticParams for type-safety / IDE hints but dynamic overrides it.
+// Remove if you want 404 for unknown slugs without a DB hit.
 export function generateStaticParams() {
   return BUSINESSES.filter((b) => b.hasShop).map((b) => ({ slug: b.slug }))
 }

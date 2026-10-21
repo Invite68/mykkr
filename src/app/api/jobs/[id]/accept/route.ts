@@ -4,8 +4,11 @@
  * Atomically accept an open job. Uses a single UPDATE with WHERE guard
  * so only one driver wins even under concurrent requests.
  *
+ * Authorization: Bearer <firebase-id-token>  (driver role required)
+ *
  * Body (JSON):
- *   driverId, driverName, driverPhone, driverVehicle
+ *   driverName, driverPhone, driverVehicle
+ *   (driverId is derived from the authenticated Firebase UID)
  *
  * Returns:
  *   200 { job: SafeJob }   — you got it
@@ -13,12 +16,13 @@
  *   404 — job not found
  *
  * Security:
+ *   - Firebase Auth required — driverId comes from verified token, never body
  *   - driverPhone encrypted before storage
  *   - Response never returns raw phone numbers
- *   - TODO: verify driverId against Firebase Auth session
  */
 
 import { NextRequest, NextResponse } from 'next/server'
+import { requireAuth } from '@/lib/firebase-admin'
 import { query } from '@/lib/db'
 import { encryptPII, decryptPII } from '@/lib/encrypt'
 import { broadcast } from '@/lib/job-broadcaster'
@@ -38,6 +42,14 @@ export async function POST(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  // ── Auth — driverId comes from the verified token, NOT the request body ───────
+  let auth: { uid: string; phone: string }
+  try {
+    auth = await requireAuth(req)
+  } catch {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
   const { id: jobId } = await params
 
   let body: Record<string, unknown>
@@ -47,8 +59,11 @@ export async function POST(
     return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 })
   }
 
-  const { driverId, driverName, driverPhone, driverVehicle } = body
-  if (!driverId || !driverName || !driverPhone || !driverVehicle) {
+  // driverId is always the authenticated Firebase UID — cannot be spoofed by body
+  const { driverName, driverPhone, driverVehicle } = body
+  const driverId = auth.uid
+
+  if (!driverName || !driverPhone || !driverVehicle) {
     return NextResponse.json({ error: 'Missing driver fields' }, { status: 400 })
   }
 

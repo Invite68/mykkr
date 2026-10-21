@@ -2,19 +2,22 @@
  * GET  /api/jobs/[id]/status   — poll current job state (customer tracking page)
  * PATCH /api/jobs/[id]/status  — driver advances state through the pipeline
  *
- * GET response:
+ * GET — public (no auth required; used by customer tracking page)
  *   { job: SafeJob } — driver_phone only revealed once status is accepted+
  *
- * PATCH body: { status: 'driver_en_route' | 'picked_up' | 'completed' }
+ * PATCH — requires Firebase Auth (driver must own the job)
+ *   Body: { status: 'driver_en_route' | 'picked_up' | 'completed' }
  *   Only forward transitions are allowed (no going back).
+ *   Returns 403 if the authenticated driver does not own this job.
  *
  * Security:
  *   - Raw phone numbers never returned
  *   - driver_phone only revealed when status is accepted/en_route/picked_up
- *   - TODO: verify driver session before PATCH
+ *   - PATCH enforces ownership: driver_id must match the authenticated UID
  */
 
 import { NextRequest, NextResponse } from 'next/server'
+import { requireAuth } from '@/lib/firebase-admin'
 import { query } from '@/lib/db'
 import { decryptPII } from '@/lib/encrypt'
 import { broadcast } from '@/lib/job-broadcaster'
@@ -66,6 +69,14 @@ export async function PATCH(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  // ── Auth — only the assigned driver can advance the job ───────────────────────
+  let auth: { uid: string; phone: string }
+  try {
+    auth = await requireAuth(req)
+  } catch {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
   const { id: jobId } = await params
 
   let body: Record<string, unknown>
@@ -80,13 +91,20 @@ export async function PATCH(
     return NextResponse.json({ error: 'status is required' }, { status: 400 })
   }
 
-  // Verify the requested transition is valid
-  const currentRows = await query<Job>('SELECT status FROM jobs WHERE id = $1', [jobId])
+  // Verify the requested transition is valid, and that this driver owns the job
+  const currentRows = await query<Job>('SELECT status, driver_id FROM jobs WHERE id = $1', [jobId])
   if (currentRows.length === 0) {
     return NextResponse.json({ error: 'Job not found' }, { status: 404 })
   }
 
   const currentStatus = currentRows[0].status
+  const ownerId       = currentRows[0].driver_id
+
+  // Ownership check: the job must belong to the authenticated driver
+  if (ownerId !== auth.uid) {
+    return NextResponse.json({ error: 'Forbidden — not your job' }, { status: 403 })
+  }
+
   const expectedNext = DRIVER_TRANSITIONS[currentStatus]
 
   if (newStatus !== expectedNext) {

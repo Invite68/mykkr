@@ -2,6 +2,8 @@
  * POST /api/jobs
  * Create a new ride or delivery job.
  *
+ * Authorization: Bearer <firebase-id-token>
+ *
  * Body (JSON):
  *   mode, customerName, customerPhone,
  *   pickupLabel, pickupLat, pickupLon,
@@ -12,12 +14,13 @@
  * Returns: { job: { id, ref, status, ... } }
  *
  * Security:
+ *   - Firebase Auth required — only authenticated customers can create jobs
  *   - customerPhone is AES-256-GCM encrypted before insert
  *   - Response never returns raw phone numbers
- *   - No API key needed — authenticated via session (TODO: add auth middleware)
  */
 
 import { NextRequest, NextResponse } from 'next/server'
+import { requireAuth } from '@/lib/firebase-admin'
 import { query } from '@/lib/db'
 import { encryptPII } from '@/lib/encrypt'
 import { broadcast } from '@/lib/job-broadcaster'
@@ -41,6 +44,13 @@ function toSafeJob(job: Job): SafeJob {
 }
 
 export async function POST(req: NextRequest) {
+  // ── Auth ─────────────────────────────────────────────────────────────────────
+  try {
+    await requireAuth(req)
+  } catch {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
   let body: Record<string, unknown>
   try {
     body = await req.json() as Record<string, unknown>
