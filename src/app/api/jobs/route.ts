@@ -40,6 +40,46 @@ import { broadcast }                 from '@/lib/job-broadcaster'
 import { apiLimiter, readLimiter, checkLimit } from '@/lib/rate-limit'
 import type { Job, SafeJob } from '@/lib/job-types'
 
+// ── Server-side fare calculation ──────────────────────────────────────────────
+// Prevents clients from submitting arbitrarily low or high fare estimates.
+
+interface FareRate {
+  base_fare_paise:  number
+  per_km_paise:     number
+  per_min_paise:    number
+  min_fare_paise:   number
+  surge_multiplier: string
+}
+
+async function calculateServerFare(
+  vehicleType: string,
+  mode: string,
+  distanceKm: number | null
+): Promise<number | null> {
+  try {
+    const rows = await query<FareRate>(
+      `SELECT base_fare_paise, per_km_paise, per_min_paise, min_fare_paise, surge_multiplier
+         FROM fare_rates
+        WHERE vehicle_type = $1 AND mode = $2 AND is_active = TRUE
+        LIMIT 1`,
+      [vehicleType, mode]
+    )
+    if (!rows.length || distanceKm === null) return null
+
+    const r = rows[0]
+    const surge = parseFloat(r.surge_multiplier) || 1.0
+    const raw   = (r.base_fare_paise + r.per_km_paise * distanceKm) * surge
+    return Math.max(Math.round(raw), r.min_fare_paise)
+  } catch {
+    // fare_rates table may not exist yet — non-fatal, server fare stays null
+    return null
+  }
+}
+
+// Tolerance: client fare is accepted if within ±30% of server calculation.
+// Outside that range the server overwrites the client value with the server calc.
+const FARE_TOLERANCE = 0.30
+
 // Generate a short human-readable job reference: KKR-XXXX
 function makeRef(): string {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789' // no ambiguous chars
@@ -178,6 +218,24 @@ export async function POST(req: NextRequest) {
   // ── Encrypt PII ─────────────────────────────────────────────────────────────
   const encPhone = encryptPII(phoneStr)
 
+  // ── Server-side fare calculation ─────────────────────────────────────────────
+  // Derive vehicle_type from vehicleId (format: 'bike-123', 'auto-456', etc.)
+  const vehicleType = vehicleStr.split('-')[0] ?? vehicleStr
+  const serverFarePaise = await calculateServerFare(vehicleType, mode as string, distKmN)
+
+  // If client sent a fare, validate it's within ±30% of server calculation.
+  // If outside tolerance, silently use the server fare (no error — UX stays smooth).
+  let acceptedFarePaise: number | null = null
+  if (serverFarePaise !== null && fareN !== null) {
+    const lo = serverFarePaise * (1 - FARE_TOLERANCE)
+    const hi = serverFarePaise * (1 + FARE_TOLERANCE)
+    acceptedFarePaise = fareN >= lo && fareN <= hi ? fareN : serverFarePaise
+  } else if (serverFarePaise !== null) {
+    acceptedFarePaise = serverFarePaise
+  } else {
+    acceptedFarePaise = fareN  // fare_rates not seeded yet — accept client value
+  }
+
   // ── Insert ───────────────────────────────────────────────────────────────────
   let ref = makeRef()
 
@@ -190,9 +248,10 @@ export async function POST(req: NextRequest) {
          pickup_label, pickup_lat, pickup_lon,
          dropoff_label, dropoff_lat, dropoff_lon,
          vehicle_id, distance_km, fare_estimate,
+         fare_client_paise, fare_server_paise, fare_accepted_paise,
          notes, scheduled_at
        ) VALUES (
-         $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15
+         $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18
        )
        RETURNING *`,
       [
@@ -202,7 +261,10 @@ export async function POST(req: NextRequest) {
         dropStr, dropLatN, dropLonN,
         vehicleStr,
         distKmN,
-        fareN,
+        acceptedFarePaise !== null ? acceptedFarePaise / 100 : null, // fare_estimate in rupees (legacy col)
+        fareN,              // fare_client_paise — what client submitted
+        serverFarePaise,   // fare_server_paise — what server calculated
+        acceptedFarePaise, // fare_accepted_paise — final value used
         notesStr,
         schedStr,
       ]

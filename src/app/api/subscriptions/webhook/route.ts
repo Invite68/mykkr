@@ -6,7 +6,7 @@
  *
  * Events handled:
  *   subscription.activated   → status = 'active', set period dates
- *   subscription.charged     → update period dates (renewal)
+ *   subscription.charged     → update period dates + record payment (idempotent)
  *   subscription.cancelled   → status = 'cancelled', set cancelled_at
  *   subscription.completed   → status = 'expired'
  *   payment.failed           → status = 'past_due'
@@ -15,6 +15,13 @@
  *   https://mykkr.in/api/subscriptions/webhook
  *
  * Required env var: RAZORPAY_WEBHOOK_SECRET
+ *
+ * Security:
+ *   - HMAC-SHA256 signature verified before ANY processing
+ *   - Idempotency: subscription.charged uses ON CONFLICT DO NOTHING on
+ *     (razorpay_payment_id) so replay attacks can't double-credit revenue
+ *   - rzpSubId extracted from subscription entity only (not payment.subscription_id)
+ *     to prevent cross-event injection
  */
 
 import { NextRequest, NextResponse } from 'next/server'
@@ -29,7 +36,7 @@ export async function POST(req: NextRequest) {
   const rawBody = await req.text()
   const signature = req.headers.get('x-razorpay-signature') ?? ''
 
-  // ── Verify signature ──────────────────────────────────────────────────────────
+  // ── Verify signature FIRST — reject anything without a valid sig ──────────────
   let valid = false
   try {
     valid = verifyWebhookSignature(rawBody, signature)
@@ -53,17 +60,26 @@ export async function POST(req: NextRequest) {
 
   const eventType = event.event as string
   const payload   = event.payload as Record<string, { entity: Record<string, unknown> }>
-  const sub       = payload?.subscription?.entity ?? payload?.payment?.entity ?? {}
 
-  const rzpSubId    = sub.subscription_id as string ?? sub.id as string
-  const status      = sub.status as string
-
-  if (!rzpSubId) {
-    // Not a subscription event — ignore
+  // ── Extract subscription entity (safe extraction — no unsafe casting) ─────────
+  const subEntity = payload?.subscription?.entity
+  if (!subEntity || typeof subEntity !== 'object') {
+    // Not a subscription event we care about
     return NextResponse.json({ received: true })
   }
 
-  console.log(`[webhook] ${eventType} — ${rzpSubId} — ${status}`)
+  // Always use the subscription entity's own id for the razorpay_sub_id
+  const rzpSubId = typeof subEntity.id === 'string' ? subEntity.id : null
+
+  if (!rzpSubId) {
+    return NextResponse.json({ received: true })
+  }
+
+  const currentStart = typeof subEntity.current_start === 'number' ? subEntity.current_start : null
+  const currentEnd   = typeof subEntity.current_end   === 'number' ? subEntity.current_end   : null
+  const plan         = typeof subEntity.plan_id === 'string' ? subEntity.plan_id : null
+
+  console.log(`[webhook] ${eventType} — ${rzpSubId}`)
 
   try {
     switch (eventType) {
@@ -71,26 +87,52 @@ export async function POST(req: NextRequest) {
         await query(
           `UPDATE subscriptions SET
              status               = 'active',
-             current_period_start = to_timestamp($1),
-             current_period_end   = to_timestamp($2),
+             current_period_start = CASE WHEN $1::bigint IS NOT NULL THEN to_timestamp($1) ELSE current_period_start END,
+             current_period_end   = CASE WHEN $2::bigint IS NOT NULL THEN to_timestamp($2) ELSE current_period_end END,
              updated_at           = NOW()
            WHERE razorpay_sub_id = $3`,
-          [sub.current_start as number, sub.current_end as number, rzpSubId]
+          [currentStart, currentEnd, rzpSubId]
         )
         break
       }
 
       case 'subscription.charged': {
-        // Successful renewal — update period window
+        // ── Idempotency: record the payment with ON CONFLICT DO NOTHING ────────
+        // Razorpay may retry webhooks; this prevents duplicate revenue rows.
+        const paymentEntity = payload?.payment?.entity
+        const rzpPaymentId  = paymentEntity && typeof paymentEntity.id === 'string'
+          ? paymentEntity.id
+          : null
+        const amountPaise   = paymentEntity && typeof paymentEntity.amount === 'number'
+          ? paymentEntity.amount
+          : null
+
+        // Update subscription period — idempotent (same values on replay)
         await query(
           `UPDATE subscriptions SET
              status               = 'active',
-             current_period_start = to_timestamp($1),
-             current_period_end   = to_timestamp($2),
+             current_period_start = CASE WHEN $1::bigint IS NOT NULL THEN to_timestamp($1) ELSE current_period_start END,
+             current_period_end   = CASE WHEN $2::bigint IS NOT NULL THEN to_timestamp($2) ELSE current_period_end END,
              updated_at           = NOW()
            WHERE razorpay_sub_id = $3`,
-          [sub.current_start as number, sub.current_end as number, rzpSubId]
+          [currentStart, currentEnd, rzpSubId]
         )
+
+        // Record payment if we have the payment ID — skip on replay (ON CONFLICT DO NOTHING)
+        if (rzpPaymentId && amountPaise !== null) {
+          await query(
+            `INSERT INTO subscription_payments
+               (razorpay_payment_id, razorpay_sub_id, amount_paise, plan, status, created_at)
+             SELECT
+               $1, $2, $3,
+               (SELECT plan FROM subscriptions WHERE razorpay_sub_id = $2 LIMIT 1),
+               'captured',
+               NOW()
+             ON CONFLICT (razorpay_payment_id) DO NOTHING`,
+            [rzpPaymentId, rzpSubId, amountPaise]
+          )
+          void plan // plan may be used in future for multi-tier pricing
+        }
         break
       }
 
@@ -118,26 +160,24 @@ export async function POST(req: NextRequest) {
       }
 
       case 'payment.failed': {
-        // Only mark as past_due if there's a linked subscription
-        if (rzpSubId) {
-          await query(
-            `UPDATE subscriptions SET
-               status     = 'past_due',
-               updated_at = NOW()
-             WHERE razorpay_sub_id = $1`,
-            [rzpSubId]
-          )
-        }
+        // Mark the linked subscription as past_due
+        await query(
+          `UPDATE subscriptions SET
+             status     = 'past_due',
+             updated_at = NOW()
+           WHERE razorpay_sub_id = $1`,
+          [rzpSubId]
+        )
         break
       }
 
       default:
-        // Unknown event — acknowledge but don't process
+        // Unknown event — acknowledge receipt, don't process
         console.log(`[webhook] Unhandled event: ${eventType}`)
     }
   } catch (err) {
     console.error('[webhook] DB error:', err)
-    // Return 500 so Razorpay retries
+    // Return 500 so Razorpay retries (idempotency handles safe replays)
     return NextResponse.json({ error: 'Database error' }, { status: 500 })
   }
 
