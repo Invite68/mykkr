@@ -156,11 +156,12 @@ export default function TrackingClient({ initialJob }: { initialJob: SafeJob }) 
   const [job, setJob] = useState<SafeJob>(initialJob)
   const meta = STATUS_META[job.status] ?? STATUS_META.open
 
-  const [cancelling, setCancelling]   = useState(false)
-  const [cancelError, setCancelError] = useState('')
+  const [cancelling, setCancelling]     = useState(false)
+  const [cancelError, setCancelError]   = useState('')
+  const [confirmCancel, setConfirmCancel] = useState(false)
 
-  const handleCancel = useCallback(async () => {
-    if (!confirm('Cancel this job?')) return
+  const handleCancelConfirmed = useCallback(async () => {
+    setConfirmCancel(false)
     setCancelling(true)
     const res = await fetch(`/api/jobs/${job.id}/cancel`, {
       method: 'POST',
@@ -171,7 +172,7 @@ export default function TrackingClient({ initialJob }: { initialJob: SafeJob }) 
     if (!res.ok) { setCancelError(json.error ?? 'Could not cancel'); setCancelling(false); return }
     if (json.job) setJob(json.job)
     setCancelling(false)
-  }, [job.id])
+  }, [job.id])  // eslint-disable-line react-hooks/exhaustive-deps
 
   // ── Polling — every 6 seconds ─────────────────────────────────────────────
   useEffect(() => {
@@ -235,9 +236,30 @@ export default function TrackingClient({ initialJob }: { initialJob: SafeJob }) 
         {canCancel && (
           <div style={{ marginTop: 12 }}>
             {cancelError && <p style={{ color: '#ef4444', fontSize: 13, marginBottom: 8 }}>{cancelError}</p>}
-            <button className="btn btn-outline btn-sm" onClick={handleCancel} disabled={cancelling} style={{ color: '#ef4444', borderColor: '#ef4444' }}>
-              {cancelling ? 'Cancelling…' : '✖ Cancel this job'}
-            </button>
+            {!confirmCancel ? (
+              <button
+                className="btn btn-outline btn-sm"
+                onClick={() => setConfirmCancel(true)}
+                disabled={cancelling}
+                style={{ color: '#ef4444', borderColor: '#ef4444' }}
+              >
+                {cancelling ? 'Cancelling…' : '✖ Cancel this job'}
+              </button>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                <p style={{ fontSize: 13, fontWeight: 600, color: '#ef4444', margin: 0 }}>
+                  Are you sure you want to cancel?
+                </p>
+                <div style={{ display: 'flex', gap: 8 }}>
+                  <button className="btn btn-outline btn-sm" style={{ flex: 1, color: '#ef4444', borderColor: '#ef4444' }} onClick={handleCancelConfirmed}>
+                    Yes, cancel
+                  </button>
+                  <button className="btn btn-outline btn-sm" style={{ flex: 1 }} onClick={() => setConfirmCancel(false)}>
+                    Keep job
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         )}
       </div>

@@ -67,8 +67,44 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'mode must be "ride" or "deliver"' }, { status: 400 })
   }
 
+  // ── Length & type guards (prevent oversized payloads reaching the DB) ────────
+  const nameStr   = String(customerName).trim().slice(0, 120)
+  const phoneStr  = String(customerPhone).trim().slice(0, 20)
+  const pickStr   = String(pickupLabel).trim().slice(0, 300)
+  const dropStr   = String(dropoffLabel).trim().slice(0, 300)
+  const vehicleStr = String(vehicleId).trim().slice(0, 40)
+  const notesStr  = notes ? String(notes).trim().slice(0, 500) : null
+  const schedStr  = scheduledAt ? String(scheduledAt).trim().slice(0, 40) : null
+
+  const pickLatN  = Number(pickupLat)
+  const pickLonN  = Number(pickupLon)
+  const dropLatN  = Number(dropoffLat)
+  const dropLonN  = Number(dropoffLon)
+  if ([pickLatN, pickLonN, dropLatN, dropLonN].some(isNaN)) {
+    return NextResponse.json({ error: 'Coordinates must be numbers' }, { status: 400 })
+  }
+  // Rough bounding box: India roughly 6°N–37°N, 68°E–97°E
+  if (pickLatN < 6 || pickLatN > 37 || pickLonN < 68 || pickLonN > 97 ||
+      dropLatN < 6 || dropLatN > 37 || dropLonN < 68 || dropLonN > 97) {
+    return NextResponse.json({ error: 'Coordinates out of range' }, { status: 400 })
+  }
+  const distKmN   = distanceKm  != null ? Number(distanceKm)  : null
+  const fareN     = fareEstimate != null ? Number(fareEstimate) : null
+  if (distKmN !== null && (isNaN(distKmN) || distKmN < 0 || distKmN > 5000)) {
+    return NextResponse.json({ error: 'distanceKm out of range' }, { status: 400 })
+  }
+  if (fareN !== null && (isNaN(fareN) || fareN < 0 || fareN > 100_000_00)) {
+    return NextResponse.json({ error: 'fareEstimate out of range' }, { status: 400 })
+  }
+
+  if (nameStr.length < 2)    return NextResponse.json({ error: 'customerName too short' }, { status: 400 })
+  if (phoneStr.length < 10)  return NextResponse.json({ error: 'customerPhone too short' }, { status: 400 })
+  if (pickStr.length < 2)    return NextResponse.json({ error: 'pickupLabel too short' }, { status: 400 })
+  if (dropStr.length < 2)    return NextResponse.json({ error: 'dropoffLabel too short' }, { status: 400 })
+  if (vehicleStr.length < 1) return NextResponse.json({ error: 'vehicleId too short' }, { status: 400 })
+
   // ── Encrypt PII ─────────────────────────────────────────────────────────────
-  const encPhone = encryptPII(String(customerPhone))
+  const encPhone = encryptPII(phoneStr)
 
   // ── Insert ───────────────────────────────────────────────────────────────────
   let ref = makeRef()
@@ -89,14 +125,14 @@ export async function POST(req: NextRequest) {
        RETURNING *`,
       [
         ref, mode,
-        customerName, encPhone,
-        pickupLabel, pickupLat, pickupLon,
-        dropoffLabel, dropoffLat, dropoffLon,
-        vehicleId,
-        distanceKm ?? null,
-        fareEstimate ?? null,
-        notes ?? null,
-        scheduledAt ?? null,
+        nameStr, encPhone,
+        pickStr, pickLatN, pickLonN,
+        dropStr, dropLatN, dropLonN,
+        vehicleStr,
+        distKmN,
+        fareN,
+        notesStr,
+        schedStr,
       ]
     )
 

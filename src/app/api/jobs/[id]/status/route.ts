@@ -96,19 +96,22 @@ export async function PATCH(
     )
   }
 
-  // Build timestamp field for this transition
-  const tsField: Record<string, string> = {
-    driver_en_route: 'accepted_at',  // already set, no new timestamp
-    picked_up:       'picked_up_at',
-    completed:       'completed_at',
+  // Build timestamp clause — use a hardcoded safe map to prevent SQL injection.
+  // newStatus is already validated against DRIVER_TRANSITIONS above, but we
+  // never interpolate it into SQL directly; only known literal column names go in.
+  const SAFE_TS_CLAUSES: Record<string, string> = {
+    driver_en_route: '',                       // accepted_at already set at accept time
+    picked_up:       'picked_up_at = NOW(),',
+    completed:       'completed_at = NOW(),',
   }
-  const tsCol = tsField[newStatus]
+  // If newStatus isn't in the map (shouldn't happen after transition check), default to ''
+  const tsClause = SAFE_TS_CLAUSES[newStatus] ?? ''
 
   try {
     const rows = await query<Job>(
       `UPDATE jobs SET
          status     = $1,
-         ${tsCol ? `${tsCol} = NOW(),` : ''}
+         ${tsClause}
          updated_at = NOW()
        WHERE id = $2
        RETURNING *`,

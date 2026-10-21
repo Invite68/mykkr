@@ -64,7 +64,8 @@ export const SITE = {
   city: 'Kurukshetra',
   state: 'Haryana',
   url: 'https://mykkr.in',
-  supportWhatsApp: 'https://wa.me/91XXXXXXXXXX',
+  // TODO: Replace with real support WhatsApp number before launch
+  supportWhatsApp: process.env.NEXT_PUBLIC_SUPPORT_WHATSAPP ?? 'https://wa.me/91XXXXXXXXXX',
   privacyEmail: 'privacy@mykkr.in',
   legalEmail: 'legal@mykkr.in',
 } as const

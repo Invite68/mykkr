@@ -52,8 +52,19 @@ export async function POST(
     return NextResponse.json({ error: 'Missing driver fields' }, { status: 400 })
   }
 
+  // ── Length & type guards ─────────────────────────────────────────────────────
+  const driverIdStr      = String(driverId).trim().slice(0, 128)
+  const driverNameStr    = String(driverName).trim().slice(0, 120)
+  const driverPhoneStr   = String(driverPhone).trim().slice(0, 20)
+  const driverVehicleStr = String(driverVehicle).trim().slice(0, 80)
+
+  if (driverIdStr.length < 1)      return NextResponse.json({ error: 'driverId too short' }, { status: 400 })
+  if (driverNameStr.length < 2)    return NextResponse.json({ error: 'driverName too short' }, { status: 400 })
+  if (driverPhoneStr.length < 10)  return NextResponse.json({ error: 'driverPhone too short' }, { status: 400 })
+  if (driverVehicleStr.length < 1) return NextResponse.json({ error: 'driverVehicle too short' }, { status: 400 })
+
   // Encrypt driver phone before storage
-  const encDriverPhone = encryptPII(String(driverPhone))
+  const encDriverPhone = encryptPII(driverPhoneStr)
 
   // ── Atomic accept ────────────────────────────────────────────────────────────
   // The WHERE clause is the race-condition guard:
@@ -73,7 +84,7 @@ export async function POST(
          AND status = 'open'
          AND driver_id IS NULL
        RETURNING *`,
-      [driverId, driverName, encDriverPhone, driverVehicle, jobId]
+      [driverIdStr, driverNameStr, encDriverPhone, driverVehicleStr, jobId]
     )
 
     if (rows.length === 0) {

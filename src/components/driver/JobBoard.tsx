@@ -49,6 +49,7 @@ function JobCard({
     myAccepted ? 'mine' : 'idle'
   )
   const [err, setErr] = useState('')
+  const [confirmCancel, setConfirmCancel] = useState(false)
   const fare = job.fare_estimate
     ? `₹${Math.round(job.fare_estimate / 100).toLocaleString('en-IN')}`
     : null
@@ -76,8 +77,8 @@ function JobCard({
     }
   }
 
-  async function handleCancel() {
-    if (!confirm('Cancel this job? It will go back to other drivers.')) return
+  async function handleCancelConfirmed() {
+    setConfirmCancel(false)
     setState('cancelling')
     try {
       await onCancel(job.id)
@@ -150,7 +151,7 @@ function JobCard({
             {state === 'accepting' ? '⏳ Accepting…' : '✅ Accept job'}
           </button>
         )}
-        {mine && (
+        {mine && !confirmCancel && (
           <>
             <a href={`/track/${job.ref}`} className="btn btn-outline btn-sm" target="_blank" rel="noopener noreferrer">
               🗺️ View map
@@ -159,11 +160,26 @@ function JobCard({
               className="btn btn-ghost btn-sm"
               style={{ color: '#ef4444' }}
               disabled={busy}
-              onClick={handleCancel}
+              onClick={() => setConfirmCancel(true)}
             >
               {cancelling ? '⏳…' : '✖ Cancel'}
             </button>
           </>
+        )}
+        {mine && confirmCancel && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 6, width: '100%' }}>
+            <p style={{ fontSize: 13, fontWeight: 600, color: '#ef4444', margin: 0 }}>
+              Cancel this job? It will go back to other drivers.
+            </p>
+            <div style={{ display: 'flex', gap: 8 }}>
+              <button className="btn btn-ghost btn-sm" style={{ flex: 1, color: '#ef4444', borderColor: '#ef4444' }} onClick={handleCancelConfirmed}>
+                Yes, cancel
+              </button>
+              <button className="btn btn-outline btn-sm" style={{ flex: 1 }} onClick={() => setConfirmCancel(false)}>
+                Keep job
+              </button>
+            </div>
+          </div>
         )}
         {taken && (
           <p className="muted" style={{ fontSize: 12, textAlign: 'center' }}>

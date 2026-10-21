@@ -13,7 +13,7 @@
  */
 
 import Link from 'next/link'
-import { useState, useEffect, type ChangeEvent, type FormEvent, type ReactNode } from 'react'
+import { useState, useEffect, useRef, type ChangeEvent, type FormEvent, type ReactNode } from 'react'
 import AreaSelect from '@/components/ui/AreaSelect'
 import { CATEGORY_GROUPS } from '@/data/categories'
 import { DELIVERY_VEHICLES } from '@/data/vehicles'
@@ -21,6 +21,13 @@ import { ROLES, type UserRole } from '@/config/roles'
 import { PLANS, formatInr } from '@/config/platform'
 import { DELIVERY_LABELS, type DeliveryOption } from '@/types'
 import { isValidIndianMobile, isValidPin } from '@/lib/sanitize'
+import {
+  getAuth,
+  signInWithPhoneNumber,
+  RecaptchaVerifier,
+  type ConfirmationResult,
+} from 'firebase/auth'
+import { firebaseApp } from '@/lib/firebase-client'
 
 type SignupRole = Exclude<UserRole, 'admin'>
 const SIGNUP_ROLES = ROLES.filter((r) => r.selfSignup)
@@ -136,14 +143,18 @@ function OtpLoginStep({
 }: {
   role: SignupRole
   onRole: (r: SignupRole) => void
-  onVerified: (phone: string) => void
+  onVerified: (phone: string, idToken: string) => void
 }) {
   const [phone, setPhone] = useState('')
   const [otp, setOtp] = useState('')
   const [sent, setSent] = useState(false)
+  const [sending, setSending] = useState(false)
+  const [verifying, setVerifying] = useState(false)
   const [cooldown, setCooldown] = useState(0)
   const [msg, setMsg] = useState('')
   const [errors, setErrors] = useState<string[]>([])
+  const confirmRef = useRef<ConfirmationResult | null>(null)
+  const recaptchaRef = useRef<RecaptchaVerifier | null>(null)
 
   useEffect(() => {
     if (cooldown <= 0) return
@@ -151,25 +162,51 @@ function OtpLoginStep({
     return () => clearTimeout(t)
   }, [cooldown])
 
-  function sendOtp() {
+  // Clean up reCAPTCHA on unmount
+  useEffect(() => {
+    return () => { recaptchaRef.current?.clear() }
+  }, [])
+
+  async function sendOtp() {
     if (!isValidIndianMobile(phone)) {
       setErrors(['Enter a valid 10-digit Indian mobile number.'])
       return
     }
     setErrors([])
-    setSent(true)
-    setCooldown(60)
-    setMsg('OTP sent. Enter the 6-digit code below.')
-    // TODO(backend): Firebase signInWithPhoneNumber(phone)
+    setSending(true)
+    try {
+      const auth = getAuth(firebaseApp)
+
+      // Create invisible reCAPTCHA verifier (required by Firebase)
+      if (!recaptchaRef.current) {
+        recaptchaRef.current = new RecaptchaVerifier(auth, 'recaptcha-container', {
+          size: 'invisible',
+          callback: () => { /* auto-solved */ },
+        })
+      }
+
+      const fullPhone = `+91${phone}`
+      confirmRef.current = await signInWithPhoneNumber(auth, fullPhone, recaptchaRef.current)
+      setSent(true)
+      setCooldown(60)
+      setMsg('OTP sent. Enter the 6-digit code below.')
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Failed to send OTP'
+      setErrors([`Could not send OTP: ${msg}`])
+      recaptchaRef.current?.clear()
+      recaptchaRef.current = null
+    } finally {
+      setSending(false)
+    }
   }
 
-  function verify(e: FormEvent) {
+  async function verify(e: FormEvent) {
     e.preventDefault()
     if (!isValidIndianMobile(phone)) {
       setErrors(['Enter a valid 10-digit Indian mobile number.'])
       return
     }
-    if (!sent) {
+    if (!sent || !confirmRef.current) {
       setErrors(['Send the OTP first.'])
       return
     }
@@ -178,8 +215,17 @@ function OtpLoginStep({
       return
     }
     setErrors([])
-    // TODO(backend): confirm Firebase OTP result.confirm(otp)
-    onVerified(phone)
+    setVerifying(true)
+    try {
+      const result = await confirmRef.current.confirm(otp)
+      const idToken = await result.user.getIdToken()
+      onVerified(`+91${phone}`, idToken)
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Verification failed'
+      setErrors([`Wrong OTP or it has expired. ${msg}`])
+    } finally {
+      setVerifying(false)
+    }
   }
 
   return (
@@ -231,9 +277,9 @@ function OtpLoginStep({
               type="button"
               className="btn btn-outline btn-sm"
               onClick={sendOtp}
-              disabled={cooldown > 0}
+              disabled={cooldown > 0 || sending}
             >
-              {cooldown > 0 ? `Resend in ${cooldown}s` : sent ? 'Resend OTP' : 'Send OTP'}
+              {sending ? '⏳ Sending…' : cooldown > 0 ? `Resend in ${cooldown}s` : sent ? 'Resend OTP' : 'Send OTP'}
             </button>
           </div>
           {msg && <span className="muted" role="status">{msg}</span>}
@@ -257,8 +303,11 @@ function OtpLoginStep({
 
         <Errors list={errors} />
 
-        <button type="submit" className="btn btn-primary btn-block" disabled={!sent}>
-          Verify & Continue →
+        {/* Invisible reCAPTCHA mount point — required by Firebase */}
+        <div id="recaptcha-container" />
+
+        <button type="submit" className="btn btn-primary btn-block" disabled={!sent || verifying}>
+          {verifying ? '⏳ Verifying…' : 'Verify & Continue →'}
         </button>
 
         <p className="muted" style={{ textAlign: 'center', fontSize: 12 }}>
@@ -293,7 +342,7 @@ type BizData = {
 const BIZ_STEPS = ['Business basics', 'Your location', 'Contact & hours', 'Delivery & photos', 'Review & submit']
 const BIZ_TOTAL = BIZ_STEPS.length
 
-function BusinessWizard({ phone, onDone }: { phone: string; onDone: () => void }) {
+function BusinessWizard({ phone, idToken, onDone }: { phone: string; idToken: string; onDone: () => void }) {
   const [step, setStep] = useState(1)
   const [d, setD] = useState<BizData>({
     name: '', owner: '', catSlug: null, subSlug: null, otherLabel: '',
@@ -358,9 +407,45 @@ function BusinessWizard({ phone, onDone }: { phone: string; onDone: () => void }
     const errs: string[] = []
     if (!d.terms) errs.push('Accept the terms to continue.')
     setErrors(errs)
-    if (!errs.length) {
-      // TODO(backend): POST /api/businesses { ...d, phone } → Firebase Storage for photos
+    if (errs.length) return
+
+    setErrors([])
+    submitBusiness()
+  }
+
+  async function submitBusiness() {
+    setErrors(['Submitting…'])
+    try {
+      const res = await fetch('/api/businesses', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${idToken}`,
+        },
+        body: JSON.stringify({
+          businessName:  d.name.trim(),
+          category:      activeGroup?.label ?? d.otherLabel.trim(),
+          subCategory:   d.subSlug ?? undefined,
+          description:   undefined,
+          addressLine:   d.street.trim() || undefined,
+          area:          d.area || undefined,
+          city:          d.area || 'Kurukshetra',
+          pinCode:       d.pin || undefined,
+          contactEmail:  d.email.trim() || undefined,
+          gstin:         d.gstin.trim() || undefined,
+          openingTime:   d.hours.split('–')[0]?.trim() || undefined,
+          closingTime:   d.hours.split('–')[1]?.trim() || undefined,
+          deliveryModes: d.delivery,
+        }),
+      })
+      if (!res.ok) {
+        const json = await res.json() as { error?: string }
+        setErrors([json.error ?? 'Submission failed. Please try again.'])
+        return
+      }
       onDone()
+    } catch {
+      setErrors(['Network error — please check your connection and try again.'])
     }
   }
 
@@ -551,7 +636,7 @@ type CustData = { name: string; email: string; area: string; pin: string; terms:
 const CUST_STEPS = ['Your details', 'Your location', 'Start trial']
 const CUST_TOTAL = CUST_STEPS.length
 
-function CustomerWizard({ phone, onDone }: { phone: string; onDone: () => void }) {
+function CustomerWizard({ phone, idToken, onDone }: { phone: string; idToken: string; onDone: () => void }) {
   const [step, setStep] = useState(1)
   const [d, setD] = useState<CustData>({ name: '', email: '', area: '', pin: '', terms: false })
   const [errors, setErrors] = useState<string[]>([])
@@ -583,8 +668,35 @@ function CustomerWizard({ phone, onDone }: { phone: string; onDone: () => void }
     e.preventDefault()
     if (!d.terms) { setErrors(['Accept the terms to continue.']); return }
     setErrors([])
-    // TODO(backend): POST /api/customers { ...d, phone } → Razorpay subscription with trial
-    onDone()
+    submitCustomer()
+  }
+
+  async function submitCustomer() {
+    setErrors(['Submitting…'])
+    try {
+      const res = await fetch('/api/customers', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${idToken}`,
+        },
+        body: JSON.stringify({
+          fullName: d.name.trim(),
+          email:    d.email.trim() || undefined,
+          area:     d.area || undefined,
+          city:     d.area || 'Kurukshetra',
+          pinCode:  d.pin || undefined,
+        }),
+      })
+      if (!res.ok) {
+        const json = await res.json() as { error?: string }
+        setErrors([json.error ?? 'Submission failed. Please try again.'])
+        return
+      }
+      onDone()
+    } catch {
+      setErrors(['Network error — please check your connection and try again.'])
+    }
   }
 
   return (
@@ -667,7 +779,7 @@ type DriverData = {
 const DRV_STEPS = ['Personal details', 'Vehicle details', 'ID verification', 'Working area']
 const DRV_TOTAL = DRV_STEPS.length
 
-function DriverWizard({ phone, onDone }: { phone: string; onDone: () => void }) {
+function DriverWizard({ phone, idToken, onDone }: { phone: string; idToken: string; onDone: () => void }) {
   const [step, setStep] = useState(1)
   const [d, setD] = useState<DriverData>({
     name: '', vehicle: DELIVERY_VEHICLES[0].id, regNo: '', licence: '',
@@ -710,9 +822,36 @@ function DriverWizard({ phone, onDone }: { phone: string; onDone: () => void }) 
     if (!d.area) errs.push('Choose the area you mostly work in.')
     if (!d.terms) errs.push('Accept the terms to continue.')
     setErrors(errs)
-    if (!errs.length) {
-      // TODO(backend): POST /api/drivers { ...d, phone } → KYC verification queue
+    if (!errs.length) submitDriver()
+  }
+
+  async function submitDriver() {
+    setErrors(['Submitting…'])
+    try {
+      const res = await fetch('/api/drivers', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${idToken}`,
+        },
+        body: JSON.stringify({
+          fullName:      d.name.trim(),
+          vehicleType:   d.vehicle,
+          vehicleNumber: d.regNo.trim(),
+          licenseNumber: d.licence.trim() || undefined,
+          aadhaarLast4:  d.idLast4.trim() || undefined,
+          workingArea:   d.area || undefined,
+          city:          d.area || 'Kurukshetra',
+        }),
+      })
+      if (!res.ok) {
+        const json = await res.json() as { error?: string }
+        setErrors([json.error ?? 'Submission failed. Please try again.'])
+        return
+      }
       onDone()
+    } catch {
+      setErrors(['Network error — please check your connection and try again.'])
     }
   }
 
@@ -825,19 +964,24 @@ function ReviewRow({ label, value }: { label: string; value: string }) {
 
 export default function RegisterForms({ initialRole }: { initialRole: SignupRole }) {
   const [role, setRole] = useState<SignupRole>(initialRole)
-  const [phone, setPhone] = useState<string | null>(null) // null = Phase 1, string = Phase 2
+  // null = Phase 1, { phone, idToken } = Phase 2
+  const [session, setSession] = useState<{ phone: string; idToken: string } | null>(null)
   const [done, setDone] = useState(false)
 
   if (done) return <Success role={role} />
 
   return (
     <div className="panel">
-      {phone === null ? (
+      {session === null ? (
         /* Phase 1 — OTP login */
         <>
           <h2 className="page-title" style={{ fontSize: 20, marginBottom: 4 }}>Create your account</h2>
           <p className="muted" style={{ marginBottom: 18 }}>Enter your phone number to get started — takes under a minute.</p>
-          <OtpLoginStep role={role} onRole={setRole} onVerified={(p) => setPhone(p)} />
+          <OtpLoginStep
+            role={role}
+            onRole={setRole}
+            onVerified={(phone, idToken) => setSession({ phone, idToken })}
+          />
         </>
       ) : (
         /* Phase 2 — profile wizard */
@@ -852,9 +996,9 @@ export default function RegisterForms({ initialRole }: { initialRole: SignupRole
               : role === 'customer' ? 'Just a couple more details to get you started.'
               : 'Submit your application — we verify and activate within 24 hours.'}
           </p>
-          {role === 'business' && <BusinessWizard phone={phone} onDone={() => setDone(true)} />}
-          {role === 'customer' && <CustomerWizard phone={phone} onDone={() => setDone(true)} />}
-          {role === 'driver' && <DriverWizard phone={phone} onDone={() => setDone(true)} />}
+          {role === 'business' && <BusinessWizard phone={session.phone} idToken={session.idToken} onDone={() => setDone(true)} />}
+          {role === 'customer' && <CustomerWizard phone={session.phone} idToken={session.idToken} onDone={() => setDone(true)} />}
+          {role === 'driver'   && <DriverWizard   phone={session.phone} idToken={session.idToken} onDone={() => setDone(true)} />}
         </>
       )}
     </div>
