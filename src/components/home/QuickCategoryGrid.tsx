@@ -13,7 +13,7 @@ const CATS = [
   { href: '/c/shopping',  emoji: '🛍️', label: 'Shopping',      sub: 'Groceries, fashion…' },
   { href: '/rides',       emoji: '🚗', label: 'Rides & Cabs',  sub: 'Book a cab now' },
   { href: '/c/venues',    emoji: '🏛️', label: 'Venues',        sub: 'Halls, hotels…' },
-  { href: '/c/realestate',emoji: '🏢', label: 'Real Estate',   sub: 'Rent or buy a shop' },
+  { href: '/c/venues',    emoji: '🏢', label: 'Real Estate',   sub: 'Rent or buy a shop' },
   { href: '/c/transport', emoji: '🚚', label: 'Delivery',      sub: 'Couriers, cargo' },
   { href: '/find-book',   emoji: '📋', label: 'Post a Task',   sub: 'Get quotes fast' },
   { href: '/categories',  emoji: '🗂️', label: 'All Categories',sub: 'See everything' },

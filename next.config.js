@@ -22,7 +22,8 @@ const CSP = [
   // unpkg.com needed for Leaflet default marker icon images
   "img-src 'self' data: blob: https://*.tile.openstreetmap.org https://nominatim.openstreetmap.org https://unpkg.com",
   "frame-src https://www.openstreetmap.org https://www.youtube-nocookie.com https://challenges.cloudflare.com",
-  `connect-src 'self' https://nominatim.openstreetmap.org https://router.project-osrm.org${isDev ? ' ws: wss:' : ''}`,
+  // Firebase Auth (Phone OTP): identitytoolkit for token exchange, securetoken for refresh
+  `connect-src 'self' https://nominatim.openstreetmap.org https://router.project-osrm.org https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://www.googleapis.com${isDev ? ' ws: wss:' : ''}`,
   "base-uri 'self'",
   "form-action 'self'",
   "frame-ancestors 'none'",
