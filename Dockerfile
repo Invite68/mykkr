@@ -37,6 +37,9 @@ COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 COPY --from=builder --chown=nextjs:nodejs /app/public ./public
 
+# Database migrations — needed for manual DB maintenance scripts
+COPY --from=builder --chown=nextjs:nodejs /app/migrations ./migrations
+
 USER nextjs
 EXPOSE 3000
 
