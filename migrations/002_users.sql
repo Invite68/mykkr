@@ -167,7 +167,7 @@ CREATE TRIGGER set_sub_updated_at
 -- ── Subscription payments ─────────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS subscription_payments (
   id                    BIGSERIAL     PRIMARY KEY,
-  user_id               TEXT          NOT NULL REFERENCES users(uid) ON DELETE CASCADE,
+  user_id               UUID          NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   subscription_id       BIGINT        REFERENCES subscriptions(id) ON DELETE SET NULL,
   razorpay_payment_id   TEXT          UNIQUE,
   amount_paise          INT           NOT NULL,
