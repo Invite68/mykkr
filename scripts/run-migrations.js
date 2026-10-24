@@ -12,6 +12,7 @@ var pool = new pg.Pool({ connectionString: process.env.DATABASE_URL });
 var migrations = [
   '/app/migrations/001_jobs.sql',
   '/app/migrations/002_users.sql',
+  '/app/migrations/002b_subscription_payments.sql',
   '/app/migrations/003_security_hardening.sql',
 ];
 

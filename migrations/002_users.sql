@@ -164,5 +164,21 @@ CREATE TRIGGER set_sub_updated_at
   BEFORE UPDATE ON subscriptions
   FOR EACH ROW EXECUTE FUNCTION set_updated_at();
 
+-- ── Subscription payments ─────────────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS subscription_payments (
+  id                    BIGSERIAL     PRIMARY KEY,
+  user_id               TEXT          NOT NULL REFERENCES users(uid) ON DELETE CASCADE,
+  subscription_id       BIGINT        REFERENCES subscriptions(id) ON DELETE SET NULL,
+  razorpay_payment_id   TEXT          UNIQUE,
+  amount_paise          INT           NOT NULL,
+  currency              TEXT          NOT NULL DEFAULT 'INR',
+  status                TEXT          NOT NULL DEFAULT 'pending',  -- pending, captured, failed, refunded
+  method                TEXT,                                      -- card, upi, netbanking, wallet
+  created_at            TIMESTAMPTZ   NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS sp_user_id_idx ON subscription_payments (user_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS sp_sub_id_idx  ON subscription_payments (subscription_id);
+
 -- ── DONE ──────────────────────────────────────────────────────────────────────
--- Next migration: 003_listings.sql (products, services, venue listings)
+-- Next migration: 003_security_hardening.sql
