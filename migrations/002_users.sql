@@ -75,6 +75,7 @@ CREATE TABLE IF NOT EXISTS business_profiles (
   open_days       TEXT[]      NOT NULL DEFAULT '{}',   -- ["Mon","Tue",…]
   delivery_modes  TEXT[]      NOT NULL DEFAULT '{}',   -- ["self","partner","pickup"]
   kyc_status      kyc_status  NOT NULL DEFAULT 'unverified',
+  verified_at     TIMESTAMPTZ,                         -- set by admin when manually verified
   is_active       BOOLEAN     NOT NULL DEFAULT TRUE,
   created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at      TIMESTAMPTZ NOT NULL DEFAULT NOW()
