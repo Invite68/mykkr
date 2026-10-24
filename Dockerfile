@@ -40,6 +40,9 @@ COPY --from=builder --chown=nextjs:nodejs /app/public ./public
 # Database migrations — needed for manual DB maintenance scripts
 COPY --from=builder --chown=nextjs:nodejs /app/migrations ./migrations
 
+# Migration runner script
+COPY --from=builder --chown=nextjs:nodejs /app/scripts ./scripts
+
 USER nextjs
 EXPOSE 3000
 
