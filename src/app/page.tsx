@@ -5,17 +5,16 @@ import HomeFeed from '@/components/home/HomeFeed'
 import MediaStrip from '@/components/home/MediaStrip'
 import TrustStrip from '@/components/home/TrustStrip'
 import SocialProofBar from '@/components/home/SocialProofBar'
-import QuickCategoryGrid from '@/components/home/QuickCategoryGrid'
 import { BUSINESSES } from '@/data/businesses'
 import { PLANS, formatInr } from '@/config/platform'
 
 const HERO_PILLS = [
-  { href: '/c/services', label: '🔧 Services' },
-  { href: '/c/shopping', label: '🛍️ Shop' },
-  { href: '/c/food', label: '🍛 Food & Sweets' },
-  { href: '/rides', label: '🚗 Rides & Cabs' },
-  { href: '/find-book', label: '📋 Post a Task' },
-  { href: '/c/venues', label: '🏛️ Venues' },
+  { href: '/c/services', icon: '🔧', label: 'Services',    cat: 'services' },
+  { href: '/c/shopping', icon: '🛍️', label: 'Shop',        cat: 'shop'     },
+  { href: '/c/food',     icon: '🍛', label: 'Food & Sweets', cat: 'food'   },
+  { href: '/rides',      icon: '🚗', label: 'Rides & Cabs', cat: 'rides'   },
+  { href: '/find-book',  icon: '📋', label: 'Post a Task', cat: 'task'     },
+  { href: '/c/venues',   icon: '🏛️', label: 'Venues',      cat: 'venues'   },
 ]
 
 export const metadata: Metadata = {
@@ -64,10 +63,13 @@ export default function HomePage() {
               </span>
             ))}
           </p>
-          {/* Quick-nav pill row */}
+          {/* Quick-nav icon chip row */}
           <div className="hero-pills">
             {HERO_PILLS.map((p) => (
-              <Link key={p.href} href={p.href} className="hero-pill">{p.label}</Link>
+              <Link key={p.href} href={p.href} className="hero-pill" data-cat={p.cat}>
+                <span className="hero-pill-icon" aria-hidden="true">{p.icon}</span>
+                {p.label}
+              </Link>
             ))}
           </div>
 
@@ -94,11 +96,6 @@ export default function HomePage() {
 
       {/* ── Social proof scrolling bar ────────────────────────────── */}
       <SocialProofBar />
-
-      {/* ── Quick category grid ──────────────────────────────────── */}
-      <div className="container" style={{ paddingBottom: 0 }}>
-        <QuickCategoryGrid />
-      </div>
 
       {/* ── City updates ─────────────────────────────────────────── */}
       <div className="container">

@@ -415,27 +415,45 @@ img, svg { max-width: 100%; display: block; }
 .hero-hint a { color: rgba(255,255,255,.78); text-decoration: underline; text-underline-offset: 2px; }
 
 /* Quick-nav pill row in hero — single horizontal scroll line */
+/* ── Hero category pills — icon chip style ─────────────────────────── */
 .hero-pills {
-  display: flex; flex-wrap: nowrap; gap: 8px;
-  margin-top: 14px;
+  display: flex; flex-wrap: nowrap; gap: 10px;
+  margin-top: 18px;
   overflow-x: auto; scrollbar-width: none;
   -webkit-overflow-scrolling: touch;
-  /* center on wide screens */
   justify-content: center;
+  padding-bottom: 4px;
 }
 .hero-pills::-webkit-scrollbar { display: none; }
-@media (max-width: 600px) { .hero-pills { justify-content: flex-start; } }
+@media (max-width: 600px) { .hero-pills { justify-content: flex-start; padding-left: 4px; } }
 .hero-pill {
-  display: inline-flex; align-items: center; gap: 5px;
-  padding: 6px 13px; border-radius: 99px;
-  background: rgba(255,255,255,.1);
-  border: 1px solid rgba(255,255,255,.18);
-  color: rgba(255,255,255,.88);
-  font-size: 13px; font-weight: 600;
-  transition: background var(--t), border-color var(--t);
+  display: inline-flex; flex-direction: column; align-items: center; gap: 6px;
+  padding: 10px 14px 8px;
+  border-radius: 16px;
+  background: #fff;
+  border: none;
+  color: var(--night-d);
+  font-size: 11px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: .3px;
+  transition: transform var(--t), box-shadow var(--t);
   white-space: nowrap; flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(0,0,0,.12);
+  min-width: 64px; text-align: center;
 }
-.hero-pill:hover { background: rgba(255,255,255,.18); border-color: rgba(255,255,255,.32); color: #fff; }
+.hero-pill:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(0,0,0,.18); color: var(--night-d); }
+/* Icon circle inside each pill */
+.hero-pill-icon {
+  width: 38px; height: 38px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; line-height: 1;
+}
+/* Per-category icon colours (MyKKR brand palette) */
+.hero-pill[data-cat="services"]  .hero-pill-icon { background: #eef3f4; color: var(--night-d); }
+.hero-pill[data-cat="shop"]      .hero-pill-icon { background: #f0fdf4; color: #15803d; }
+.hero-pill[data-cat="food"]      .hero-pill-icon { background: #fff7ed; color: #c2410c; }
+.hero-pill[data-cat="rides"]     .hero-pill-icon { background: #eff6ff; color: #1d4ed8; }
+.hero-pill[data-cat="task"]      .hero-pill-icon { background: #faf5ff; color: #7e22ce; }
+.hero-pill[data-cat="venues"]    .hero-pill-icon { background: #fefce8; color: #92400e; }
 
 /* ── Search box ────────────────────────────────────────────────────────── */
 .search-box {

@@ -1,6 +1,6 @@
 'use client'
 
-import { useRef } from 'react'
+import { useRef } from 'react' // ref kept for future programmatic scroll if needed
 
 interface MediaSlot {
   tag: string
@@ -61,31 +61,8 @@ const SLOTS: MediaSlot[] = [
 export default function MediaStrip() {
   const trackRef = useRef<HTMLDivElement>(null)
 
-  function scroll(dir: 'prev' | 'next') {
-    if (!trackRef.current) return
-    const card = trackRef.current.querySelector('.media-card') as HTMLElement
-    const step = card ? card.offsetWidth + 12 : 280
-    trackRef.current.scrollBy({ left: dir === 'next' ? step : -step, behavior: 'smooth' })
-  }
-
   return (
     <div style={{ position: 'relative' }}>
-      {/* Scroll controls */}
-      <div className="media-controls" aria-hidden="true">
-        <button
-          className="media-arrow"
-          onClick={() => scroll('prev')}
-          aria-label="Scroll left"
-          type="button"
-        >&#8592;</button>
-        <button
-          className="media-arrow"
-          onClick={() => scroll('next')}
-          aria-label="Scroll right"
-          type="button"
-        >&#8594;</button>
-      </div>
-
       <div
         className="media-track"
         ref={trackRef}
