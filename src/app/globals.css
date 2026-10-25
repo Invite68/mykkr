@@ -724,20 +724,24 @@ img, svg { max-width: 100%; display: block; }
 .chip.active { background: var(--night-d); border-color: var(--night-d); color: #fff; }
 
 /* ══════════════════════════════════════════════════════════════════════════
-   BUSINESS CARDS — image-first design
+   BUSINESS CARDS — square boxes with rounded corners
    ══════════════════════════════════════════════════════════════════════════ */
-.biz-grid { display: grid; gap: 16px; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); }
+.biz-grid { display: grid; gap: 14px; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); }
+@media (min-width: 640px) { .biz-grid { grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); } }
+@media (min-width: 1024px) { .biz-grid { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); } }
 .biz-card {
   background: var(--white); border: 1.5px solid var(--border);
-  border-radius: var(--r-xl); overflow: hidden; display: flex; flex-direction: column;
+  border-radius: 16px; overflow: hidden; display: flex; flex-direction: column;
   transition: box-shadow var(--t-md), transform var(--t-md), border-color var(--t-md);
   cursor: pointer;
+  /* Force square by using aspect-ratio + a fixed height on cover */
 }
-.biz-card:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); border-color: rgba(45,84,94,.18); }
+.biz-card:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); border-color: rgba(45,84,94,.25); }
 
-/* Cover — photo or emoji hero */
+/* Cover — square aspect, photo or emoji */
 .biz-cover {
-  display: block; position: relative; height: 140px; overflow: hidden;
+  display: block; position: relative;
+  aspect-ratio: 1 / 1; width: 100%; overflow: hidden;
   background: var(--bg); flex-shrink: 0;
 }
 .biz-cover-img {
@@ -749,7 +753,7 @@ img, svg { max-width: 100%; display: block; }
   width: 100%; height: 100%;
   display: grid; place-items: center;
 }
-.biz-cover-emoji span { font-size: 56px; }
+.biz-cover-emoji span { font-size: 48px; }
 
 /* Open / Closed badge */
 .biz-open-badge {
@@ -798,16 +802,22 @@ img, svg { max-width: 100%; display: block; }
   padding: 3px 8px; border-radius: 99px;
 }
 
-.biz-body { padding: 12px 14px 14px; display: flex; flex-direction: column; gap: 3px; flex: 1; }
-.biz-cat { font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: .6px; color: var(--tan-d); }
-.biz-name { font-size: 15px; font-weight: 700; color: var(--night-d); line-height: 1.3; }
+.biz-body { padding: 10px 12px 12px; display: flex; flex-direction: column; gap: 3px; flex: 1; }
+.biz-cat { font-size: 9.5px; font-weight: 800; text-transform: uppercase; letter-spacing: .6px; color: var(--tan-d); }
+.biz-name { font-size: 13.5px; font-weight: 700; color: var(--night-d); line-height: 1.25; }
 .biz-name a:hover { text-decoration: underline; }
-.biz-area { font-size: 11.5px; color: var(--text-3); }
-.biz-meta { font-size: 12px; color: var(--text-2); display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+.biz-desc {
+  font-size: 11.5px; color: var(--text-3); line-height: 1.4;
+  /* Exactly 2 lines with ellipsis */
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+  overflow: hidden; margin: 3px 0 2px;
+}
+.biz-area { font-size: 10.5px; color: var(--text-4); }
+.biz-meta { font-size: 11px; color: var(--text-2); display: flex; gap: 5px; align-items: center; flex-wrap: wrap; }
 .biz-rev-count { color: var(--text-4); font-weight: 400; }
-.stars { color: #f59e0b; letter-spacing: 1.5px; font-size: 11.5px; }
-.biz-price { font-size: 13px; font-weight: 700; color: var(--text); margin: 5px 0 8px; }
-.biz-actions { display: flex; gap: 8px; margin-top: auto; }
+.stars { color: #f59e0b; letter-spacing: 1.5px; font-size: 10.5px; }
+.biz-price { font-size: 12px; font-weight: 700; color: var(--text); margin: 4px 0 6px; }
+.biz-actions { display: flex; gap: 6px; margin-top: auto; }
 .biz-actions > * { flex: 1; text-align: center; }
 
 /* WhatsApp button */
@@ -1289,6 +1299,7 @@ a.media-ph-cta:hover { background: rgba(18,52,59,.16); }
 .kpi:hover { box-shadow: var(--shadow-sm); }
 .kpi-label { font-size: 11.5px; color: var(--text-3); font-weight: 600; text-transform: uppercase; letter-spacing: .4px; }
 .kpi-value { font-size: 24px; font-weight: 900; color: var(--night-d); margin-top: 4px; }
+.kpi-sub { font-size: 10px; color: var(--text-4); margin-top: 2px; }
 .kpi-delta { font-size: 11.5px; color: var(--green-d); margin-top: 2px; font-weight: 600; }
 
 /* ══════════════════════════════════════════════════════════════════════════

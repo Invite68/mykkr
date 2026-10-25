@@ -100,6 +100,9 @@ export default function BusinessCard({ business }: { business: Business }) {
         <h3 className="biz-name">
           <Link href={href}>{business.name}</Link>
         </h3>
+        {business.description && (
+          <p className="biz-desc">{business.description}</p>
+        )}
         <div className="biz-area">📍 {business.area}</div>
         <div className="biz-meta">
           <Stars rating={business.rating} />

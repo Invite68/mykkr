@@ -178,10 +178,15 @@ export default function FindBookForm({ initialSub = '' }: { initialSub?: string 
             <span className="findbk-step-title">WHAT ARE YOU LOOKING FOR?</span>
           </div>
 
-          {/* Free-text keyword */}
+          {/* Free-text keyword — autoCorrect off prevents mobile keyboard eating spaces */}
           <input
             className="input"
-            type="text"
+            type="search"
+            inputMode="text"
+            autoCorrect="off"
+            autoCapitalize="none"
+            autoComplete="off"
+            spellCheck={false}
             placeholder="e.g. wedding venue, electrician, catering…"
             value={keyword}
             onChange={(e) => setKeyword(e.target.value)}

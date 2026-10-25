@@ -12,15 +12,13 @@ import JobBoardWrapper from '@/components/driver/JobBoardWrapper'
 
 type Params = Promise<{ role: string }>
 
-// Admin dashboard needs live DB data, so force dynamic for admin role.
-// Other roles still get static generation.
 export const dynamic = 'force-dynamic'
 
 export function generateStaticParams() {
   return ROLES.map((r) => ({ role: r.id }))
 }
 
-// ── Live admin stats from DB ───────────────────────────────────────────────────
+// ── Live admin stats from DB ──────────────────────────────────────────────────
 
 interface AdminStats {
   totalBusinesses:     number
@@ -103,35 +101,35 @@ async function fetchAdminStats(): Promise<AdminStats | null> {
 
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
   return {
-    title: `${getRole((await params).role)?.name ?? 'Dashboard'} dashboard`,
-    // Dashboards are user-specific — never index in search engines
+    title: `${getRole((await params).role)?.name ?? 'Dashboard'} — My KKR`,
     robots: { index: false, follow: false },
   }
 }
 
-function Kpis({ items }: { items: [string, string][] }) {
+function Kpis({ items }: { items: [string, string, string?][] }) {
   return (
     <div className="kpi-grid">
-      {items.map(([label, value]) => (
+      {items.map(([label, value, sub]) => (
         <div className="kpi" key={label}>
           <div className="kpi-label">{label}</div>
           <div className="kpi-value">{value}</div>
+          {sub && <div className="kpi-sub">{sub}</div>}
         </div>
       ))}
     </div>
   )
 }
 
-function Table({ head, rows }: { head: string[]; rows: string[][] }) {
+function Table({ head, rows }: { head: string[]; rows: (string | React.ReactNode)[][] }) {
   return (
     <div style={{ overflowX: 'auto' }}>
-      <table className="list-table" style={{ minWidth: 480 }}>
+      <table className="list-table" style={{ minWidth: 400 }}>
         <thead>
           <tr>{head.map((h) => <td key={h} className="muted" style={{ fontWeight: 700, textAlign: 'left' }}>{h}</td>)}</tr>
         </thead>
         <tbody>
-          {rows.map((r) => (
-            <tr key={r.join('|')}>{r.map((c, i) => <td key={i} style={{ textAlign: i === r.length - 1 ? 'right' : 'left', fontWeight: i === r.length - 1 ? 700 : 400 }}>{c}</td>)}</tr>
+          {rows.map((r, ri) => (
+            <tr key={ri}>{r.map((c, i) => <td key={i} style={{ textAlign: i === r.length - 1 ? 'right' : 'left', fontWeight: i === r.length - 1 ? 700 : 400 }}>{c}</td>)}</tr>
           ))}
         </tbody>
       </table>
@@ -139,58 +137,187 @@ function Table({ head, rows }: { head: string[]; rows: string[][] }) {
   )
 }
 
-function BusinessDash() {
+function StatusBadge({ status }: { status: string }) {
+  const map: Record<string, string> = {
+    'Delivered': '#16a34a',
+    'Out for delivery': '#0ea5e9',
+    'Confirmed': '#7c3aed',
+    'Ready for pickup': '#d97706',
+    'Pending': '#6b7280',
+  }
+  const color = map[status] ?? '#6b7280'
   return (
-    <>
-      <Kpis items={[['Orders this month', '42'], ['Bookings', '17'], ['Profile views', '1,284'], ['Commission paid', '₹0']]} />
-      <div className="panel" style={{ marginTop: 14 }}>
-        <h2 className="panel-title">Recent orders &amp; bookings</h2>
-        <Table head={['Ref', 'Customer', 'Type', 'Fulfilment', 'Status']} rows={[
-          ['KKR-7Q2M', 'R. Kumar', 'Goods', 'Partner driver', 'Out for delivery'],
-          ['KKR-3HXP', 'S. Devi', 'Booking · 24 Oct', '—', 'Confirmed'],
-          ['KKR-9LKA', 'A. Singh', 'Goods', 'Customer pickup', 'Ready'],
-        ]} />
-      </div>
-      <div className="panel">
-        <h2 className="panel-title">Subscription</h2>
-        <p className="prose">{PLANS.business.name} · {formatInr(PLANS.business.priceInr)} + GST ({formatInr(withGst(PLANS.business.priceInr))}/month) · <strong>Active</strong> · renews via Razorpay.</p>
-        <p className="muted">Customer payments go straight to you (UPI / card / wallet / COD). My KKR never touches them.</p>
-      </div>
-    </>
+    <span style={{
+      background: color + '18', color, fontWeight: 700,
+      fontSize: 11, padding: '3px 8px', borderRadius: 99,
+      border: `1px solid ${color}44`,
+    }}>
+      {status}
+    </span>
   )
 }
 
-function CustomerDash() {
+// ── BUSINESS DASHBOARD ────────────────────────────────────────────────────────
+
+function BusinessDash() {
   return (
     <>
-      <Kpis items={[['Trial days left', String(PLANS.customer.trialDays)], ['Active bookings', '2'], ['Open requirements', '1'], ['Favourites', '5']]} />
-      <div className="panel" style={{ marginTop: 14 }}>
-        <h2 className="panel-title">My orders &amp; bookings</h2>
-        <Table head={['Ref', 'Business', 'What', 'Status']} rows={[
-          ['KKR-7Q2M', 'Sharma Kirana Store', 'Groceries', 'Out for delivery'],
-          ['KKR-3HXP', 'Rangoli Painters', 'Painting · 24 Oct', 'Confirmed'],
-        ]} />
+      <Kpis items={[
+        ['Orders this month', '42', 'sample data'],
+        ['Bookings pending', '3', 'sample data'],
+        ['Profile views', '1,284', 'sample data'],
+        ['Commission paid', '₹0', 'My KKR takes nothing'],
+      ]} />
+
+      {/* Subscription status */}
+      <div className="panel" style={{ marginTop: 14, borderLeft: '4px solid #12343b' }}>
+        <h2 className="panel-title">Your Subscription</h2>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 10 }}>
+          <div>
+            <div style={{ fontWeight: 700, fontSize: 15, marginBottom: 4 }}>
+              Business Plan — <span style={{ color: '#16a34a' }}>Active</span>
+            </div>
+            <div className="muted">
+              {formatInr(PLANS.business.priceInr)} + GST = {formatInr(withGst(PLANS.business.priceInr))} / month
+            </div>
+            <div className="muted" style={{ marginTop: 4, fontSize: 12 }}>
+              Renews automatically via Razorpay. Cancel any time.
+            </div>
+          </div>
+          <div style={{ textAlign: 'right' }}>
+            <div style={{ fontWeight: 800, fontSize: 22, color: '#12343b' }}>₹0</div>
+            <div className="muted" style={{ fontSize: 11 }}>commission on all sales</div>
+          </div>
+        </div>
+        <p className="muted" style={{ marginTop: 10, fontSize: 12, borderTop: '1px solid var(--border)', paddingTop: 10 }}>
+          All customer payments (UPI, card, wallet, COD) go directly to you. My KKR is only the connector.
+        </p>
       </div>
+
+      {/* Recent activity */}
       <div className="panel">
-        <h2 className="panel-title">Quick actions</h2>
-        <div className="chips" style={{ flexWrap: 'wrap' }}>
-          <Link href="/post" className="chip">📋 Post a requirement</Link>
-          <Link href="/rides" className="chip">🚗 Request a ride</Link>
-          <Link href="/find-book" className="chip">📅 Find &amp; book</Link>
+        <h2 className="panel-title">Recent orders &amp; bookings</h2>
+        <p className="muted" style={{ fontSize: 12, marginBottom: 12 }}>
+          Sample preview — your real orders appear here after sign-in is connected.
+        </p>
+        <Table
+          head={['Order ID', 'What', 'Fulfilment', 'Status']}
+          rows={[
+            ['#KKR-7Q2M', 'Groceries (3 items)', 'Partner driver', <StatusBadge key="1" status="Out for delivery" />],
+            ['#KKR-3HXP', 'House painting — 24 Oct', 'On-site service', <StatusBadge key="2" status="Confirmed" />],
+            ['#KKR-9LKA', 'Stationery bundle', 'Customer pickup', <StatusBadge key="3" status="Ready for pickup" />],
+            ['#KKR-2BNQ', 'Vegetables (daily box)', 'Self-delivery', <StatusBadge key="4" status="Delivered" />],
+          ]}
+        />
+      </div>
+
+      {/* Quick actions */}
+      <div className="panel">
+        <h2 className="panel-title">Manage your business</h2>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: 10 }}>
+          {[
+            { label: 'Edit profile', href: '/register?role=business', icon: '✏️' },
+            { label: 'Add a listing', href: '/register?role=business', icon: '➕' },
+            { label: 'Manage hours', href: '/register?role=business', icon: '🕐' },
+            { label: 'View my public page', href: '/business/sharma-kirana-store', icon: '👁️' },
+          ].map((a) => (
+            <Link key={a.label} href={a.href} className="btn btn-outline btn-sm" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              <span>{a.icon}</span> {a.label}
+            </Link>
+          ))}
         </div>
       </div>
     </>
   )
 }
 
+// ── CUSTOMER DASHBOARD ────────────────────────────────────────────────────────
+
+function CustomerDash() {
+  return (
+    <>
+      <Kpis items={[
+        ['Trial days left', String(PLANS.customer.trialDays), 'free trial'],
+        ['Active bookings', '2', 'sample data'],
+        ['Open requirements', '1', 'sample data'],
+        ['Favourites saved', '5', 'sample data'],
+      ]} />
+
+      {/* Subscription */}
+      <div className="panel" style={{ marginTop: 14, borderLeft: '4px solid #0f766e' }}>
+        <h2 className="panel-title">Your Subscription</h2>
+        <div style={{ fontWeight: 700, fontSize: 15, marginBottom: 4 }}>
+          Customer Plan — <span style={{ color: '#d97706' }}>Free Trial ({PLANS.customer.trialDays} days)</span>
+        </div>
+        <div className="muted">
+          After trial: {formatInr(PLANS.customer.priceInr)} + GST = {formatInr(withGst(PLANS.customer.priceInr))} / month.
+          Unlimited browsing and booking.
+        </div>
+      </div>
+
+      {/* My bookings */}
+      <div className="panel">
+        <h2 className="panel-title">My orders &amp; bookings</h2>
+        <p className="muted" style={{ fontSize: 12, marginBottom: 12 }}>
+          Sample preview — your real history appears here after sign-in is connected.
+        </p>
+        <Table
+          head={['Order ID', 'Business', 'What', 'Status']}
+          rows={[
+            ['#KKR-7Q2M', 'Sharma Kirana Store', 'Groceries', <StatusBadge key="1" status="Out for delivery" />],
+            ['#KKR-3HXP', 'Rangoli Painters', 'House painting — 24 Oct', <StatusBadge key="2" status="Confirmed" />],
+            ['#KKR-4DZK', 'Gupta Sweet House', 'Mithai 1 kg box', <StatusBadge key="3" status="Delivered" />],
+          ]}
+        />
+      </div>
+
+      {/* Quick actions */}
+      <div className="panel">
+        <h2 className="panel-title">What would you like to do?</h2>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(170px, 1fr))', gap: 10 }}>
+          {[
+            { label: 'Post a requirement', href: '/post', icon: '📋', desc: 'Let businesses come to you' },
+            { label: 'Request a ride', href: '/rides', icon: '🚗', desc: 'Taxi or delivery' },
+            { label: 'Find & book a service', href: '/find-book', icon: '📅', desc: 'Plumber, painter, venue…' },
+            { label: 'Browse businesses', href: '/categories', icon: '🏪', desc: 'Shops, food, services' },
+          ].map((a) => (
+            <Link key={a.label} href={a.href} className="panel" style={{ textDecoration: 'none', padding: '12px 14px', border: '1.5px solid var(--border)', gap: 4 }}>
+              <div style={{ fontSize: 22, marginBottom: 4 }}>{a.icon}</div>
+              <div style={{ fontWeight: 700, fontSize: 13, color: 'var(--night-d)' }}>{a.label}</div>
+              <div className="muted" style={{ fontSize: 11 }}>{a.desc}</div>
+            </Link>
+          ))}
+        </div>
+      </div>
+    </>
+  )
+}
+
+// ── DRIVER DASHBOARD ──────────────────────────────────────────────────────────
+
 function DriverDash() {
   return (
     <>
-      <Kpis items={[['Jobs today', '6'], ['Earnings today', '₹1,140'], ['Rating', '4.8 ★'], ['Commission', '₹0']]} />
-      <div className="panel" style={{ marginTop: 14 }}>
+      <Kpis items={[
+        ['Jobs today', '6', 'sample data'],
+        ['Earnings today', '₹1,140', 'sample data'],
+        ['Rating', '4.8 ★', 'sample data'],
+        ['Commission to My KKR', '₹0', 'keep everything'],
+      ]} />
+
+      <div className="panel" style={{ marginTop: 14, borderLeft: '4px solid #b45309' }}>
+        <h2 className="panel-title">How driver earnings work</h2>
+        <p className="prose">
+          When a customer places an order or books a service, they can choose
+          <strong> &ldquo;Partner Driver&rdquo;</strong> for delivery. The request appears on your job board.
+          You accept, pick up, deliver, and upload a photo. The customer pays you directly — My KKR takes <strong>no commission</strong>.
+        </p>
+      </div>
+
+      <div className="panel">
         <h2 className="panel-title">Live Job Board</h2>
         <p className="muted" style={{ marginBottom: 14, fontSize: 13 }}>
-          New ride/delivery requests appear here in real time. Accept atomically — only one driver gets each job.
+          New delivery and ride requests appear here in real time. Only one driver can accept each job.
         </p>
         <JobBoardWrapper />
       </div>
@@ -198,8 +325,9 @@ function DriverDash() {
   )
 }
 
+// ── ADMIN DASHBOARD ───────────────────────────────────────────────────────────
+
 function AdminDash({ stats }: { stats: AdminStats | null }) {
-  // Use live DB stats when available, fall back to static demo data
   const totalBiz    = stats?.totalBusinesses    ?? BUSINESSES.length
   const verifiedBiz = stats?.verifiedBusinesses ?? BUSINESSES.filter((b) => b.verified).length
   const pending     = stats?.pendingVerification ?? (BUSINESSES.length - BUSINESSES.filter((b) => b.verified).length)
@@ -219,7 +347,7 @@ function AdminDash({ stats }: { stats: AdminStats | null }) {
       {isLive && (
         <div className="banner banner-ok" style={{ marginBottom: 14 }}>
           <span aria-hidden="true">🟢</span>
-          <div>Live platform data</div>
+          <div>Live platform data from database</div>
         </div>
       )}
 
@@ -244,37 +372,48 @@ function AdminDash({ stats }: { stats: AdminStats | null }) {
         ['Total all-time',  String(jobs)],
         ['Open now',        String(openJobs)],
         ['Completed',       String(completed)],
-        ['Revenue (subs)',  `₹${revInr}`],
+        ['Sub revenue',     `₹${revInr}`],
       ]} />
 
       {!isLive && (
         <div className="panel" style={{ marginTop: 14 }}>
-          <h2 className="panel-title">Pending KYC (demo)</h2>
-          <Table head={['Business', 'Area', 'Status']} rows={BUSINESSES.filter((b) => !b.verified).map((b) => [b.name, b.area, 'Pending KYC'])} />
+          <h2 className="panel-title">Pending KYC</h2>
+          <p className="muted" style={{ fontSize: 12, marginBottom: 10 }}>
+            Businesses with no GSTIN entered. Live data replaces this once DB is connected.
+          </p>
+          <Table head={['Business', 'Category', 'Area', 'Action']} rows={
+            BUSINESSES.filter((b) => !b.verified).map((b) => [b.name, b.sub, b.area, 'Mark verified'])
+          } />
         </div>
       )}
 
       <div className="panel" style={{ marginTop: 14 }}>
-        <h2 className="panel-title">Plans</h2>
+        <h2 className="panel-title">Subscription plans</h2>
         <Table head={['Plan', 'Price + GST', 'Trial']} rows={[
           [PLANS.business.name, `${formatInr(withGst(PLANS.business.priceInr))}/mo`, '—'],
           [PLANS.customer.name, `${formatInr(withGst(PLANS.customer.priceInr))}/mo`, `${PLANS.customer.trialDays} days`],
         ]} />
         <p className="muted" style={{ marginTop: 10 }}>
-          {String(CATEGORY_GROUPS.length)} categories · admins see analytics only · My KKR takes no commission on transactions.
+          {String(CATEGORY_GROUPS.length)} categories active &nbsp;&middot;&nbsp;
+          My KKR takes 0% commission on all transactions.
         </p>
       </div>
     </>
   )
 }
 
+// ── Page ──────────────────────────────────────────────────────────────────────
+
 export default async function RoleDashboard({ params }: { params: Params }) {
   const role = getRole((await params).role)
   if (!role) notFound()
 
-  // Fetch live DB stats for admin; skip for other roles
   const adminStats = role.id === 'admin' ? await fetchAdminStats() : null
   const isLive = role.id === 'admin' && adminStats !== null
+
+  const ROLE_EMOJI: Record<string, string> = {
+    business: '🏪', customer: '🙋', driver: '🏍️', admin: '🛡️',
+  }
 
   let View: React.JSX.Element
   switch (role.id as UserRole) {
@@ -287,14 +426,20 @@ export default async function RoleDashboard({ params }: { params: Params }) {
   return (
     <div className="container">
       <Breadcrumbs items={[{ href: '/dashboard', label: 'Dashboards' }, { label: role.name }]} />
-      <h1 className="page-title">{role.icon} {role.name}</h1>
-      <p className="page-sub">{role.summary}</p>
+      <h1 className="page-title">{ROLE_EMOJI[role.id] ?? ''} {role.name} Dashboard</h1>
+      <p className="page-sub" style={{ marginBottom: 14 }}>{role.summary}</p>
+
       {!isLive && (
-        <div className="banner banner-warn" style={{ margin: '14px 0' }}>
-          <span aria-hidden="true">🧪</span>
-          <div>Preview with sample data. Live data appears once sign-in and the backend API are connected.</div>
+        <div className="banner banner-warn" style={{ marginBottom: 14 }}>
+          <span aria-hidden="true">👁️</span>
+          <div>
+            <strong>Preview mode</strong> — showing sample data.
+            Real data appears once Firebase sign-in is connected.{' '}
+            <Link href="/dashboard" className="link">See all roles →</Link>
+          </div>
         </div>
       )}
+
       {View}
     </div>
   )
