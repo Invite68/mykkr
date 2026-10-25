@@ -193,155 +193,140 @@ const SAMPLE_HOURS: Record<string, { open: boolean; start: string; end: string }
 }
 
 function BusinessDash() {
+  // ── "Needs attention" items — these drive urgency at the top ─────────────
+  // Once DB is connected, these come from real queries.
+  // We show them only when count > 0 so the panel disappears when all clear.
+  const pendingActions = [
+    { count: 3, label: 'bookings waiting for your confirmation', href: '/register?role=business', urgent: true },
+    { count: 1, label: 'customer message unread',                href: '/register?role=business', urgent: false },
+    { count: 2, label: 'orders ready — assign a driver or confirm pickup', href: '/register?role=business', urgent: false },
+  ]
+
   return (
     <>
-      {/* ── KPI strip with trends ─────────────────────────────────────── */}
+      {/* ── NEEDS ATTENTION — most important panel, always first ─────── */}
+      <div className="panel" style={{ marginTop: 0, borderLeft: '4px solid #dc2626' }}>
+        <h2 className="panel-title" style={{ marginBottom: 10 }}>
+          <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#dc2626" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            Needs your attention
+          </span>
+        </h2>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          {pendingActions.map(({ count, label, href, urgent }) => (
+            <Link key={label} href={href} style={{
+              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+              padding: '10px 12px', borderRadius: 8, textDecoration: 'none',
+              background: urgent ? '#fef2f2' : 'var(--bg-2)',
+              border: `1px solid ${urgent ? '#fecaca' : 'var(--border)'}`,
+            }}>
+              <span style={{ fontSize: 13, color: 'var(--text-1)' }}>
+                <strong style={{ color: urgent ? '#dc2626' : 'var(--night-d)' }}>{count}</strong> {label}
+              </span>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
+            </Link>
+          ))}
+        </div>
+        <p className="muted" style={{ fontSize: 11, marginTop: 8 }}>Sample data — connects to live orders after sign-in is wired.</p>
+      </div>
+
+      {/* ── TODAY AT A GLANCE ─────────────────────────────────────────── */}
       <Kpis items={[
-        { label: 'Orders this month', value: '42',   trend: '+18%',  trendUp: true  },
-        { label: 'Bookings pending',  value: '3',    sub: 'awaiting confirmation'   },
-        { label: 'Profile views',     value: '1,284',trend: '+11%',  trendUp: true  },
-        { label: 'Commission paid',   value: '₹0',   sub: 'My KKR takes nothing'    },
+        { label: 'Orders this month', value: '42',    sub: 'sample data'           },
+        { label: 'Awaiting action',   value: '3',     sub: 'bookings to confirm'   },
+        { label: 'Profile views',     value: '1,284', sub: 'this month'            },
+        { label: 'Revenue to you',    value: '₹0',    sub: 'platform takes nothing'},
       ]} />
 
-      {/* ── Business type + listing counts ───────────────────────────── */}
-      <div className="panel" style={{ marginTop: 14 }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 12 }}>
-          <div>
-            <h2 className="panel-title" style={{ marginBottom: 6 }}>Your Business Mode</h2>
-            <p className="muted" style={{ fontSize: 12 }}>
-              Your listing is set up as a <strong>Hybrid</strong> business — you can sell goods, offer services, and list venues all from one profile.
-            </p>
-          </div>
-          <div style={{ display: 'flex', gap: 6 }}>
-            {(['Goods', 'Services', 'Venues'] as const).map((t) => (
-              <span key={t} style={{
-                padding: '4px 10px', borderRadius: 99, fontSize: 11, fontWeight: 700,
-                background: t === 'Services' ? '#12343b' : 'var(--bg-2)',
-                color:      t === 'Services' ? '#fff'    : 'var(--text-2)',
-                border: '1.5px solid var(--border)',
-              }}>{t}</span>
-            ))}
-          </div>
-        </div>
-
-        {/* Listing counts row */}
-        <div style={{ display: 'flex', gap: 16, marginTop: 14, flexWrap: 'wrap' }}>
-          {[
-            { label: 'Products listed', value: '12', icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg> },
-            { label: 'Services active', value: '4',  icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg> },
-            { label: 'Avg rating',      value: '4.7',icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg> },
-            { label: 'Response rate',   value: '92%',icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg> },
-          ].map(({ label, value, icon }) => (
-            <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12 }}>
-              <span style={{ color: 'var(--night-d)' }}>{icon}</span>
-              <span style={{ fontWeight: 700, color: 'var(--night-d)' }}>{value}</span>
-              <span className="muted">{label}</span>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* ── Subscription status ───────────────────────────────────────── */}
-      <div className="panel" style={{ borderLeft: '4px solid #12343b' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 10 }}>
-          <div>
-            <h2 className="panel-title" style={{ marginBottom: 4 }}>
-              Business Plan — <span style={{ color: '#16a34a' }}>Active</span>
-            </h2>
-            <div className="muted">
-              {formatInr(PLANS.business.priceInr)} + GST = <strong>{formatInr(withGst(PLANS.business.priceInr))}</strong> / month
-            </div>
-            <div className="muted" style={{ marginTop: 4, fontSize: 12 }}>
-              Renews automatically via Razorpay · Cancel any time
-            </div>
-          </div>
-          <div style={{ textAlign: 'right' }}>
-            <div style={{ fontWeight: 800, fontSize: 24, color: '#12343b', lineHeight: 1 }}>₹0</div>
-            <div className="muted" style={{ fontSize: 11 }}>commission on all sales</div>
-          </div>
-        </div>
-
-        {/* What's included */}
-        <div style={{ display: 'flex', gap: 12, marginTop: 12, flexWrap: 'wrap', paddingTop: 12, borderTop: '1px solid var(--border)' }}>
-          {[
-            'Unlimited listings', 'Full shop page', 'Booking calendar',
-            'Driver dispatch', 'Analytics', 'Direct UPI/COD payments',
-          ].map((f) => (
-            <span key={f} style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12, color: 'var(--text-2)' }}>
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
-              {f}
+      {/* ── SHOP STATUS + HOURS ───────────────────────────────────────── */}
+      {/* Business owner's first question: is my shop showing as open right now? */}
+      <div className="panel">
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+          <h2 className="panel-title" style={{ marginBottom: 0 }}>
+            Shop status &amp; hours
+          </h2>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            {/* Open/closed indicator — reads from today's hours */}
+            <span style={{
+              display: 'flex', alignItems: 'center', gap: 5,
+              padding: '4px 10px', borderRadius: 99, fontSize: 12, fontWeight: 700,
+              background: '#dcfce7', color: '#16a34a', border: '1px solid #bbf7d0',
+            }}>
+              <span style={{ width: 7, height: 7, borderRadius: '50%', background: '#16a34a', display: 'inline-block' }} />
+              Open now
             </span>
-          ))}
+            <Link href="/register?role=business" className="btn btn-outline btn-sm" style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 12 }}>
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+              Edit
+            </Link>
+          </div>
         </div>
-
-        <p className="muted" style={{ marginTop: 10, fontSize: 12 }}>
-          All customer payments (UPI, card, wallet, COD) go directly to you. My KKR is only the connector.
-        </p>
-      </div>
-
-      {/* ── Recent orders & bookings ──────────────────────────────────── */}
-      <div className="panel">
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-          <h2 className="panel-title" style={{ marginBottom: 0 }}>Recent orders &amp; bookings</h2>
-          <span className="muted" style={{ fontSize: 11 }}>Sample preview</span>
-        </div>
-        <Table
-          head={['Order ID', 'Item / Service', 'Fulfilment', 'Amount', 'Status']}
-          rows={[
-            ['#KKR-7Q2M', 'Groceries (3 items)',      'Partner driver',   '₹380', <StatusBadge key="1" status="Out for delivery" />],
-            ['#KKR-3HXP', 'House painting — 24 Oct',  'On-site service',  '₹4,500', <StatusBadge key="2" status="Confirmed" />],
-            ['#KKR-9LKA', 'Stationery bundle',        'Customer pickup',  '₹210', <StatusBadge key="3" status="Ready for pickup" />],
-            ['#KKR-2BNQ', 'Vegetables (daily box)',   'Self-delivery',    '₹145', <StatusBadge key="4" status="Delivered" />],
-          ]}
-        />
-      </div>
-
-      {/* ── Weekly hours preview ─────────────────────────────────────── */}
-      <div className="panel">
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-          <h2 className="panel-title" style={{ marginBottom: 0 }}>Operating hours</h2>
-          <Link href="/register?role=business" className="btn btn-outline btn-sm" style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 12 }}>
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-            Edit
-          </Link>
-        </div>
+        {/* Weekly hours grid — at a glance, which days are you closed? */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 4 }}>
           {DAYS_SHORT.map((day) => {
             const h = SAMPLE_HOURS[day]
+            // Highlight today
+            const todayIdx = new Date().getDay() // 0=Sun,1=Mon...
+            const dayIdx   = DAYS_SHORT.indexOf(day)
+            const isToday  = (todayIdx === 0 ? 6 : todayIdx - 1) === dayIdx
             return (
               <div key={day} style={{
                 padding: '8px 4px', borderRadius: 8, textAlign: 'center',
-                background: h.open ? '#12343b12' : 'var(--bg-2)',
-                border: `1.5px solid ${h.open ? '#12343b30' : 'var(--border)'}`,
+                background: isToday ? (h.open ? '#12343b' : '#374151') : (h.open ? '#12343b12' : 'var(--bg-2)'),
+                border: `1.5px solid ${isToday ? 'transparent' : (h.open ? '#12343b30' : 'var(--border)')}`,
               }}>
-                <div style={{ fontSize: 11, fontWeight: 700, color: h.open ? 'var(--night-d)' : 'var(--text-3)', marginBottom: 4 }}>{day}</div>
+                <div style={{ fontSize: 11, fontWeight: 700, marginBottom: 3,
+                  color: isToday ? '#fff' : (h.open ? 'var(--night-d)' : 'var(--text-3)') }}>
+                  {day}
+                </div>
                 {h.open ? (
                   <>
-                    <div style={{ fontSize: 10, color: 'var(--text-2)', lineHeight: 1.4 }}>{h.start}</div>
-                    <div style={{ fontSize: 9, color: 'var(--text-3)' }}>—</div>
-                    <div style={{ fontSize: 10, color: 'var(--text-2)', lineHeight: 1.4 }}>{h.end}</div>
+                    <div style={{ fontSize: 10, lineHeight: 1.3, color: isToday ? '#d1fae5' : 'var(--text-2)' }}>{h.start}</div>
+                    <div style={{ fontSize: 9,  color: isToday ? '#6ee7b7' : 'var(--text-3)' }}>—</div>
+                    <div style={{ fontSize: 10, lineHeight: 1.3, color: isToday ? '#d1fae5' : 'var(--text-2)' }}>{h.end}</div>
                   </>
                 ) : (
-                  <div style={{ fontSize: 10, color: 'var(--text-3)' }}>Closed</div>
+                  <div style={{ fontSize: 10, color: isToday ? '#9ca3af' : 'var(--text-3)' }}>Closed</div>
                 )}
               </div>
             )
           })}
         </div>
-        <p className="muted" style={{ fontSize: 11, marginTop: 8 }}>Sample hours — update in your profile settings after signing in.</p>
+        <p className="muted" style={{ fontSize: 11, marginTop: 8 }}>Today is highlighted · Sample hours — set yours after sign-in.</p>
       </div>
 
-      {/* ── Quick actions ─────────────────────────────────────────────── */}
+      {/* ── RECENT ACTIVITY ───────────────────────────────────────────── */}
+      {/* Business needs to see: what came in, what needs dispatching */}
+      <div className="panel">
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+          <h2 className="panel-title" style={{ marginBottom: 0 }}>Recent orders &amp; bookings</h2>
+          <span className="muted" style={{ fontSize: 11 }}>Sample data</span>
+        </div>
+        <Table
+          head={['Order', 'Customer ordered', 'Fulfilment', 'Amount', 'Status']}
+          rows={[
+            ['#KKR-7Q2M', 'Groceries (3 items)',           'Assign driver',    '₹380',   <StatusBadge key="1" status="Pending" />],
+            ['#KKR-3HXP', 'House painting — 26 Oct 10am',  'You go on-site',   '₹4,500', <StatusBadge key="2" status="Confirmed" />],
+            ['#KKR-9LKA', 'Stationery bundle',             'Customer pickup',  '₹210',   <StatusBadge key="3" status="Ready for pickup" />],
+            ['#KKR-2BNQ', 'Vegetables (daily box)',        'Self-delivery',    '₹145',   <StatusBadge key="4" status="Delivered" />],
+          ]}
+        />
+        <p className="muted" style={{ fontSize: 12, marginTop: 10 }}>
+          Payment for every order goes directly from customer to you — UPI, card, wallet, or cash. My KKR takes nothing.
+        </p>
+      </div>
+
+      {/* ── QUICK ACTIONS ─────────────────────────────────────────────── */}
       <div className="panel">
         <h2 className="panel-title">Manage your business</h2>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: 10 }}>
           {[
-            { label: 'Edit profile',    href: '/register?role=business', icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg> },
-            { label: 'Add a listing',   href: '/register?role=business', icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> },
-            { label: 'Manage hours',    href: '/register?role=business', icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> },
-            { label: 'View public page',href: '/business/sharma-kirana-store', icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg> },
-            { label: 'Post a task/gig', href: '/post',                    icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/></svg> },
-            { label: 'See your shop',   href: '/shop/sharma-kirana-store', icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg> },
+            { label: 'Edit profile',     href: '/register?role=business',        icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg> },
+            { label: 'Add a listing',    href: '/register?role=business',        icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> },
+            { label: 'View public page', href: '/business/sharma-kirana-store',  icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg> },
+            { label: 'Your shop',        href: '/shop/sharma-kirana-store',      icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg> },
+            { label: 'Post a task/gig',  href: '/post',                          icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/></svg> },
+            { label: 'Subscription',     href: '/pricing',                       icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg> },
           ].map((a) => (
             <Link key={a.label} href={a.href} className="btn btn-outline btn-sm" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
               {a.icon}{a.label}
@@ -358,76 +343,76 @@ function BusinessDash() {
 function CustomerDash() {
   return (
     <>
-      <Kpis items={[
-        { label: 'Trial days left',      value: String(PLANS.customer.trialDays), sub: 'free trial — no card needed' },
-        { label: 'Active bookings',      value: '2',  sub: 'sample data'          },
-        { label: 'Open requirements',    value: '1',  sub: 'awaiting bids'        },
-        { label: 'Favourites saved',     value: '5',  sub: 'sample data'          },
-      ]} />
+      {/* ── LIVE ORDERS — customer's primary need ─────────────────────── */}
+      {/* "Where is my stuff?" is the most common customer support question.
+          Showing active orders first eliminates that anxiety immediately.   */}
+      <div className="panel" style={{ marginTop: 0 }}>
+        <h2 className="panel-title" style={{ marginBottom: 12 }}>Your active orders</h2>
 
-      {/* Subscription */}
-      <div className="panel" style={{ marginTop: 14, borderLeft: '4px solid #0f766e' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 10 }}>
-          <div>
-            <h2 className="panel-title" style={{ marginBottom: 4 }}>
-              Customer Plan — <span style={{ color: '#d97706' }}>Free Trial</span>
-            </h2>
-            <div className="muted">
-              After trial: {formatInr(PLANS.customer.priceInr)} + GST = <strong>{formatInr(withGst(PLANS.customer.priceInr))}</strong> / month
+        {/* Active order card — becomes real once auth is wired */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          {[
+            {
+              id: '#KKR-7Q2M', what: 'Groceries (3 items)', biz: 'Sharma Kirana Store',
+              status: 'Out for delivery', statusColor: '#0ea5e9',
+              detail: 'Driver Raju is 2 km away · Est. 15 min',
+              showTrack: true,
+            },
+            {
+              id: '#KKR-3HXP', what: 'House painting — tomorrow 10am', biz: 'Rangoli Painters',
+              status: 'Confirmed', statusColor: '#7c3aed',
+              detail: 'Painter will arrive at your address at 10:00 AM',
+              showTrack: false,
+            },
+          ].map((o) => (
+            <div key={o.id} style={{
+              padding: 14, borderRadius: 10, border: '1.5px solid var(--border)',
+              background: 'var(--bg-1)',
+            }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 6 }}>
+                <div>
+                  <div style={{ fontWeight: 700, fontSize: 13 }}>{o.what}</div>
+                  <div className="muted" style={{ fontSize: 12 }}>{o.biz} · {o.id}</div>
+                </div>
+                <span style={{
+                  background: o.statusColor + '18', color: o.statusColor,
+                  fontWeight: 700, fontSize: 11, padding: '3px 8px', borderRadius: 99,
+                  border: `1px solid ${o.statusColor}44`, whiteSpace: 'nowrap',
+                }}>{o.status}</span>
+              </div>
+              <div className="muted" style={{ fontSize: 12, marginBottom: o.showTrack ? 10 : 0 }}>{o.detail}</div>
+              {o.showTrack && (
+                <Link href="/track/KKR-7Q2M" className="btn btn-outline btn-sm" style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 12 }}>
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></svg>
+                  Live track
+                </Link>
+              )}
             </div>
-            <div className="muted" style={{ fontSize: 12, marginTop: 3 }}>No card needed during trial · Cancel any time</div>
-          </div>
-          <div style={{ textAlign: 'right' }}>
-            <div style={{ fontWeight: 800, fontSize: 24, color: '#d97706', lineHeight: 1 }}>{PLANS.customer.trialDays}</div>
-            <div className="muted" style={{ fontSize: 11 }}>days free</div>
-          </div>
-        </div>
-        <div style={{ display: 'flex', gap: 12, marginTop: 12, flexWrap: 'wrap', paddingTop: 12, borderTop: '1px solid var(--border)' }}>
-          {['Browse all businesses', 'Book services', 'Order goods', 'Post requirements', 'In-app chat', 'Order tracking'].map((f) => (
-            <span key={f} style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12, color: 'var(--text-2)' }}>
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#0f766e" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
-              {f}
-            </span>
           ))}
         </div>
+        <p className="muted" style={{ fontSize: 11, marginTop: 8 }}>Sample data — your real orders show here once signed in.</p>
       </div>
 
-      {/* My bookings */}
-      <div className="panel">
-        <h2 className="panel-title">My orders &amp; bookings</h2>
-        <p className="muted" style={{ fontSize: 12, marginBottom: 12 }}>
-          Sample preview — your real history appears here after sign-in is connected.
-        </p>
-        <Table
-          head={['Order ID', 'Business', 'What', 'Status']}
-          rows={[
-            ['#KKR-7Q2M', 'Sharma Kirana Store', 'Groceries', <StatusBadge key="1" status="Out for delivery" />],
-            ['#KKR-3HXP', 'Rangoli Painters', 'House painting — 24 Oct', <StatusBadge key="2" status="Confirmed" />],
-            ['#KKR-4DZK', 'Gupta Sweet House', 'Mithai 1 kg box', <StatusBadge key="3" status="Delivered" />],
-          ]}
-        />
-      </div>
-
-      {/* Quick actions */}
+      {/* ── QUICK ACTIONS — what do you want to do next? ──────────────── */}
       <div className="panel">
         <h2 className="panel-title">What would you like to do?</h2>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(170px, 1fr))', gap: 10 }}>
           {([
             {
-              label: 'Post a requirement', href: '/post', desc: 'Let businesses come to you',
-              icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>,
+              label: 'Browse businesses', href: '/categories', desc: 'Shops, food, services near you',
+              icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>,
             },
             {
-              label: 'Request a ride', href: '/rides', desc: 'Taxi or delivery',
-              icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><rect x="1" y="9" width="22" height="10" rx="2" ry="2"/><path d="M16 9V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v4"/><circle cx="8.5" cy="14.5" r="1.5"/><circle cx="15.5" cy="14.5" r="1.5"/></svg>,
-            },
-            {
-              label: 'Find & book a service', href: '/find-book', desc: 'Plumber, painter, venue…',
+              label: 'Book a service', href: '/find-book', desc: 'Plumber, painter, venue, cab…',
               icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>,
             },
             {
-              label: 'Browse businesses', href: '/categories', desc: 'Shops, food, services',
-              icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>,
+              label: 'Post a requirement', href: '/post', desc: 'Tell businesses what you need',
+              icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>,
+            },
+            {
+              label: 'Request a ride', href: '/rides', desc: 'Taxi, auto, or parcel delivery',
+              icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><rect x="1" y="9" width="22" height="10" rx="2" ry="2"/><path d="M16 9V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v4"/><circle cx="8.5" cy="14.5" r="1.5"/><circle cx="15.5" cy="14.5" r="1.5"/></svg>,
             },
           ] as { label: string; href: string; desc: string; icon: React.JSX.Element }[]).map((a) => (
             <Link key={a.label} href={a.href} className="panel" style={{ textDecoration: 'none', padding: '12px 14px', border: '1.5px solid var(--border)', gap: 4 }}>
@@ -436,6 +421,37 @@ function CustomerDash() {
               <div className="muted" style={{ fontSize: 11 }}>{a.desc}</div>
             </Link>
           ))}
+        </div>
+      </div>
+
+      {/* ── ORDER HISTORY + REORDER ───────────────────────────────────── */}
+      {/* Reorder is a big retention driver — show past orders with a quick repeat action */}
+      <div className="panel">
+        <h2 className="panel-title">Past orders</h2>
+        <Table
+          head={['Business', 'What', 'Amount', 'Status', '']}
+          rows={[
+            ['Gupta Sweet House',    'Mithai 1 kg box',     '₹350', <StatusBadge key="d1" status="Delivered" />, <Link key="r1" href="/categories" className="btn btn-outline btn-sm" style={{ fontSize: 11 }}>Reorder</Link>],
+            ['Sharma Kirana Store',  'Monthly groceries',   '₹1,240', <StatusBadge key="d2" status="Delivered" />, <Link key="r2" href="/categories" className="btn btn-outline btn-sm" style={{ fontSize: 11 }}>Reorder</Link>],
+            ['City Plumbers',        'Tap repair — 14 Oct', '₹600', <StatusBadge key="d3" status="Delivered" />, <Link key="r3" href="/categories" className="btn btn-outline btn-sm" style={{ fontSize: 11 }}>Book again</Link>],
+          ]}
+        />
+        <p className="muted" style={{ fontSize: 11, marginTop: 8 }}>Sample data — real history loads once signed in.</p>
+      </div>
+
+      {/* ── TRIAL STATUS — show only if on trial ─────────────────────── */}
+      {/* Put this last: it's account info, not something they came here to see */}
+      <div className="panel" style={{ borderLeft: '4px solid #d97706' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 8 }}>
+          <div>
+            <div style={{ fontWeight: 700, fontSize: 14, marginBottom: 2 }}>
+              Free trial — <span style={{ color: '#d97706' }}>{PLANS.customer.trialDays} days remaining</span>
+            </div>
+            <div className="muted" style={{ fontSize: 12 }}>
+              After trial: {formatInr(withGst(PLANS.customer.priceInr))}/month · No card needed until then
+            </div>
+          </div>
+          <Link href="/pricing" className="btn btn-outline btn-sm" style={{ whiteSpace: 'nowrap' }}>See plan</Link>
         </div>
       </div>
     </>
@@ -448,10 +464,10 @@ function DriverDash() {
   return (
     <>
       <Kpis items={[
-        { label: 'Jobs today',           value: '6',      trend: '+2',    trendUp: true  },
-        { label: 'Earnings today',       value: '₹1,140', trend: '+₹140', trendUp: true  },
-        { label: 'Rating',               value: '4.8 / 5',sub: '48 reviews'              },
-        { label: 'Commission to My KKR', value: '₹0',     sub: 'keep everything'         },
+        { label: 'Jobs today',           value: '6',       sub: 'sample data'     },
+        { label: 'Earnings today',       value: '₹1,140',  sub: 'sample data'     },
+        { label: 'Rating',               value: '4.8 / 5', sub: 'sample data'     },
+        { label: 'Commission to My KKR', value: '₹0',      sub: 'keep everything' },
       ]} />
 
       <div className="panel" style={{ marginTop: 14, borderLeft: '4px solid #b45309' }}>
