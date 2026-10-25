@@ -1666,3 +1666,20 @@ a.media-ph-cta:hover { background: rgba(18,52,59,.16); }
 /* ── Ride type option cards ── */
 .option-icon { display: flex; align-items: center; justify-content: center; margin-bottom: 6px; }
 .option-icon svg { width: 32px; height: 32px; stroke: currentColor; fill: none; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+
+/* ── Business profile tab nav ── */
+.biz-tab-link {
+  padding: 13px 18px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-2);
+  text-decoration: none;
+  border-bottom: 2px solid transparent;
+  white-space: nowrap;
+  transition: color .15s, border-color .15s;
+  display: inline-block;
+}
+.biz-tab-link:hover {
+  color: var(--night-d);
+  border-bottom-color: var(--night-d);
+}

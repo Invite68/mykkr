@@ -377,23 +377,7 @@ export default async function BusinessPage({ params }: { params: Params }) {
               <a
                 key={tab}
                 href={`#${tab.toLowerCase().replace(/[^a-z]/g, '-').replace(/-+/g, '-').replace(/-$/, '')}`}
-                style={{
-                  padding: '13px 18px',
-                  fontSize: 13, fontWeight: 600,
-                  color: 'var(--text-2)',
-                  textDecoration: 'none',
-                  borderBottom: '2px solid transparent',
-                  whiteSpace: 'nowrap',
-                  transition: 'color .15s, border-color .15s',
-                }}
-                onMouseEnter={(e) => {
-                  (e.currentTarget as HTMLAnchorElement).style.color = 'var(--night-d)'
-                  ;(e.currentTarget as HTMLAnchorElement).style.borderBottomColor = 'var(--night-d)'
-                }}
-                onMouseLeave={(e) => {
-                  (e.currentTarget as HTMLAnchorElement).style.color = 'var(--text-2)'
-                  ;(e.currentTarget as HTMLAnchorElement).style.borderBottomColor = 'transparent'
-                }}
+                className="biz-tab-link"
               >
                 {tab}
               </a>
