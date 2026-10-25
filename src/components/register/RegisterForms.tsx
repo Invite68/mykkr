@@ -19,6 +19,7 @@ import { CATEGORY_GROUPS } from '@/data/categories'
 import { DELIVERY_VEHICLES } from '@/data/vehicles'
 import { ROLES, type UserRole } from '@/config/roles'
 import { PLANS, formatInr } from '@/config/platform'
+import { getIconComponent } from '@/components/ui/IconResolver'
 import { DELIVERY_LABELS, type DeliveryOption } from '@/types'
 import { isValidIndianMobile, isValidPin } from '@/lib/sanitize'
 import {
@@ -241,7 +242,8 @@ function OtpLoginStep({
             className={`tab${role === r.id ? ' active' : ''}`}
             onClick={() => onRole(r.id as SignupRole)}
           >
-            {r.icon} {r.id === 'business' ? 'Business' : r.id === 'customer' ? 'Customer' : 'Driver'}
+            {(() => { const C = getIconComponent(r.icon); return <span className="tab-icon" aria-hidden="true"><C /></span> })()}
+            {r.id === 'business' ? 'Business' : r.id === 'customer' ? 'Customer' : 'Driver'}
           </button>
         ))}
       </div>
@@ -249,7 +251,7 @@ function OtpLoginStep({
       {/* Role summary */}
       <div className="wizard-role-card">
         <span className="wizard-role-icon" aria-hidden="true">
-          {SIGNUP_ROLES.find((r) => r.id === role)?.icon}
+          {(() => { const iconKey = SIGNUP_ROLES.find((r) => r.id === role)?.icon ?? 'customer'; const C = getIconComponent(iconKey); return <C /> })()}
         </span>
         <p className="muted">{SIGNUP_ROLES.find((r) => r.id === role)?.summary}</p>
       </div>
@@ -472,7 +474,7 @@ function BusinessWizard({ phone, idToken, onDone }: { phone: string; idToken: st
       {/* Step 1 — Business basics */}
       {step === 1 && (
         <StepCard onNext={step1} errors={errors}>
-          <div className="step-heading">🏪 Tell us about your business</div>
+          <div className="step-heading">Tell us about your business</div>
           <div className="field">
             <label className="label" htmlFor="b-name">Business name <span className="req">*</span></label>
             <input id="b-name" className="input" maxLength={100} value={d.name}
@@ -516,7 +518,7 @@ function BusinessWizard({ phone, idToken, onDone }: { phone: string; idToken: st
       {/* Step 2 — Location */}
       {step === 2 && (
         <StepCard onNext={step2} onBack={goBack} errors={errors}>
-          <div className="step-heading">📍 Where is your business?</div>
+          <div className="step-heading">Where is your business?</div>
           <div className="field">
             <label className="label" htmlFor="b-area">Area / tehsil <span className="req">*</span></label>
             <AreaSelect id="b-area" value={d.area} onChange={(v) => up('area', v)} placeholder="Select your area" />
@@ -543,7 +545,7 @@ function BusinessWizard({ phone, idToken, onDone }: { phone: string; idToken: st
       {/* Step 3 — Contact & hours */}
       {step === 3 && (
         <StepCard onNext={step3} onBack={goBack} errors={errors}>
-          <div className="step-heading">📞 Contact & operating hours</div>
+          <div className="step-heading">Contact & operating hours</div>
           <p className="muted" style={{ marginBottom: 12 }}>Verified phone: <strong>+91 {phone}</strong></p>
           <div className="field">
             <label className="label" htmlFor="b-owner">Owner / manager name <span className="req">*</span></label>
@@ -571,7 +573,7 @@ function BusinessWizard({ phone, idToken, onDone }: { phone: string; idToken: st
       {/* Step 4 — Delivery & photos */}
       {step === 4 && (
         <StepCard onNext={step4} onBack={goBack} errors={errors}>
-          <div className="step-heading">🚚 Delivery options & photos</div>
+          <div className="step-heading">Delivery options & photos</div>
 
           <fieldset className="field" style={{ border: 'none' }}>
             <legend className="label" style={{ marginBottom: 6 }}>How can customers receive their orders?</legend>
@@ -601,7 +603,7 @@ function BusinessWizard({ phone, idToken, onDone }: { phone: string; idToken: st
       {/* Step 5 — Review & submit */}
       {step === 5 && (
         <StepCard onNext={step5} onBack={goBack} nextLabel={`List my business — ${formatInr(PLANS.business.priceInr)} + GST/month`} errors={errors}>
-          <div className="step-heading">✅ Review your details</div>
+          <div className="step-heading">Review your details</div>
 
           <div className="wizard-review">
             <ReviewRow label="Business" value={d.name} />
@@ -705,7 +707,7 @@ function CustomerWizard({ phone, idToken, onDone }: { phone: string; idToken: st
 
       {step === 1 && (
         <StepCard onNext={step1} errors={errors}>
-          <div className="step-heading">👋 Tell us your name</div>
+          <div className="step-heading">Tell us your name</div>
           <p className="muted" style={{ marginBottom: 12 }}>Verified phone: <strong>+91 {phone}</strong></p>
           <div className="field">
             <label className="label" htmlFor="c-name">Your full name <span className="req">*</span></label>
@@ -722,7 +724,7 @@ function CustomerWizard({ phone, idToken, onDone }: { phone: string; idToken: st
 
       {step === 2 && (
         <StepCard onNext={step2} onBack={goBack} errors={errors}>
-          <div className="step-heading">📍 Where are you based?</div>
+          <div className="step-heading">Where are you based?</div>
           <p className="muted" style={{ marginBottom: 12 }}>Helps us show businesses near you first.</p>
           <div className="field">
             <label className="label" htmlFor="c-area">Area / sector <span className="req">*</span></label>
@@ -738,7 +740,7 @@ function CustomerWizard({ phone, idToken, onDone }: { phone: string; idToken: st
 
       {step === 3 && (
         <StepCard onNext={step3} onBack={goBack} nextLabel={`Start ${plan.trialDays}-day free trial`} errors={errors}>
-          <div className="step-heading">🎁 Your free trial</div>
+          <div className="step-heading">Your free trial</div>
 
           <div className="wizard-plan-box">
             <div className="wizard-plan-name">Customer Plan</div>
@@ -861,7 +863,7 @@ function DriverWizard({ phone, idToken, onDone }: { phone: string; idToken: stri
 
       {step === 1 && (
         <StepCard onNext={step1} errors={errors}>
-          <div className="step-heading">🏍️ Your personal details</div>
+          <div className="step-heading">Your personal details</div>
           <p className="muted" style={{ marginBottom: 12 }}>Verified phone: <strong>+91 {phone}</strong></p>
           <div className="field">
             <label className="label" htmlFor="d-name">Full name (as on driving licence) <span className="req">*</span></label>
@@ -873,7 +875,7 @@ function DriverWizard({ phone, idToken, onDone }: { phone: string; idToken: stri
 
       {step === 2 && (
         <StepCard onNext={step2} onBack={goBack} errors={errors}>
-          <div className="step-heading">🚗 Your vehicle details</div>
+          <div className="step-heading">Your vehicle details</div>
           <div className="field">
             <label className="label" htmlFor="d-vehicle">Vehicle type <span className="req">*</span></label>
             <select id="d-vehicle" className="select" value={d.vehicle}
@@ -882,7 +884,7 @@ function DriverWizard({ phone, idToken, onDone }: { phone: string; idToken: stri
                 <option key={v.id} value={v.id}>{v.icon} {v.name} ({v.capacity})</option>
               ))}
               <option value="auto">🛺 Auto (rides)</option>
-              <option value="cab">🚗 Cab (rides)</option>
+              <option value="cab">Cab (rides)</option>
             </select>
           </div>
           <div className="field">
@@ -900,7 +902,7 @@ function DriverWizard({ phone, idToken, onDone }: { phone: string; idToken: stri
 
       {step === 3 && (
         <StepCard onNext={step3} onBack={goBack} errors={errors}>
-          <div className="step-heading">🪪 ID verification</div>
+          <div className="step-heading">ID verification</div>
           <p className="muted" style={{ marginBottom: 12 }}>
             We only store the last 4 characters — your full ID is checked once during verification and never stored.
           </p>
@@ -924,7 +926,7 @@ function DriverWizard({ phone, idToken, onDone }: { phone: string; idToken: stri
 
       {step === 4 && (
         <StepCard onNext={step4} onBack={goBack} nextLabel="Apply as driver partner" errors={errors}>
-          <div className="step-heading">📍 Your working area</div>
+          <div className="step-heading">Your working area</div>
 
           <div className="wizard-review">
             <ReviewRow label="Name" value={d.name} />
@@ -987,9 +989,9 @@ export default function RegisterForms({ initialRole }: { initialRole: SignupRole
         /* Phase 2 — profile wizard */
         <>
           <h2 className="page-title" style={{ fontSize: 20, marginBottom: 4 }}>
-            {role === 'business' ? '🏪 Complete your business profile'
-              : role === 'customer' ? '👋 Complete your profile'
-              : '🏍️ Complete your driver profile'}
+            {role === 'business' ? 'Complete your business profile'
+              : role === 'customer' ? 'Complete your profile'
+              : 'Complete your driver profile'}
           </h2>
           <p className="muted" style={{ marginBottom: 18 }}>
             {role === 'business' ? 'A few more details and your shop goes live.'

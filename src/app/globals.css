@@ -273,18 +273,18 @@ img, svg { max-width: 100%; display: block; }
   position: fixed; bottom: 0; left: 0; right: 0; z-index: 300;
   height: calc(var(--bnav) + env(safe-area-inset-bottom));
   padding-bottom: env(safe-area-inset-bottom);
-  background: var(--white);
-  border-top: 1px solid var(--border);
+  background: var(--night-d);
+  border-top: none;
   display: flex; align-items: stretch;
-  box-shadow: 0 -4px 20px rgba(0,0,0,.06);
+  box-shadow: 0 -2px 16px rgba(0,0,0,.22);
 }
 @media (min-width: 900px) { .bottom-nav { display: none; } }
 .bnav-item {
   flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px;
-  font-size: 10px; font-weight: 600; color: var(--text-4);
+  font-size: 10px; font-weight: 600; color: rgba(255,255,255,.55);
   transition: color var(--t);
 }
-.bnav-item.active { color: var(--night-d); }
+.bnav-item.active { color: #fff; }
 .bnav-icon { width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; }
 .bnav-icon svg { width: 20px; height: 20px; }
 .bnav-post {
@@ -1533,10 +1533,13 @@ a.media-ph-cta:hover { background: rgba(18,52,59,.16); }
   padding: 12px 14px;
 }
 .wizard-role-icon {
-  font-size: 24px;
-  line-height: 1;
-  flex-shrink: 0;
+  width: 36px; height: 36px; border-radius: 50%; flex-shrink: 0;
+  background: var(--night-d); color: #fff;
+  display: flex; align-items: center; justify-content: center;
 }
+.wizard-role-icon svg { width: 18px; height: 18px; stroke: #fff; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.tab-icon { display: inline-flex; align-items: center; margin-right: 4px; vertical-align: middle; }
+.tab-icon svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
 
 /* Phone prefix */
 .input-prefix {
@@ -1636,3 +1639,18 @@ a.media-ph-cta:hover { background: rgba(18,52,59,.16); }
   color: rgba(255,255,255,.65);
   margin-left: 4px;
 }
+
+/* ── Trust benefit items (register page aside) ── */
+.trust-item { display: flex; align-items: flex-start; gap: 10px; padding: 8px 0; }
+.trust-icon {
+  width: 32px; height: 32px; border-radius: 50%; flex-shrink: 0;
+  background: var(--night-d); color: #fff;
+  display: flex; align-items: center; justify-content: center;
+}
+.trust-icon svg { width: 15px; height: 15px; stroke: #fff; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.trust-title { font-size: 13px; font-weight: 700; color: var(--text-1); margin-bottom: 2px; }
+.trust-desc  { font-size: 12px; color: var(--text-3); }
+
+/* ── Ride type option cards ── */
+.option-icon { display: flex; align-items: center; justify-content: center; margin-bottom: 6px; }
+.option-icon svg { width: 32px; height: 32px; stroke: currentColor; fill: none; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }

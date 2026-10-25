@@ -12,7 +12,7 @@ export const CATEGORY_GROUPS: CategoryGroup[] = [
   {
     slug: 'services',
     label: 'Services',
-    icon: '🔧',
+    icon: 'services',
     subcategories: [
       'All Services',
       '💇 Grooming',
@@ -33,7 +33,7 @@ export const CATEGORY_GROUPS: CategoryGroup[] = [
   {
     slug: 'venues',
     label: 'Venues',
-    icon: '🏛️',
+    icon: 'venues',
     subcategories: [
       'All Venues',
       '🏛️ Marriage Halls',
@@ -48,7 +48,7 @@ export const CATEGORY_GROUPS: CategoryGroup[] = [
   {
     slug: 'shopping',
     label: 'Shopping',
-    icon: '🛍️',
+    icon: 'shopping',
     subcategories: [
       'All Shopping',
       '👗 Fashion',
@@ -68,7 +68,7 @@ export const CATEGORY_GROUPS: CategoryGroup[] = [
   {
     slug: 'food',
     label: 'Food',
-    icon: '🍛',
+    icon: 'food',
     subcategories: [
       'All Food',
       '🥦 Grocery',
@@ -85,7 +85,7 @@ export const CATEGORY_GROUPS: CategoryGroup[] = [
   {
     slug: 'transport',
     label: 'Transport',
-    icon: '🚗',
+    icon: 'transport',
     subcategories: [
       'All Transport',
       '🛺 Autos',
@@ -101,7 +101,7 @@ export const CATEGORY_GROUPS: CategoryGroup[] = [
   {
     slug: 'events',
     label: 'Events',
-    icon: '🎉',
+    icon: 'events',
     subcategories: [
       'All Events',
       '🎵 DJs & Music',
@@ -142,8 +142,8 @@ export function subFromSlug(group: CategoryGroup, slug: string): string | undefi
 
 // All L1 slugs including 'all' for the nav
 export const ALL_L1_TABS = [
-  { slug: 'all', label: '⊕ All', icon: '⊕' },
-  ...CATEGORY_GROUPS.map((g) => ({ slug: g.slug, label: `${g.icon} ${g.label}`, icon: g.icon })),
+  { slug: 'all', label: 'All', icon: 'all' },
+  ...CATEGORY_GROUPS.map((g) => ({ slug: g.slug, label: g.label, icon: g.icon })),
 ]
 
 // Register form categories (for business signup) — includes "Other"
@@ -152,7 +152,7 @@ export const REGISTER_CATEGORIES = [
   {
     slug: '__other__',
     label: 'Other',
-    icon: '➕',
+    icon: 'other',
     subcategories: [],
   },
 ]

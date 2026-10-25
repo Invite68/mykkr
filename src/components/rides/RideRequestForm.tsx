@@ -2,6 +2,7 @@
 
 import { useEffect, useState, type FormEvent } from 'react'
 import AreaSelect from '@/components/ui/AreaSelect'
+import { IconRides, IconPackage, IconLock, IconZap, IconDriver, IconPin, IconMap, IconCheck } from '@/components/layout/NavIcons'
 import { DELIVERY_VEHICLES, RIDE_VEHICLES } from '@/data/vehicles'
 import { KKR_CENTER, findArea, osmBboxUrl, osmEmbedUrl } from '@/data/areas'
 import { estimateRoute, fareFor, geocode, mapsLinks, type LatLon, type RouteEstimate } from '@/lib/routing'
@@ -93,13 +94,13 @@ function LocationField({
           setText(label)
           onChange({ lat, lon, label })
           setArea('')
-          setStatus('✅ Location set')
+          setStatus('Location set')
         } catch {
           // Reverse geocode failed — still set the coordinates
           const label = `${lat.toFixed(5)}, ${lon.toFixed(5)}`
           setText(label)
           onChange({ lat, lon, label })
-          setStatus('✅ GPS coordinates set')
+          setStatus('GPS coordinates set')
         }
         setGpsLoading(false)
       },
@@ -150,7 +151,7 @@ function LocationField({
         aria-label={`Use current GPS location as ${label.toLowerCase()}`}
         style={{ marginTop: 6, width: '100%', justifyContent: 'center', gap: 7 }}
       >
-        {gpsLoading ? '⏳ Getting location…' : `📍 Use my current location as ${label.toLowerCase()}`}
+        {gpsLoading ? 'Getting location…' : `Use my current location as ${label.toLowerCase()}`}
       </button>
       <p className="muted" style={{ marginTop: 4, fontSize: 11 }}>
         Tapping the button above asks your device for one-time GPS access. My KKR never stores your live location.
@@ -275,7 +276,7 @@ export default function RideRequestForm() {
             className="btn btn-primary btn-block"
             style={{ marginBottom: 12, display: 'flex', justifyContent: 'center', gap: 8 }}
           >
-            🗺️ Track live on map →
+            Track live on map →
           </a>
         )}
 
@@ -301,9 +302,9 @@ export default function RideRequestForm() {
       <div className="option-grid" role="radiogroup" aria-label="Request type" style={{ gridTemplateColumns: '1fr 1fr' }}>
         {(
           [
-            { id: 'ride', icon: '🚗', name: 'Book a ride', desc: 'Auto, cab or SUV' },
-            { id: 'deliver', icon: '📦', name: 'Deliver goods', desc: 'Parcels to freight' },
-          ] as const
+            { id: 'ride' as Mode, icon: <IconRides />, name: 'Book a ride', desc: 'Auto, cab or SUV' },
+            { id: 'deliver' as Mode, icon: <IconPackage />, name: 'Deliver goods', desc: 'Parcels to freight' },
+          ]
         ).map((m) => (
           <button
             type="button"
@@ -332,7 +333,7 @@ export default function RideRequestForm() {
             <input id="rd-phone" className="input" type="tel" maxLength={15} placeholder="98765 43210" value={phone} onChange={(e) => setPhone(e.target.value)} autoComplete="tel" />
           </div>
         </div>
-        <p className="muted" style={{ marginTop: 8 }}>🔒 Your number stays private until a driver is assigned.</p>
+        <p className="muted" style={{ marginTop: 8 }}>Your number stays private until a driver is assigned.</p>
       </div>
 
       <div className="step-block">
@@ -352,7 +353,7 @@ export default function RideRequestForm() {
         )}
         {links && (
           <div className="chips" style={{ marginTop: 10 }}>
-            <a className="chip" href={links.google} target="_blank" rel="noopener noreferrer">🗺️ Google Maps</a>
+            <a className="chip" href={links.google} target="_blank" rel="noopener noreferrer">Google Maps</a>
             <a className="chip" href={links.apple} target="_blank" rel="noopener noreferrer">🍎 Apple Maps</a>
             <a className="chip" href={links.waze} target="_blank" rel="noopener noreferrer">🚗 Waze</a>
             <a className="chip" href={links.osm} target="_blank" rel="noopener noreferrer">🌍 OpenStreetMap</a>
@@ -425,10 +426,10 @@ export default function RideRequestForm() {
       )}
       <button type="submit" className="btn btn-primary btn-block" disabled={submitting}>
         {submitting
-          ? '⏳ Sending…'
+          ? 'Sending…'
           : mode === 'ride'
-            ? '🚗 Send ride request to nearby drivers →'
-            : '📦 Send delivery request to nearby drivers →'}
+            ? 'Send ride request →'
+            : 'Send delivery request →'}
       </button>
     </form>
   )

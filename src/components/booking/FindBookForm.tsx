@@ -7,10 +7,10 @@ import { CATEGORY_GROUPS } from '@/data/categories'
 import { BUSINESSES } from '@/data/businesses'
 import { KKR_CENTER, findArea } from '@/data/areas'
 
-// All categories for dropdown
+// All categories for dropdown (plain text only — <option> cannot render SVG)
 const ALL_CATS = [
-  { slug: '', label: 'Any category', icon: '🔍' },
-  ...CATEGORY_GROUPS.map((g) => ({ slug: g.slug, label: g.label, icon: g.icon })),
+  { slug: '', label: 'Any category' },
+  ...CATEGORY_GROUPS.map((g) => ({ slug: g.slug, label: g.label })),
 ]
 
 const SLOTS = ['Any time', 'Morning (8–12)', 'Afternoon (12–4)', 'Evening (4–8)', 'Full day']
@@ -195,7 +195,7 @@ export default function FindBookForm({ initialSub = '' }: { initialSub?: string 
             style={{ marginTop: 8 }}
           >
             {ALL_CATS.map((c) => (
-              <option key={c.slug} value={c.slug}>{c.icon} {c.label}</option>
+              <option key={c.slug} value={c.slug}>{c.label}</option>
             ))}
           </select>
         </div>

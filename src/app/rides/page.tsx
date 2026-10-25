@@ -18,7 +18,7 @@ export default function RidesPage() {
         <RideRequestForm />
         <aside className="form-grid">
           <div className="panel">
-            <h2 className="panel-title">🔒 Your privacy</h2>
+            <h2 className="panel-title">Your privacy</h2>
             <ul className="prose">
               <li>Name shown only after a driver accepts</li>
               <li>Phone hidden until a driver is assigned</li>
@@ -26,7 +26,7 @@ export default function RidesPage() {
             </ul>
           </div>
           <div className="panel">
-            <h2 className="panel-title">⚡ How it works</h2>
+            <h2 className="panel-title">How it works</h2>
             <ol className="prose" style={{ paddingLeft: 18 }}>
               <li>Fill in the form and submit</li>
               <li>Nearby drivers are notified</li>
@@ -36,7 +36,7 @@ export default function RidesPage() {
             </ol>
           </div>
           <div className="panel" style={{ background: 'var(--night-l)' }}>
-            <h2 className="panel-title">🏍️ Are you a driver?</h2>
+            <h2 className="panel-title">Are you a driver?</h2>
             <p className="muted" style={{ marginBottom: 12 }}>Join the My KKR partner network and receive delivery &amp; ride jobs.</p>
             <Link href="/register?role=driver" className="btn btn-primary btn-block">Register as a driver →</Link>
           </div>
