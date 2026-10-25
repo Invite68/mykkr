@@ -71,26 +71,26 @@ export default function AdminDashboard() {
         <button className="btn btn-secondary" onClick={() => void load()}>↻ Refresh</button>
       </div>
 
-      <Section title="💰 Revenue (Subscriptions Only)">
+      <Section title="Revenue (Subscriptions Only)">
         <StatCard label="Total Revenue" value={fmt(stats.totalRevenuePaise)} color="var(--primary)" />
         <StatCard label="Business Subs Revenue" value={fmt(stats.businessSubRevenue)} />
         <StatCard label="Customer Subs Revenue" value={fmt(stats.customerSubRevenue)} />
       </Section>
 
-      <Section title="🏪 Businesses">
+      <Section title="Businesses">
         <StatCard label="Total Businesses" value={stats.totalBusinesses} />
         <StatCard label="Verified (GSTIN)" value={stats.verifiedBusinesses} color="green" />
         <StatCard label="Pending Verification" value={stats.pendingVerification} color="orange" />
         <StatCard label="Active Subscriptions" value={stats.activeBusinessSubs} sub="₹99/mo" />
       </Section>
 
-      <Section title="👥 Customers">
+      <Section title="Customers">
         <StatCard label="Total Customers" value={stats.totalCustomers} />
         <StatCard label="Active Subscribers" value={stats.activeCustomerSubs} sub="₹9.99/mo" />
         <StatCard label="On Free Trial" value={stats.trialCustomers} />
       </Section>
 
-      <Section title="🚗 Drivers & Jobs">
+      <Section title="Drivers & Jobs">
         <StatCard label="Total Drivers" value={stats.totalDrivers} />
         <StatCard label="Open Jobs" value={stats.openJobs} color="orange" />
         <StatCard label="Completed Jobs" value={stats.completedJobs} color="green" />

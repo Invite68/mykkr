@@ -50,7 +50,7 @@ export default function AdminJobs() {
       body: JSON.stringify({ jobId, action }),
     })
     const json = await res.json() as { error?: string }
-    setMsg(res.ok ? '✅ Done' : (json.error ?? 'Error'))
+    setMsg(res.ok ? 'Done' : (json.error ?? 'Error'))
     if (res.ok) void load()
   }
 
@@ -71,7 +71,7 @@ export default function AdminJobs() {
         <button className="btn btn-secondary" onClick={() => void load()}>↻ Refresh</button>
       </div>
 
-      {msg && <p style={{ color: msg.startsWith('✅') ? 'green' : 'red', marginBottom: 12 }}>{msg}</p>}
+      {msg && <p style={{ color: msg === 'Done' ? 'green' : 'red', marginBottom: 12 }}>{msg}</p>}
       <p style={{ color: 'var(--text-muted)', marginBottom: 12 }}>{total} jobs</p>
 
       {loading ? <p>Loading…</p> : (
@@ -89,8 +89,8 @@ export default function AdminJobs() {
                 <tr key={j.id} style={{ borderBottom: '1px solid var(--border)' }}>
                   <td style={{ padding: '10px 12px', fontSize: 11, color: 'var(--text-muted)' }}>{j.id.slice(0, 8)}…</td>
                   <td style={{ padding: '10px 12px', maxWidth: 200 }}>
-                    <div style={{ fontSize: 12 }}>📍 {j.pickup_address?.slice(0, 40)}</div>
-                    <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>🏁 {j.drop_address?.slice(0, 40)}</div>
+                    <div style={{ fontSize: 12 }}>↑ {j.pickup_address?.slice(0, 40)}</div>
+                    <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>↓ {j.drop_address?.slice(0, 40)}</div>
                   </td>
                   <td style={{ padding: '10px 12px', fontSize: 12 }}>{j.vehicle_type}</td>
                   <td style={{ padding: '10px 12px', fontSize: 12 }}>{fmt(j.fare_accepted_paise)}</td>

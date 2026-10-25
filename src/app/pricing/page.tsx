@@ -9,11 +9,11 @@ export const metadata: Metadata = { title: 'Pricing — My KKR' }
 const COMPARE_ROWS = [
   { feature: 'Monthly cost for businesses', mykkr: '₹99 + GST', amazon: '₹499–₹3,999', urban: '₹0 (30% commission!)' },
   { feature: 'Commission on each sale', mykkr: '0%', amazon: '5–18%', urban: '25–35%' },
-  { feature: 'Customer pays business directly', mykkr: '✓ Always', amazon: '✗ Amazon holds', urban: '✗ Platform holds' },
-  { feature: 'Local discovery (Kurukshetra)', mykkr: '✓ Hyper-local', amazon: '✗ All-India only', urban: '✓ City level' },
-  { feature: 'Rides & delivery included', mykkr: '✓', amazon: '✗', urban: 'Partial' },
-  { feature: 'Venues & real estate', mykkr: '✓', amazon: '✗', urban: '✗' },
-  { feature: 'WhatsApp / direct contact', mykkr: '✓ Unlimited', amazon: '✗', urban: '✗ Blocked' },
+  { feature: 'Customer pays business directly', mykkr: 'Yes — always', amazon: 'No — Amazon holds', urban: 'No — Platform holds' },
+  { feature: 'Local discovery (Kurukshetra)', mykkr: 'Yes — hyper-local', amazon: 'No — all-India only', urban: 'Yes — city level' },
+  { feature: 'Rides & delivery included', mykkr: 'Yes', amazon: 'No', urban: 'Partial' },
+  { feature: 'Venues & real estate', mykkr: 'Yes', amazon: 'No', urban: 'No' },
+  { feature: 'WhatsApp / direct contact', mykkr: 'Yes — unlimited', amazon: 'No', urban: 'No — blocked' },
   { feature: 'Setup time', mykkr: '< 5 minutes', amazon: '3–7 days', urban: '2–3 days' },
 ]
 
@@ -74,7 +74,7 @@ export default function PricingPage() {
 
       {/* ── Zero commission banner ───────────────────────────────── */}
       <div className="banner banner-ok" style={{ marginTop: 20 }}>
-        <span aria-hidden="true">🔒</span>
+        <span aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span>
         <div>
           <strong>My KKR takes zero commission on sales, bookings and deliveries.</strong>{' '}
           Customers pay businesses and drivers directly ({DIRECT_PAYMENT_METHODS.join(' / ')}).

@@ -45,7 +45,7 @@ export default function AdminFareRates() {
       body: JSON.stringify({ id: rate.id, ...changes }),
     })
     const json = await res.json() as { error?: string }
-    setMsg(res.ok ? '✅ Saved' : (json.error ?? 'Error'))
+    setMsg(res.ok ? 'Saved' : (json.error ?? 'Error'))
     if (res.ok) { setEditing(prev => { const n = { ...prev }; delete n[rate.id]; return n }); void load() }
   }
 
@@ -64,7 +64,7 @@ export default function AdminFareRates() {
         <button className="btn btn-secondary" onClick={() => void load()}>↻ Refresh</button>
       </div>
 
-      {msg && <p style={{ color: msg.startsWith('✅') ? 'green' : 'red', marginBottom: 16 }}>{msg}</p>}
+      {msg && <p style={{ color: msg === 'Saved' ? 'green' : 'red', marginBottom: 16 }}>{msg}</p>}
 
       {loading ? <p>Loading…</p> : (
         <div style={{ overflowX: 'auto' }}>

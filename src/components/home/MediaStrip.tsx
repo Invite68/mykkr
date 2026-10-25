@@ -8,7 +8,7 @@ interface MediaSlot {
   title: string
   youtubeId?: string
   placeholder?: string
-  placeholderIcon?: string
+  placeholderIcon?: string | null
   placeholderBg?: string
   cta?: string
   ctaHref?: string
@@ -32,7 +32,7 @@ const SLOTS: MediaSlot[] = [
     tagColor: '#d97706',
     title: 'Promote your business here',
     placeholder: 'Your ad here',
-    placeholderIcon: '⭐',
+    placeholderIcon: null,
     placeholderBg: 'linear-gradient(135deg, #fef3c7 0%, #fde68a 100%)',
     cta: '₹999/week · Contact admin',
     ctaHref: '/about#advertise',
@@ -42,7 +42,7 @@ const SLOTS: MediaSlot[] = [
     tagColor: '#12343b',
     title: 'Managed from the admin panel',
     placeholder: 'Awaiting content',
-    placeholderIcon: '📢',
+    placeholderIcon: null,
     placeholderBg: 'linear-gradient(135deg, #eef3f4 0%, #d8e8ec 100%)',
     cta: 'Check back soon',
   },
@@ -51,7 +51,7 @@ const SLOTS: MediaSlot[] = [
     tagColor: '#7c3aed',
     title: 'Premium position — contact admin',
     placeholder: 'Premium ad slot',
-    placeholderIcon: '💒',
+    placeholderIcon: null,
     placeholderBg: 'linear-gradient(135deg, #f3e8ff 0%, #e9d5ff 100%)',
     cta: '₹1,499/week · Contact admin',
     ctaHref: '/about#advertise',
@@ -85,7 +85,11 @@ export default function MediaStrip() {
                   className="media-placeholder"
                   style={{ background: s.placeholderBg ?? 'var(--night-l)' }}
                 >
-                  <span className="media-ph-icon" aria-hidden="true">{s.placeholderIcon ?? '📺'}</span>
+                  <span className="media-ph-icon" aria-hidden="true">
+                    {s.placeholderIcon ?? (
+                      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+                    )}
+                  </span>
                   <span className="media-ph-text">{s.placeholder}</span>
                   {s.cta && (
                     s.ctaHref ? (

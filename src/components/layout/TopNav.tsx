@@ -50,7 +50,9 @@ export default function TopNav() {
           <aside className="drawer" role="dialog" aria-modal="true" aria-label="Menu">
             <div className="drawer-head">
               <strong>Menu</strong>
-              <button className="btn btn-outline btn-sm" onClick={() => setDrawerOpen(false)} aria-label="Close menu">✕</button>
+              <button className="btn btn-outline btn-sm" onClick={() => setDrawerOpen(false)} aria-label="Close menu">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+              </button>
             </div>
             <NavList onNavigate={() => setDrawerOpen(false)} />
           </aside>

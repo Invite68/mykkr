@@ -151,12 +151,19 @@ function JobCard({
 
   return (
     <div className={`job-card${taken ? ' job-card--taken' : mine ? ' job-card--mine' : ''}`}>
-      {taken && <div className="job-ribbon job-ribbon--taken">✖ Taken</div>}
-      {mine  && <div className="job-ribbon job-ribbon--mine">✅ Your job</div>}
+      {taken && <div className="job-ribbon job-ribbon--taken">
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> Taken
+      </div>}
+      {mine  && <div className="job-ribbon job-ribbon--mine">
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg> Your job
+      </div>}
 
       <div className="job-card-header">
-        <span className="job-mode-badge">
-          {job.mode === 'ride' ? '🚗 Ride' : '📦 Delivery'}
+        <span className="job-mode-badge" style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+          {job.mode === 'ride'
+            ? <><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><rect x="1" y="3" width="15" height="13" rx="2"/><path d="M16 8h4l3 5v3h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg> Ride</>
+            : <><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg> Delivery</>
+          }
         </span>
         <span className="job-time">{relTime(job.created_at)}</span>
       </div>
@@ -176,11 +183,11 @@ function JobCard({
 
       {/* Meta */}
       <div className="job-meta">
-        {job.distance_km && <span>📏 ~{job.distance_km.toFixed(1)} km</span>}
-        {fare             && <span>💰 {fare} est.</span>}
-        <span>🚗 {job.vehicle_id}</span>
+        {job.distance_km && <span style={{ display: 'inline-flex', alignItems: 'center', gap: 3 }}><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>~{job.distance_km.toFixed(1)} km</span>}
+        {fare             && <span style={{ display: 'inline-flex', alignItems: 'center', gap: 3 }}><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>{fare} est.</span>}
+        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 3 }}><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><rect x="1" y="3" width="15" height="13" rx="2"/><path d="M16 8h4l3 5v3h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>{job.vehicle_id}</span>
         {job.scheduled_at && (
-          <span>🕐 {new Date(job.scheduled_at).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}</span>
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 3 }}><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>{new Date(job.scheduled_at).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}</span>
         )}
       </div>
 
@@ -189,10 +196,14 @@ function JobCard({
       {/* Customer contact — only visible to the driver who accepted */}
       {mine && (
         <div className="job-contact">
-          <strong>👤 {job.customer_name}</strong>
+          <strong style={{ display: 'inline-flex', alignItems: 'center', gap: 5 }}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            {job.customer_name}
+          </strong>
           {job.driver_phone && (
-            <a href={`tel:${job.driver_phone}`} className="btn btn-sm btn-outline" style={{ marginLeft: 'auto' }}>
-              📞 Call rider
+            <a href={`tel:${job.driver_phone}`} className="btn btn-sm btn-outline" style={{ marginLeft: 'auto', display: 'inline-flex', alignItems: 'center', gap: 5 }}>
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.99 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.92 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 8.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+              Call rider
             </a>
           )}
         </div>
@@ -203,21 +214,28 @@ function JobCard({
       <div className="job-actions">
         {!taken && !mine && (
           <button className="btn btn-primary btn-block" disabled={busy} onClick={handleAccept}>
-            {state === 'accepting' ? '⏳ Accepting…' : '✅ Accept job'}
+            {state === 'accepting'
+              ? <><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" style={{ animation: 'spin 1s linear infinite' }}><circle cx="12" cy="12" r="10" strokeOpacity="0.25"/><path d="M12 2a10 10 0 0 1 10 10" /></svg> Accepting…</>
+              : <><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg> Accept job</>
+            }
           </button>
         )}
         {mine && !confirmCancel && (
           <>
-            <a href={`/track/${job.ref}`} className="btn btn-outline btn-sm" target="_blank" rel="noopener noreferrer">
-              🗺️ View map
+            <a href={`/track/${job.ref}`} className="btn btn-outline btn-sm" target="_blank" rel="noopener noreferrer" style={{ display: 'inline-flex', alignItems: 'center', gap: 5 }}>
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>
+              View map
             </a>
             <button
               className="btn btn-ghost btn-sm"
-              style={{ color: '#ef4444' }}
+              style={{ color: '#ef4444', display: 'inline-flex', alignItems: 'center', gap: 4 }}
               disabled={busy}
               onClick={() => setConfirmCancel(true)}
             >
-              {cancelling ? '⏳…' : '✖ Cancel'}
+              {cancelling
+                ? <><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" style={{ animation: 'spin 1s linear infinite' }}><circle cx="12" cy="12" r="10" strokeOpacity="0.25"/><path d="M12 2a10 10 0 0 1 10 10" /></svg>…</>
+                : <><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> Cancel</>
+              }
             </button>
           </>
         )}
@@ -392,7 +410,7 @@ export default function JobBoard() {
   if (!authed) {
     return (
       <div className="panel" style={{ textAlign: 'center', padding: 40 }}>
-        <div style={{ fontSize: 40 }}>🔒</div>
+        <div style={{ color: 'var(--text-3)', marginBottom: 8 }}><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>
         <p style={{ fontWeight: 700, marginTop: 8 }}>Sign in to see jobs</p>
         <p className="muted">Please sign in with your driver account to view and accept jobs.</p>
         <a href="/login?role=driver" className="btn btn-primary" style={{ marginTop: 16, display: 'inline-block' }}>
@@ -415,7 +433,7 @@ export default function JobBoard() {
 
       {visibleJobs.length === 0 ? (
         <div className="panel" style={{ textAlign: 'center', padding: 40 }}>
-          <div style={{ fontSize: 40 }}>🕐</div>
+          <div style={{ color: 'var(--text-3)', marginBottom: 8 }}><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
           <p style={{ fontWeight: 700, marginTop: 8 }}>No open jobs right now</p>
           <p className="muted">New requests will appear here instantly.</p>
         </div>

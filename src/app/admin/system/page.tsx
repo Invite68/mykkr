@@ -57,7 +57,7 @@ export default function AdminSystem() {
     if (res.ok) {
       setSettings(json.settings ?? null)
       setDraft({})
-      setMsg('✅ Settings saved')
+      setMsg('Settings saved')
     } else {
       setMsg(json.error ?? 'Error saving')
     }
@@ -77,7 +77,7 @@ export default function AdminSystem() {
 
       {/* Health */}
       <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 20, marginBottom: 28 }}>
-        <h2 style={{ fontSize: 15, fontWeight: 600, marginBottom: 16 }}>🟢 System Health</h2>
+        <h2 style={{ fontSize: 15, fontWeight: 600, marginBottom: 16, display: 'flex', alignItems: 'center', gap: 8 }}><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>System Health</h2>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, fontSize: 13 }}>
           <div><strong>Database:</strong> <span style={{ color: health.db === 'ok' ? 'green' : 'red' }}>{health.db}</span></div>
           <div><strong>Environment:</strong> {health.nodeEnv}</div>
@@ -88,19 +88,19 @@ export default function AdminSystem() {
 
       {/* Platform toggles */}
       <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 20, marginBottom: 28 }}>
-        <h2 style={{ fontSize: 15, fontWeight: 600, marginBottom: 20 }}>⚙️ Platform Controls</h2>
+        <h2 style={{ fontSize: 15, fontWeight: 600, marginBottom: 20 }}>Platform Controls</h2>
 
-        <Toggle label="🔧 Maintenance Mode" sub="Prevents all new logins. Existing sessions unaffected."
+        <Toggle label="Maintenance Mode" sub="Prevents all new logins. Existing sessions unaffected."
           value={cur.maintenanceMode} onChange={v => set('maintenanceMode', v)} danger />
-        <Toggle label="📝 New Registrations Open" sub="Allow new businesses, customers, and drivers to sign up."
+        <Toggle label="New Registrations Open" sub="Allow new businesses, customers, and drivers to sign up."
           value={cur.newRegistrationsOpen} onChange={v => set('newRegistrationsOpen', v)} />
-        <Toggle label="🚗 Driver Registrations Open" sub="Allow new drivers to apply."
+        <Toggle label="Driver Registrations Open" sub="Allow new drivers to apply."
           value={cur.driverRegistrationsOpen} onChange={v => set('driverRegistrationsOpen', v)} />
       </div>
 
       {/* Pricing */}
       <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 12, padding: 20, marginBottom: 28 }}>
-        <h2 style={{ fontSize: 15, fontWeight: 600, marginBottom: 4 }}>💰 Subscription Pricing</h2>
+        <h2 style={{ fontSize: 15, fontWeight: 600, marginBottom: 4 }}>Subscription Pricing</h2>
         <p style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 20 }}>
           These are display/reference values. Actual charges are controlled in Razorpay dashboard.
           Change these to reflect what Razorpay is charging.
@@ -117,7 +117,7 @@ export default function AdminSystem() {
         </div>
       </div>
 
-      {msg && <p style={{ color: msg.startsWith('✅') ? 'green' : 'red', marginBottom: 12 }}>{msg}</p>}
+      {msg && <p style={{ color: msg === 'Settings saved' ? 'green' : 'red', marginBottom: 12 }}>{msg}</p>}
 
       <button className="btn btn-primary" style={{ minWidth: 160 }} onClick={() => void save()}
         disabled={!Object.keys(draft).length}>

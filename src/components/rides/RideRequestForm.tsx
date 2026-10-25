@@ -61,7 +61,7 @@ function LocationField({
       }
       onChange({ ...hit, label: q })
       setArea('')
-      setStatus('✓ Found')
+      setStatus('Location found')
     } catch {
       setStatus('Could not look up the address — pick an area instead.')
     }
@@ -138,7 +138,7 @@ function LocationField({
           aria-label={`Find ${label.toLowerCase()} address`}
           title="Look up this address"
         >
-          🔍
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
         </button>
       </div>
 
@@ -161,7 +161,7 @@ function LocationField({
       <AreaSelect id={`${which}-area`} value={area} onChange={pickArea} placeholder={`…or choose ${label.toLowerCase()} area from list`} />
 
       {status && <span className="muted" role="status" aria-live="polite">{status}</span>}
-      {point && !status && <span className="muted">📌 Set: {point.label}</span>}
+      {point && !status && <span className="muted" style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>Set: {point.label}</span>}
     </div>
   )
 }
@@ -264,7 +264,9 @@ export default function RideRequestForm() {
   if (submittedRef) {
     return (
       <div className="panel" style={{ textAlign: 'center' }} role="status">
-        <div style={{ fontSize: 40 }} aria-hidden="true">✅</div>
+        <div style={{ color: '#10b981', marginBottom: 8 }} aria-hidden="true">
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        </div>
         <h2 className="page-title" style={{ fontSize: 20 }}>Request sent to nearby drivers</h2>
         <p className="muted">You'll be notified when a verified driver accepts.</p>
         <p style={{ margin: '12px 0' }}><span className="ref">{submittedRef}</span></p>
@@ -354,9 +356,9 @@ export default function RideRequestForm() {
         {links && (
           <div className="chips" style={{ marginTop: 10 }}>
             <a className="chip" href={links.google} target="_blank" rel="noopener noreferrer">Google Maps</a>
-            <a className="chip" href={links.apple} target="_blank" rel="noopener noreferrer">🍎 Apple Maps</a>
-            <a className="chip" href={links.waze} target="_blank" rel="noopener noreferrer">🚗 Waze</a>
-            <a className="chip" href={links.osm} target="_blank" rel="noopener noreferrer">🌍 OpenStreetMap</a>
+            <a className="chip" href={links.apple} target="_blank" rel="noopener noreferrer">Apple Maps</a>
+            <a className="chip" href={links.waze} target="_blank" rel="noopener noreferrer">Waze</a>
+            <a className="chip" href={links.osm} target="_blank" rel="noopener noreferrer">OpenStreetMap</a>
           </div>
         )}
       </div>
@@ -420,7 +422,7 @@ export default function RideRequestForm() {
 
       {errors.length > 0 && (
         <div className="banner banner-err" role="alert" style={{ marginBottom: 12 }}>
-          <span aria-hidden="true">⚠️</span>
+          <span aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></span>
           <ul style={{ paddingLeft: 16 }}>{errors.map((e) => <li key={e}>{e}</li>)}</ul>
         </div>
       )}

@@ -42,8 +42,12 @@ export default function SubscriptionProvider({ children }: { children: ReactNode
       {target && (
         <div className="modal-overlay" onClick={close}>
           <div className="modal" role="dialog" aria-modal="true" aria-labelledby="sub-title" onClick={(e) => e.stopPropagation()}>
-            <button className="modal-close" onClick={close} aria-label="Close">✕</button>
-            <div className="modal-icon" aria-hidden="true">🔒</div>
+            <button className="modal-close" onClick={close} aria-label="Close">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+            <div className="modal-icon" aria-hidden="true">
+              <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            </div>
             <div className="modal-title" id="sub-title">Subscribe to contact</div>
             <p className="muted">
               Unlock WhatsApp and phone details for <strong>{target}</strong> and every other business on My KKR.

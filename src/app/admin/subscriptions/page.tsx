@@ -56,7 +56,7 @@ export default function AdminSubscriptions() {
       body: JSON.stringify({ subscriptionId, action, days }),
     })
     const json = await res.json() as { error?: string }
-    setMsg(res.ok ? '✅ Done' : (json.error ?? 'Error'))
+    setMsg(res.ok ? 'Done' : (json.error ?? 'Error'))
     if (res.ok) void load()
   }
 
@@ -87,7 +87,7 @@ export default function AdminSubscriptions() {
         <button className="btn btn-secondary" onClick={() => void load()}>↻ Refresh</button>
       </div>
 
-      {msg && <p style={{ color: msg.startsWith('✅') ? 'green' : 'red', marginBottom: 12 }}>{msg}</p>}
+      {msg && <p style={{ color: msg === 'Done' ? 'green' : 'red', marginBottom: 12 }}>{msg}</p>}
       <p style={{ color: 'var(--text-muted)', marginBottom: 12 }}>{total} subscriptions</p>
 
       {loading ? <p>Loading…</p> : (
@@ -107,7 +107,7 @@ export default function AdminSubscriptions() {
                     {s.business_name ?? s.customer_name ?? '—'}
                   </td>
                   <td style={{ padding: '10px 12px', fontSize: 12 }}>
-                    {s.plan === 'business' ? '🏪 Business ₹99' : '👤 Customer ₹9.99'}
+                    {s.plan === 'business' ? 'Business ₹99' : 'Customer ₹9.99'}
                   </td>
                   <td style={{ padding: '10px 12px' }}>
                     <span style={{ color: STATUS_COLOR[s.status] ?? '#888', fontWeight: 600 }}>{s.status}</span>

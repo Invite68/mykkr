@@ -6,12 +6,12 @@ import { CircularLogo } from '@/components/layout/Logo'
 export const metadata: Metadata = { title: 'About Kurukshetra' }
 
 const PLACES = [
-  { icon: '🌊', name: 'Brahma Sarovar', desc: 'One of Asia\'s largest sacred tanks. Lakhs bathe here during solar eclipses.', tag: 'Sacred site' },
-  { icon: '🙏', name: 'Jyotisar', desc: 'Where Lord Krishna is believed to have delivered the Bhagavad Gita to Arjuna.', tag: 'Pilgrimage' },
-  { icon: '⚔️', name: 'Kurukshetra Panorama', desc: '360 degree mural of the Mahabharata war with a science centre.', tag: 'Museum' },
-  { icon: '🛕', name: 'Sthaneshwar Mahadev', desc: 'Ancient Shiva temple where the Pandavas are said to have prayed.', tag: 'Temple' },
-  { icon: '🌺', name: 'Bhadrakali Temple', desc: 'Shakti peeth with huge Navratri celebrations.', tag: 'Temple' },
-  { icon: '💧', name: 'Sannihit Sarovar', desc: 'Sacred lake where seven Saraswatis are believed to meet.', tag: 'Sacred site' },
+  { name: 'Brahma Sarovar', desc: 'One of Asia\'s largest sacred tanks. Lakhs bathe here during solar eclipses.', tag: 'Sacred site' },
+  { name: 'Jyotisar', desc: 'Where Lord Krishna is believed to have delivered the Bhagavad Gita to Arjuna.', tag: 'Pilgrimage' },
+  { name: 'Kurukshetra Panorama', desc: '360 degree mural of the Mahabharata war with a science centre.', tag: 'Museum' },
+  { name: 'Sthaneshwar Mahadev', desc: 'Ancient Shiva temple where the Pandavas are said to have prayed.', tag: 'Temple' },
+  { name: 'Bhadrakali Temple', desc: 'Shakti peeth with huge Navratri celebrations.', tag: 'Temple' },
+  { name: 'Sannihit Sarovar', desc: 'Sacred lake where seven Saraswatis are believed to meet.', tag: 'Sacred site' },
 ]
 
 const TEHSILS = [
@@ -57,7 +57,7 @@ export default function AboutPage() {
         </nav>
 
         <section className="sec panel" id="overview">
-          <h2 className="panel-title">📋 Quick facts</h2>
+          <h2 className="panel-title">Quick facts</h2>
           <dl className="kv">
             <dt>Name</dt><dd>Kurukshetra (<span lang="hi">कुरुक्षेत्र</span>)</dd>
             <dt>Also known as</dt><dd>Dharmakshetra &middot; Land of the Bhagavad Gita</dd>
@@ -65,7 +65,7 @@ export default function AboutPage() {
             <dt>Named after</dt><dd>King Kuru, ancestor of the Kauravas and Pandavas</dd>
             <dt>Railway</dt><dd>Kurukshetra Junction (Delhi&ndash;Ambala line)</dd>
           </dl>
-          <h3 className="panel-title" style={{ marginTop: 18 }}>📜 Timeline</h3>
+          <h3 className="panel-title" style={{ marginTop: 18 }}>Timeline</h3>
           <ul className="timeline">
             <li><strong>c. 1200&ndash;900 BCE</strong>Kuru kingdom &mdash; Vedic texts compiled in the region.</li>
             <li><strong>7th century CE</strong>Thanesar flourishes under King Harshavardhana; Xuanzang visits.</li>
@@ -75,11 +75,13 @@ export default function AboutPage() {
         </section>
 
         <section className="sec" id="places">
-          <h2 className="sec-title" style={{ marginBottom: 12 }}>🕌 Tourist places</h2>
+          <h2 className="sec-title" style={{ marginBottom: 12 }}>Tourist places</h2>
           <div className="biz-grid">
             {PLACES.map((p) => (
               <article className="biz-card" key={p.name}>
-                <div className="biz-top" aria-hidden="true">{p.icon}</div>
+                <div className="biz-top" aria-hidden="true">
+                  <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                </div>
                 <div className="biz-body">
                   <div className="biz-cat">{p.tag}</div>
                   <h3 className="biz-name">{p.name}</h3>
@@ -91,14 +93,14 @@ export default function AboutPage() {
         </section>
 
         <section className="sec panel" id="tehsils">
-          <h2 className="panel-title">🗺️ Tehsils &amp; localities</h2>
+          <h2 className="panel-title">Tehsils &amp; localities</h2>
           <dl className="kv">
             {TEHSILS.map(([t, d]) => (<Fragment key={t}><dt><strong>{t}</strong></dt><dd>{d}</dd></Fragment>))}
           </dl>
         </section>
 
         <section className="sec panel" id="events">
-          <h2 className="panel-title">📅 Events &amp; festivals</h2>
+          <h2 className="panel-title">Events &amp; festivals</h2>
           <ul className="timeline">
             <li><strong>Gita Jayanti</strong>International Gita Mahotsav &mdash; state-level fair with cultural programmes.</li>
             <li><strong>Somvati Amavasya</strong>New moon on a Monday &mdash; lakhs bathe in Brahma Sarovar.</li>
@@ -108,7 +110,7 @@ export default function AboutPage() {
         </section>
 
         <section className="sec panel" id="education">
-          <h2 className="panel-title">🎓 Universities &amp; institutions</h2>
+          <h2 className="panel-title">Universities &amp; institutions</h2>
           <ul className="timeline">
             <li><strong>KU</strong>Kurukshetra University &mdash; founded 1956.</li>
             <li><strong>NIT Kurukshetra</strong>National Institute of Technology.</li>

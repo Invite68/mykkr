@@ -46,7 +46,7 @@ function Errors({ list }: { list: string[] }) {
   if (!list.length) return null
   return (
     <div className="banner banner-err" role="alert">
-      <span aria-hidden="true">⚠️</span>
+      <span aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></span>
       <ul style={{ paddingLeft: 16 }}>{list.map((e) => <li key={e}>{e}</li>)}</ul>
     </div>
   )
@@ -72,7 +72,9 @@ function Success({ role }: { role: SignupRole }) {
   }
   return (
     <div className="panel" style={{ textAlign: 'center' }} role="status">
-      <div style={{ fontSize: 40 }} aria-hidden="true">🎉</div>
+      <div style={{ color: '#10b981', marginBottom: 8 }} aria-hidden="true">
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+      </div>
       <h2 className="page-title" style={{ fontSize: 20 }}>Registration complete</h2>
       <p className="muted" style={{ margin: '6px 0 16px' }}>{copy[role]}</p>
       <div style={{ display: 'flex', gap: 10, justifyContent: 'center', flexWrap: 'wrap' }}>
@@ -487,8 +489,8 @@ function BusinessWizard({ phone, idToken, onDone }: { phone: string; idToken: st
             <select id="b-cat" className="select" value={d.catSlug ?? ''}
               onChange={(e) => { up('catSlug', e.target.value || null); up('subSlug', null); up('otherLabel', '') }}>
               <option value="">Select a category</option>
-              {CATEGORY_GROUPS.map((g) => <option key={g.slug} value={g.slug}>{g.icon} {g.label}</option>)}
-              <option value={OTHER_SLUG}>➕ Other</option>
+              {CATEGORY_GROUPS.map((g) => <option key={g.slug} value={g.slug}>{g.label}</option>)}
+              <option value={OTHER_SLUG}>+ Other</option>
             </select>
           </div>
 
@@ -536,7 +538,7 @@ function BusinessWizard({ phone, idToken, onDone }: { phone: string; idToken: st
             </div>
           </div>
           <div className="wizard-map-hint">
-            <span aria-hidden="true">🗺️</span>
+            <span aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg></span>
             <span className="muted">Exact map pin can be added from your dashboard after signup.</span>
           </div>
         </StepCard>
@@ -881,9 +883,9 @@ function DriverWizard({ phone, idToken, onDone }: { phone: string; idToken: stri
             <select id="d-vehicle" className="select" value={d.vehicle}
               onChange={(e) => up('vehicle', e.target.value)}>
               {DELIVERY_VEHICLES.map((v) => (
-                <option key={v.id} value={v.id}>{v.icon} {v.name} ({v.capacity})</option>
+                <option key={v.id} value={v.id}>{v.name} ({v.capacity})</option>
               ))}
-              <option value="auto">🛺 Auto (rides)</option>
+              <option value="auto">Auto (rides)</option>
               <option value="cab">Cab (rides)</option>
             </select>
           </div>

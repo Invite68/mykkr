@@ -5,19 +5,30 @@
  * No Supabase, no external dependencies — pure fetch + setInterval.
  */
 
-import { useEffect, useRef, useState, useCallback } from 'react'
+import React, { useEffect, useRef, useState, useCallback } from 'react'
 import type { SafeJob, JobStatus } from '@/lib/job-types'
 import { directionsUrl, fetchRoute } from '@/lib/maps'
 
 // ── Status display config ─────────────────────────────────────────────────────
-const STATUS_META: Record<JobStatus, { label: string; color: string; icon: string; done: boolean }> = {
-  open:                 { label: 'Looking for a driver…',                    color: '#f59e0b', icon: '🔍', done: false },
-  accepted:             { label: 'Driver assigned!',                          color: '#10b981', icon: '✅', done: false },
-  driver_en_route:      { label: 'Driver on the way',                         color: '#3b82f6', icon: '🚗', done: false },
-  picked_up:            { label: 'En route to drop-off',                      color: '#8b5cf6', icon: '📦', done: false },
-  completed:            { label: 'Completed!',                                color: '#10b981', icon: '🎉', done: true  },
-  cancelled_by_rider:   { label: 'Cancelled by you',                          color: '#ef4444', icon: '✖',  done: true  },
-  cancelled_by_driver:  { label: 'Driver cancelled — finding a new one…',     color: '#f59e0b', icon: '⚠️', done: false },
+/* Status icons — stroke SVGs, 20×20 */
+const StatusIcons: Record<JobStatus, React.ReactNode> = {
+  open:                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>,
+  accepted:            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>,
+  driver_en_route:     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>,
+  picked_up:           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>,
+  completed:           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>,
+  cancelled_by_rider:  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>,
+  cancelled_by_driver: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>,
+}
+
+const STATUS_META: Record<JobStatus, { label: string; color: string; done: boolean }> = {
+  open:                 { label: 'Looking for a driver…',                    color: '#f59e0b', done: false },
+  accepted:             { label: 'Driver assigned!',                          color: '#10b981', done: false },
+  driver_en_route:      { label: 'Driver on the way',                         color: '#3b82f6', done: false },
+  picked_up:            { label: 'En route to drop-off',                      color: '#8b5cf6', done: false },
+  completed:            { label: 'Completed!',                                color: '#10b981', done: true  },
+  cancelled_by_rider:   { label: 'Cancelled by you',                          color: '#ef4444', done: true  },
+  cancelled_by_driver:  { label: 'Driver cancelled — finding a new one…',     color: '#f59e0b', done: false },
 }
 
 const STEPS: JobStatus[] = ['open', 'accepted', 'driver_en_route', 'picked_up', 'completed']
@@ -65,8 +76,8 @@ function JobMap({ job }: { job: SafeJob }) {
       const pickupLatLng:  [number, number] = [from.lat, from.lon]
       const dropoffLatLng: [number, number] = [to.lat,   to.lon  ]
 
-      L.marker(pickupLatLng,  { icon: mkPin('#22c55e', 'A') }).addTo(map).bindPopup(`<strong>🟢 Pickup</strong><br>${from.label}`)
-      L.marker(dropoffLatLng, { icon: mkPin('#ef4444', 'B') }).addTo(map).bindPopup(`<strong>🔴 Drop-off</strong><br>${to.label}`)
+      L.marker(pickupLatLng,  { icon: mkPin('#22c55e', 'A') }).addTo(map).bindPopup(`<strong>A · Pickup</strong><br>${from.label}`)
+      L.marker(dropoffLatLng, { icon: mkPin('#ef4444', 'B') }).addTo(map).bindPopup(`<strong>B · Drop-off</strong><br>${to.label}`)
 
       // Straight fallback line immediately so map isn't empty while route loads
       const straight = L.polyline([pickupLatLng, dropoffLatLng], {
@@ -115,7 +126,8 @@ function JobMap({ job }: { job: SafeJob }) {
           boxShadow: '0 2px 8px rgba(0,0,0,.25)',
         }}
       >
-        🗺️ Open in Maps
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>
+        Open in Maps
       </button>
     </div>
   )
@@ -135,7 +147,7 @@ function Stepper({ status }: { status: JobStatus }) {
           <div key={s} style={{ display: 'flex', alignItems: 'center', flex: i < STEPS.length - 1 ? 1 : 'none' }}>
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
               <div style={{ width: 28, height: 28, borderRadius: '50%', background: done ? '#10b981' : active ? '#12343b' : '#e5e7eb', color: done || active ? '#fff' : '#9ca3af', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 700, flexShrink: 0 }}>
-                {done ? '✓' : i + 1}
+                {done ? <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg> : i + 1}
               </div>
               <span style={{ fontSize: 10, fontWeight: 600, textAlign: 'center', maxWidth: 56, color: active ? '#12343b' : future ? '#9ca3af' : '#6b7280', lineHeight: 1.2 }}>
                 {labels[i]}
@@ -154,7 +166,8 @@ function Stepper({ status }: { status: JobStatus }) {
 // ── Main component ────────────────────────────────────────────────────────────
 export default function TrackingClient({ initialJob }: { initialJob: SafeJob }) {
   const [job, setJob] = useState<SafeJob>(initialJob)
-  const meta = STATUS_META[job.status] ?? STATUS_META.open
+  const meta    = STATUS_META[job.status] ?? STATUS_META.open
+  const metaIcon = StatusIcons[job.status] ?? StatusIcons.open
 
   const [cancelling, setCancelling]     = useState(false)
   const [cancelError, setCancelError]   = useState('')
@@ -202,8 +215,9 @@ export default function TrackingClient({ initialJob }: { initialJob: SafeJob }) 
             <span style={{ fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '.6px', color: 'var(--text-3)' }}>
               {job.mode === 'ride' ? 'Ride' : 'Delivery'} request
             </span>
-            <h1 style={{ fontSize: 22, fontWeight: 800, color: 'var(--night-d)', margin: '4px 0 2px' }}>
-              {meta.icon} {meta.label}
+            <h1 style={{ fontSize: 22, fontWeight: 800, color: 'var(--night-d)', margin: '4px 0 2px', display: 'flex', alignItems: 'center', gap: 8 }}>
+              <span style={{ color: meta.color }}>{metaIcon}</span>
+              {meta.label}
             </h1>
             <span style={{ fontSize: 12, color: 'var(--text-3)', fontFamily: 'monospace' }}>{job.ref}</span>
           </div>
@@ -220,13 +234,16 @@ export default function TrackingClient({ initialJob }: { initialJob: SafeJob }) 
         {/* Driver card — shown once accepted */}
         {(job.status === 'accepted' || job.status === 'driver_en_route' || job.status === 'picked_up') && job.driver_name && (
           <div className="track-driver-card">
-            <div style={{ fontSize: 36 }}>🧑‍✈️</div>
+            <div style={{ width: 44, height: 44, borderRadius: '50%', background: 'var(--surface)', border: '1.5px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            </div>
             <div>
               <div style={{ fontWeight: 800, fontSize: 15 }}>{job.driver_name}</div>
               {job.driver_vehicle && <div style={{ color: 'var(--text-3)', fontSize: 13 }}>{job.driver_vehicle}</div>}
               {job.driver_phone && (
-                <a href={`tel:${job.driver_phone}`} style={{ fontSize: 13, color: 'var(--night)', fontWeight: 700, display: 'block', marginTop: 4 }}>
-                  📞 Call driver
+                <a href={`tel:${job.driver_phone}`} style={{ fontSize: 13, color: 'var(--night)', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: 5, marginTop: 4 }}>
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.56 1.18h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 8.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                  Call driver
                 </a>
               )}
             </div>
@@ -243,7 +260,7 @@ export default function TrackingClient({ initialJob }: { initialJob: SafeJob }) 
                 disabled={cancelling}
                 style={{ color: '#ef4444', borderColor: '#ef4444' }}
               >
-                {cancelling ? 'Cancelling…' : '✖ Cancel this job'}
+                {cancelling ? 'Cancelling…' : 'Cancel this job'}
               </button>
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
@@ -293,9 +310,9 @@ export default function TrackingClient({ initialJob }: { initialJob: SafeJob }) 
       </div>
 
       {/* Final banners */}
-      {job.status === 'completed'          && <div className="banner banner-ok"   role="status">🎉 Job completed! Pay your driver directly — cash or UPI. My KKR takes ₹0 commission.</div>}
-      {job.status === 'cancelled_by_rider' && <div className="banner banner-err"  role="status">✖ You cancelled this job.</div>}
-      {job.status === 'cancelled_by_driver'&& <div className="banner banner-warn" role="status">⚠️ Your driver cancelled. The job is back live — another driver will pick it up shortly.</div>}
+      {job.status === 'completed'          && <div className="banner banner-ok"   role="status">Job completed! Pay your driver directly — cash or UPI. My KKR takes ₹0 commission.</div>}
+      {job.status === 'cancelled_by_rider' && <div className="banner banner-err"  role="status">You cancelled this job.</div>}
+      {job.status === 'cancelled_by_driver'&& <div className="banner banner-warn" role="status">Your driver cancelled. The job is back live — another driver will pick it up shortly.</div>}
 
       <p className="muted" style={{ textAlign: 'center', fontSize: 12, marginTop: 20 }}>
         This page updates live. Pay the driver directly — My KKR takes zero commission.

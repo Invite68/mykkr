@@ -133,7 +133,6 @@ async function fetchFromDB(slug: string): Promise<{ business: Business; subscrip
       cat:          biz.category,
       sub:          biz.sub_category ?? biz.category,
       area:         [biz.address_line, biz.city].filter(Boolean).join(', ') || biz.city,
-      emoji:        '🏪',
       rating:       avgRating,
       reviews:      reviews.length,
       priceRange:   'Check listings',

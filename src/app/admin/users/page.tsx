@@ -47,7 +47,7 @@ export default function AdminUsers() {
     })
     const json = await res.json() as { user?: UserRow; error?: string }
     if (!res.ok) { setMsg(json.error ?? 'Error'); return }
-    setMsg('✅ Done')
+    setMsg('Done')
     void load()
   }
 
@@ -69,7 +69,7 @@ export default function AdminUsers() {
         <button className="btn btn-secondary" onClick={() => void load()}>↻ Refresh</button>
       </div>
 
-      {msg && <p style={{ color: msg.startsWith('✅') ? 'green' : 'red', marginBottom: 12 }}>{msg}</p>}
+      {msg && <p style={{ color: msg === 'Done' ? 'green' : 'red', marginBottom: 12 }}>{msg}</p>}
       <p style={{ color: 'var(--text-muted)', marginBottom: 12 }}>{total} users</p>
 
       {loading ? <p>Loading…</p> : (

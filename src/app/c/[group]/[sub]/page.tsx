@@ -55,7 +55,7 @@ export default async function SubCategoryPage({ params }: { params: Params }) {
 
       {group.slug === 'transport' && (
         <div className="banner banner-ok" style={{ marginTop: 12 }}>
-          <span aria-hidden="true">🚕</span>
+          <span aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg></span>
           <div>
             Need a ride right now?{' '}
             <Link href="/rides" className="link">Request from nearby drivers →</Link>

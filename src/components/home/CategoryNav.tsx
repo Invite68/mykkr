@@ -1,7 +1,12 @@
 'use client'
 
 import { LayoutGrid } from 'lucide-react'
-import { CATEGORY_GROUPS, ALL_L1_TABS } from '@/data/categories'
+import { CATEGORY_GROUPS } from '@/data/categories'
+
+const ALL_L1_TABS = [
+  { slug: 'all', label: 'All' },
+  ...CATEGORY_GROUPS.map((g) => ({ slug: g.slug, label: g.label })),
+]
 import { getGroupIcon, getSubIcon } from '@/data/categoryIcons'
 
 export interface CategoryFilter {

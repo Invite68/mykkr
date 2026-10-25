@@ -54,7 +54,9 @@ export default function SearchForm({
             maxLength={100}
             autoComplete="off"
           />
-          <button type="submit" aria-label="Search">🔍</button>
+          <button type="submit" aria-label="Search">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          </button>
         </div>
       </form>
     )
@@ -63,7 +65,9 @@ export default function SearchForm({
   return (
     <form className="search-box" onSubmit={submit} role="search">
       <label className="sr-only" htmlFor={`search-${variant}`}>Search</label>
-      <span aria-hidden="true" style={{ alignSelf: 'center', paddingLeft: 14, fontSize: 18, opacity: .55 }}>🔍</span>
+      <span aria-hidden="true" style={{ alignSelf: 'center', paddingLeft: 14, color: 'var(--text-3)', display: 'flex', alignItems: 'center' }}>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      </span>
       <input
         id={`search-${variant}`}
         type="search"

@@ -50,7 +50,7 @@ export default function BusinessMap({ lat, lon, name, area }: Props) {
               transform: rotate(-45deg);
               display: flex; align-items: center; justify-content: center;
             ">
-              <span style="transform: rotate(45deg); font-size: 16px;">🏪</span>
+              <svg style="transform: rotate(45deg);" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
             </div>
             <div style="
               width: 6px; height: 6px;
@@ -67,7 +67,7 @@ export default function BusinessMap({ lat, lon, name, area }: Props) {
 
       L.marker([lat, lon], { icon: pinIcon })
         .addTo(map)
-        .bindPopup(`<strong>${name}</strong><br><span style="color:#6b7280;font-size:12px">📍 ${area}, Kurukshetra</span>`)
+        .bindPopup(`<strong>${name}</strong><br><span style="color:#6b7280;font-size:12px">${area}, Kurukshetra</span>`)
         .openPopup()
 
       map.setView([lat, lon], 15)
@@ -126,7 +126,8 @@ export default function BusinessMap({ lat, lon, name, area }: Props) {
             boxShadow: '0 2px 8px rgba(0,0,0,.25)',
           }}
         >
-          🧭 Get Directions
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>
+          Get Directions
         </button>
 
         <button
@@ -140,7 +141,8 @@ export default function BusinessMap({ lat, lon, name, area }: Props) {
             boxShadow: '0 2px 8px rgba(0,0,0,.15)',
           }}
         >
-          🗺️ Open in Maps
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>
+          Open in Maps
         </button>
       </div>
     </div>

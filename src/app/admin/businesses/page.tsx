@@ -45,7 +45,7 @@ export default function AdminBusinesses() {
       body: JSON.stringify({ businessId, action }),
     })
     const json = await res.json() as { error?: string }
-    setMsg(res.ok ? '✅ Done' : (json.error ?? 'Error'))
+    setMsg(res.ok ? 'Done' : (json.error ?? 'Error'))
     if (res.ok) void load()
   }
 
@@ -64,7 +64,7 @@ export default function AdminBusinesses() {
         <button className="btn btn-secondary" onClick={() => void load()}>↻ Refresh</button>
       </div>
 
-      {msg && <p style={{ color: msg.startsWith('✅') ? 'green' : 'red', marginBottom: 12 }}>{msg}</p>}
+      {msg && <p style={{ color: msg === 'Done' ? 'green' : 'red', marginBottom: 12 }}>{msg}</p>}
       <p style={{ color: 'var(--text-muted)', marginBottom: 12 }}>{total} businesses</p>
 
       {loading ? <p>Loading…</p> : (
@@ -90,7 +90,7 @@ export default function AdminBusinesses() {
                   <td style={{ padding: '10px 12px', fontSize: 12 }}>{b.city}</td>
                   <td style={{ padding: '10px 12px', fontSize: 12 }}>
                     {b.gstin
-                      ? <span style={{ color: 'green' }}>✓ {b.gstin}</span>
+                      ? <span style={{ color: 'green', display: 'inline-flex', alignItems: 'center', gap: 4 }}><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>{b.gstin}</span>
                       : <span style={{ color: 'var(--text-muted)' }}>—</span>}
                   </td>
                   <td style={{ padding: '10px 12px', fontSize: 12 }}>

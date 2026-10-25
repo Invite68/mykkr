@@ -215,16 +215,22 @@ function BusinessDash() {
       <div className="panel">
         <h2 className="panel-title">Manage your business</h2>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: 10 }}>
-          {[
-            { label: 'Edit profile', href: '/register?role=business', icon: '✏️' },
-            { label: 'Add a listing', href: '/register?role=business', icon: '➕' },
-            { label: 'Manage hours', href: '/register?role=business', icon: '🕐' },
-            { label: 'View my public page', href: '/business/sharma-kirana-store', icon: '👁️' },
-          ].map((a) => (
-            <Link key={a.label} href={a.href} className="btn btn-outline btn-sm" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-              <span>{a.icon}</span> {a.label}
-            </Link>
-          ))}
+          <Link href="/register?role=business" className="btn btn-outline btn-sm" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            Edit profile
+          </Link>
+          <Link href="/register?role=business" className="btn btn-outline btn-sm" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Add a listing
+          </Link>
+          <Link href="/register?role=business" className="btn btn-outline btn-sm" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            Manage hours
+          </Link>
+          <Link href="/business/sharma-kirana-store" className="btn btn-outline btn-sm" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            View public page
+          </Link>
         </div>
       </div>
     </>
@@ -275,14 +281,26 @@ function CustomerDash() {
       <div className="panel">
         <h2 className="panel-title">What would you like to do?</h2>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(170px, 1fr))', gap: 10 }}>
-          {[
-            { label: 'Post a requirement', href: '/post', icon: '📋', desc: 'Let businesses come to you' },
-            { label: 'Request a ride', href: '/rides', icon: '🚗', desc: 'Taxi or delivery' },
-            { label: 'Find & book a service', href: '/find-book', icon: '📅', desc: 'Plumber, painter, venue…' },
-            { label: 'Browse businesses', href: '/categories', icon: '🏪', desc: 'Shops, food, services' },
-          ].map((a) => (
+          {([
+            {
+              label: 'Post a requirement', href: '/post', desc: 'Let businesses come to you',
+              icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>,
+            },
+            {
+              label: 'Request a ride', href: '/rides', desc: 'Taxi or delivery',
+              icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><rect x="1" y="9" width="22" height="10" rx="2" ry="2"/><path d="M16 9V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v4"/><circle cx="8.5" cy="14.5" r="1.5"/><circle cx="15.5" cy="14.5" r="1.5"/></svg>,
+            },
+            {
+              label: 'Find & book a service', href: '/find-book', desc: 'Plumber, painter, venue…',
+              icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>,
+            },
+            {
+              label: 'Browse businesses', href: '/categories', desc: 'Shops, food, services',
+              icon: <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>,
+            },
+          ] as { label: string; href: string; desc: string; icon: React.JSX.Element }[]).map((a) => (
             <Link key={a.label} href={a.href} className="panel" style={{ textDecoration: 'none', padding: '12px 14px', border: '1.5px solid var(--border)', gap: 4 }}>
-              <div style={{ fontSize: 22, marginBottom: 4 }}>{a.icon}</div>
+              <div style={{ color: 'var(--night-d)', marginBottom: 6 }}>{a.icon}</div>
               <div style={{ fontWeight: 700, fontSize: 13, color: 'var(--night-d)' }}>{a.label}</div>
               <div className="muted" style={{ fontSize: 11 }}>{a.desc}</div>
             </Link>
@@ -301,7 +319,7 @@ function DriverDash() {
       <Kpis items={[
         ['Jobs today', '6', 'sample data'],
         ['Earnings today', '₹1,140', 'sample data'],
-        ['Rating', '4.8 ★', 'sample data'],
+        ['Rating', '4.8 / 5', 'sample data'],
         ['Commission to My KKR', '₹0', 'keep everything'],
       ]} />
 
@@ -346,7 +364,7 @@ function AdminDash({ stats }: { stats: AdminStats | null }) {
     <>
       {isLive && (
         <div className="banner banner-ok" style={{ marginBottom: 14 }}>
-          <span aria-hidden="true">🟢</span>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" style={{ flexShrink: 0 }}><polyline points="20 6 9 17 4 12"/></svg>
           <div>Live platform data from database</div>
         </div>
       )}
@@ -411,10 +429,6 @@ export default async function RoleDashboard({ params }: { params: Params }) {
   const adminStats = role.id === 'admin' ? await fetchAdminStats() : null
   const isLive = role.id === 'admin' && adminStats !== null
 
-  const ROLE_EMOJI: Record<string, string> = {
-    business: '🏪', customer: '🙋', driver: '🏍️', admin: '🛡️',
-  }
-
   let View: React.JSX.Element
   switch (role.id as UserRole) {
     case 'business': View = <BusinessDash />; break
@@ -426,16 +440,18 @@ export default async function RoleDashboard({ params }: { params: Params }) {
   return (
     <div className="container">
       <Breadcrumbs items={[{ href: '/dashboard', label: 'Dashboards' }, { label: role.name }]} />
-      <h1 className="page-title">{ROLE_EMOJI[role.id] ?? ''} {role.name} Dashboard</h1>
+      <h1 className="page-title">{role.name} Dashboard</h1>
       <p className="page-sub" style={{ marginBottom: 14 }}>{role.summary}</p>
 
       {!isLive && (
         <div className="banner banner-warn" style={{ marginBottom: 14 }}>
-          <span aria-hidden="true">👁️</span>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" style={{ flexShrink: 0 }}>
+            <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+          </svg>
           <div>
             <strong>Preview mode</strong> — showing sample data.
             Real data appears once Firebase sign-in is connected.{' '}
-            <Link href="/dashboard" className="link">See all roles →</Link>
+            <Link href="/dashboard" className="link">See all roles</Link>
           </div>
         </div>
       )}

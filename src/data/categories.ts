@@ -15,19 +15,19 @@ export const CATEGORY_GROUPS: CategoryGroup[] = [
     icon: 'services',
     subcategories: [
       'All Services',
-      '💇 Grooming',
-      '💆 Wellness',
-      '🌿 Artistry · Mehendi',
-      '🔌 Electrical',
-      '🚿 Plumbing',
-      '🖌️ Painting',
-      '🪵 Carpentry',
-      '🏠 Flooring & Tiling',
-      '🧱 Masonry',
-      '🔐 Security',
-      '🧹 Cleaning',
-      '❄️ AC Repair',
-      '☀️ Solar',
+      'Grooming',
+      'Wellness',
+      'Artistry · Mehendi',
+      'Electrical',
+      'Plumbing',
+      'Painting',
+      'Carpentry',
+      'Flooring & Tiling',
+      'Masonry',
+      'Security',
+      'Cleaning',
+      'AC Repair',
+      'Solar',
     ],
   },
   {
@@ -36,13 +36,13 @@ export const CATEGORY_GROUPS: CategoryGroup[] = [
     icon: 'venues',
     subcategories: [
       'All Venues',
-      '🏛️ Marriage Halls',
-      '⛳ Grounds',
-      '🏨 Hotels',
-      '🏠 Guest Houses',
-      '🍽️ Dining Spaces',
-      '🏢 Event Spaces',
-      '🌳 Farmhouses',
+      'Marriage Halls',
+      'Grounds',
+      'Hotels',
+      'Guest Houses',
+      'Dining Spaces',
+      'Event Spaces',
+      'Farmhouses',
     ],
   },
   {
@@ -51,18 +51,18 @@ export const CATEGORY_GROUPS: CategoryGroup[] = [
     icon: 'shopping',
     subcategories: [
       'All Shopping',
-      '👗 Fashion',
-      '👟 Footwear',
-      '💍 Jewellery',
-      '🛒 Groceries',
-      '📚 Stationery',
-      '📱 Electronics',
-      '🏠 Appliances',
-      '🍳 Kitchen',
-      '🪑 Furniture',
-      '🖼️ Decor',
-      '🔩 Hardware',
-      '🧸 Toys',
+      'Fashion',
+      'Footwear',
+      'Jewellery',
+      'Groceries',
+      'Stationery',
+      'Electronics',
+      'Appliances',
+      'Kitchen',
+      'Furniture',
+      'Decor',
+      'Hardware',
+      'Toys',
     ],
   },
   {
@@ -71,15 +71,15 @@ export const CATEGORY_GROUPS: CategoryGroup[] = [
     icon: 'food',
     subcategories: [
       'All Food',
-      '🥦 Grocery',
-      '🥛 Dairy',
-      '🌱 Organics',
-      '🍖 Meats',
-      '🎂 Bakery',
-      '🍬 Sweets',
-      '🥤 Beverages',
-      '🍛 Meals',
-      '🍽️ Catering',
+      'Grocery',
+      'Dairy',
+      'Organics',
+      'Meats',
+      'Bakery',
+      'Sweets',
+      'Beverages',
+      'Meals',
+      'Catering',
     ],
   },
   {
@@ -88,14 +88,14 @@ export const CATEGORY_GROUPS: CategoryGroup[] = [
     icon: 'transport',
     subcategories: [
       'All Transport',
-      '🛺 Autos',
-      '🚗 Cabs',
-      '🚌 Buses',
-      '🚐 Vans',
-      '🚛 Trucks',
-      '📦 Couriers',
-      '🚜 Tractors',
-      '📦 Packers & Movers',
+      'Autos',
+      'Cabs',
+      'Buses',
+      'Vans',
+      'Trucks',
+      'Couriers',
+      'Tractors',
+      'Packers & Movers',
     ],
   },
   {
@@ -104,17 +104,17 @@ export const CATEGORY_GROUPS: CategoryGroup[] = [
     icon: 'events',
     subcategories: [
       'All Events',
-      '🎵 DJs & Music',
-      '🥁 Bands & Dhol',
-      '📸 Photography',
-      '🎬 Videography',
-      '🌸 Decoration',
-      '✨ Lighting',
-      '🎆 Fireworks',
-      '🎭 Event Planning',
-      '💃 Choreography',
-      '🐴 Horse & Barat',
-      '⛺ Tent & Shamiana',
+      'DJs & Music',
+      'Bands & Dhol',
+      'Photography',
+      'Videography',
+      'Decoration',
+      'Lighting',
+      'Fireworks',
+      'Event Planning',
+      'Choreography',
+      'Horse & Barat',
+      'Tent & Shamiana',
     ],
   },
 ]
@@ -123,7 +123,7 @@ export const CATEGORY_GROUPS: CategoryGroup[] = [
  * Convert a subcategory display label to a clean URL slug.
  * Strips leading emoji + whitespace so URLs are ASCII-only and work
  * reliably in Next.js standalone mode on all filesystems.
- * e.g. "💇 Grooming" → "Grooming", "All Services" → "All-Services"
+ * e.g. "Grooming" → "Grooming", "All Services" → "All-Services"
  */
 export function subSlug(label: string): string {
   return label
@@ -135,108 +135,10 @@ export function subSlug(label: string): string {
     || label.replace(/\s+/g, '-')
 }
 
-/** Reverse: find the subcategory label from a URL slug */
+/**
+ * Find the original subcategory label from a URL slug.
+ * e.g. subFromSlug(group, "Grooming") → "Grooming"
+ */
 export function subFromSlug(group: CategoryGroup, slug: string): string | undefined {
   return group.subcategories.find((s) => subSlug(s) === slug)
-}
-
-// All L1 slugs including 'all' for the nav
-export const ALL_L1_TABS = [
-  { slug: 'all', label: 'All', icon: 'all' },
-  ...CATEGORY_GROUPS.map((g) => ({ slug: g.slug, label: g.label, icon: g.icon })),
-]
-
-// Register form categories (for business signup) — includes "Other"
-export const REGISTER_CATEGORIES = [
-  ...CATEGORY_GROUPS,
-  {
-    slug: '__other__',
-    label: 'Other',
-    icon: 'other',
-    subcategories: [],
-  },
-]
-
-// Sub-category lists used in registration form (text-only, no emoji prefix duplicates)
-export const SUB_CAT_LABELS: Record<string, string[]> = {
-  services: [
-    'Grooming',
-    'Wellness',
-    'Artistry · Mehendi',
-    'Electrical',
-    'Plumbing',
-    'Painting',
-    'Carpentry',
-    'Flooring & Tiling',
-    'Masonry',
-    'Security',
-    'Domestic & Cleaning',
-    'AC & Appliance Repair',
-    'Solar & Inverter',
-    'Landscaping',
-    'Other',
-  ],
-  venues: [
-    'Marriage Hall & Lawn',
-    'Grounds',
-    'Hotels & Resorts',
-    'Guest House',
-    'Conference Room',
-    'Farmhouse',
-    'Other',
-  ],
-  shopping: [
-    'Fashion & Clothing',
-    'Footwear',
-    'Jewellery',
-    'Grocery & Supplies',
-    'Stationery',
-    'Electronics',
-    'Appliances',
-    'Kitchen & Cookware',
-    'Furniture',
-    'Decor',
-    'Hardware & Tools',
-    'Toys',
-    'Pooja Samagri',
-    'Other',
-  ],
-  food: [
-    'Restaurant',
-    'Dhaba',
-    'Tiffin Service',
-    'Bakery & Cakes',
-    'Sweets & Mithai',
-    'Catering',
-    'Grocery',
-    'Dairy',
-    'Other',
-  ],
-  transport: [
-    'Auto Rickshaw',
-    'Taxi & Cab',
-    'Bus & Coach',
-    'Vehicle Rental',
-    'Courier & Parcel',
-    'Van & Tempo',
-    'Truck & Loading',
-    'Tractor',
-    'Packers & Movers',
-    'Other',
-  ],
-  events: [
-    'DJs & Sound',
-    'Band & Brass',
-    'Dhol & Percussion',
-    'Photography',
-    'Videography',
-    'Decoration',
-    'Lighting',
-    'Fireworks',
-    'Event Planning',
-    'Choreography',
-    'Horse & Barat',
-    'Tent & Shamiana',
-    'Other',
-  ],
 }

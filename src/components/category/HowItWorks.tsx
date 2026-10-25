@@ -14,7 +14,7 @@ export default function HowItWorks({ catSlug }: { catSlug?: string }) {
   const copy = (catSlug && COPY[catSlug]) || COPY.default
   return (
     <div className="banner banner-info" style={{ marginTop: 12 }}>
-      <span aria-hidden="true">ℹ️</span>
+      <span aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></span>
       <div>
         <strong>How it works:</strong> {copy} Payment: {DIRECT_PAYMENT_METHODS.join(' / ')} — zero commission to My KKR.
       </div>

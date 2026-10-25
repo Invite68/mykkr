@@ -76,7 +76,9 @@ export default function PostRequirementWizard({ initialSub = '' }: { initialSub?
   if (done) {
     return (
       <div className="panel" style={{ textAlign: 'center' }} role="status">
-        <div style={{ fontSize: 40 }} aria-hidden="true">📋</div>
+        <div style={{ color: 'var(--night-d)', marginBottom: 8 }} aria-hidden="true">
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+        </div>
         <h2 className="page-title" style={{ fontSize: 20 }}>Requirement ready</h2>
         <p className="muted" style={{ margin: '6px 0 16px' }}>
           Sign in or start your free trial to publish it. Only verified, subscribed businesses will see it and send quotes.
@@ -100,7 +102,7 @@ export default function PostRequirementWizard({ initialSub = '' }: { initialSub?
             <select id="pw-sub" className="select" value={draft.sub} onChange={(e) => set('sub', e.target.value)}>
               <option value="">Select a category</option>
               {CATEGORY_GROUPS.map((g) => (
-                <optgroup key={g.slug} label={`${g.icon} ${g.label}`}>
+                <optgroup key={g.slug} label={g.label}>
                   {g.subcategories.slice(1).map((s) => <option key={s} value={s}>{s}</option>)}
                 </optgroup>
               ))}
@@ -170,13 +172,13 @@ export default function PostRequirementWizard({ initialSub = '' }: { initialSub?
             <dt>Budget</dt><dd>{draft.budgetMin || draft.budgetMax ? `₹${draft.budgetMin || '0'} – ₹${draft.budgetMax || 'open'}` : 'Open to quotes'}</dd>
             {draft.extra && (<><dt>Extra</dt><dd>{draft.extra}</dd></>)}
           </dl>
-          <div className="banner banner-info"><span aria-hidden="true">🔒</span><div>Only verified, subscribed businesses can see your requirement.</div></div>
+          <div className="banner banner-info"><span aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span><div>Only verified, subscribed businesses can see your requirement.</div></div>
         </div>
       )}
 
       {warning && (
         <div className="banner banner-warn" role="alert" style={{ marginTop: 12 }}>
-          <span aria-hidden="true">⚠️</span>
+          <span aria-hidden="true"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></span>
           <div>{warning}</div>
         </div>
       )}
@@ -187,7 +189,10 @@ export default function PostRequirementWizard({ initialSub = '' }: { initialSub?
         {step < 3 ? (
           <button type="button" className="btn btn-primary" style={{ marginLeft: 'auto' }} onClick={next}>Next →</button>
         ) : (
-          <button type="button" className="btn btn-accent" style={{ marginLeft: 'auto' }} onClick={() => setDone(true)}>🚀 Post requirement</button>
+          <button type="button" className="btn btn-accent" style={{ marginLeft: 'auto', display: 'inline-flex', alignItems: 'center', gap: 6 }} onClick={() => setDone(true)}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+            Post requirement
+          </button>
         )}
       </div>
     </div>
