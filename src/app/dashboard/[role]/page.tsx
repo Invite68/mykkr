@@ -106,14 +106,33 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
   }
 }
 
-function Kpis({ items }: { items: [string, string, string?][] }) {
+interface KpiItem {
+  label: string
+  value: string
+  sub?: string
+  trend?: string      // e.g. '+12%' (positive) or '-3%' (negative)
+  trendUp?: boolean   // true = green arrow, false = red arrow
+}
+
+function Kpis({ items }: { items: KpiItem[] }) {
   return (
     <div className="kpi-grid">
-      {items.map(([label, value, sub]) => (
+      {items.map(({ label, value, sub, trend, trendUp }) => (
         <div className="kpi" key={label}>
           <div className="kpi-label">{label}</div>
           <div className="kpi-value">{value}</div>
-          {sub && <div className="kpi-sub">{sub}</div>}
+          {trend && (
+            <div className="kpi-trend" style={{ color: trendUp ? '#16a34a' : '#dc2626', display: 'flex', alignItems: 'center', gap: 3, fontSize: 11, fontWeight: 700, marginTop: 2 }}>
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                {trendUp
+                  ? <><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></>
+                  : <><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></>
+                }
+              </svg>
+              {trend} this month
+            </div>
+          )}
+          {sub && !trend && <div className="kpi-sub">{sub}</div>}
         </div>
       ))}
     </div>
@@ -159,78 +178,175 @@ function StatusBadge({ status }: { status: string }) {
 
 // ── BUSINESS DASHBOARD ────────────────────────────────────────────────────────
 
+// Days shown in the weekly hours mini-table
+const DAYS_SHORT = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+
+// Sample working hours — replaced by real DB data once connected
+const SAMPLE_HOURS: Record<string, { open: boolean; start: string; end: string }> = {
+  Mon: { open: true,  start: '09:00', end: '18:00' },
+  Tue: { open: true,  start: '09:00', end: '18:00' },
+  Wed: { open: true,  start: '09:00', end: '18:00' },
+  Thu: { open: true,  start: '09:00', end: '18:00' },
+  Fri: { open: true,  start: '09:00', end: '17:00' },
+  Sat: { open: true,  start: '10:00', end: '14:00' },
+  Sun: { open: false, start: '10:00', end: '14:00' },
+}
+
 function BusinessDash() {
   return (
     <>
+      {/* ── KPI strip with trends ─────────────────────────────────────── */}
       <Kpis items={[
-        ['Orders this month', '42', 'sample data'],
-        ['Bookings pending', '3', 'sample data'],
-        ['Profile views', '1,284', 'sample data'],
-        ['Commission paid', '₹0', 'My KKR takes nothing'],
+        { label: 'Orders this month', value: '42',   trend: '+18%',  trendUp: true  },
+        { label: 'Bookings pending',  value: '3',    sub: 'awaiting confirmation'   },
+        { label: 'Profile views',     value: '1,284',trend: '+11%',  trendUp: true  },
+        { label: 'Commission paid',   value: '₹0',   sub: 'My KKR takes nothing'    },
       ]} />
 
-      {/* Subscription status */}
-      <div className="panel" style={{ marginTop: 14, borderLeft: '4px solid #12343b' }}>
-        <h2 className="panel-title">Your Subscription</h2>
+      {/* ── Business type + listing counts ───────────────────────────── */}
+      <div className="panel" style={{ marginTop: 14 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 12 }}>
+          <div>
+            <h2 className="panel-title" style={{ marginBottom: 6 }}>Your Business Mode</h2>
+            <p className="muted" style={{ fontSize: 12 }}>
+              Your listing is set up as a <strong>Hybrid</strong> business — you can sell goods, offer services, and list venues all from one profile.
+            </p>
+          </div>
+          <div style={{ display: 'flex', gap: 6 }}>
+            {(['Goods', 'Services', 'Venues'] as const).map((t) => (
+              <span key={t} style={{
+                padding: '4px 10px', borderRadius: 99, fontSize: 11, fontWeight: 700,
+                background: t === 'Services' ? '#12343b' : 'var(--bg-2)',
+                color:      t === 'Services' ? '#fff'    : 'var(--text-2)',
+                border: '1.5px solid var(--border)',
+              }}>{t}</span>
+            ))}
+          </div>
+        </div>
+
+        {/* Listing counts row */}
+        <div style={{ display: 'flex', gap: 16, marginTop: 14, flexWrap: 'wrap' }}>
+          {[
+            { label: 'Products listed', value: '12', icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg> },
+            { label: 'Services active', value: '4',  icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg> },
+            { label: 'Avg rating',      value: '4.7',icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg> },
+            { label: 'Response rate',   value: '92%',icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg> },
+          ].map(({ label, value, icon }) => (
+            <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 12 }}>
+              <span style={{ color: 'var(--night-d)' }}>{icon}</span>
+              <span style={{ fontWeight: 700, color: 'var(--night-d)' }}>{value}</span>
+              <span className="muted">{label}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* ── Subscription status ───────────────────────────────────────── */}
+      <div className="panel" style={{ borderLeft: '4px solid #12343b' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 10 }}>
           <div>
-            <div style={{ fontWeight: 700, fontSize: 15, marginBottom: 4 }}>
+            <h2 className="panel-title" style={{ marginBottom: 4 }}>
               Business Plan — <span style={{ color: '#16a34a' }}>Active</span>
-            </div>
+            </h2>
             <div className="muted">
-              {formatInr(PLANS.business.priceInr)} + GST = {formatInr(withGst(PLANS.business.priceInr))} / month
+              {formatInr(PLANS.business.priceInr)} + GST = <strong>{formatInr(withGst(PLANS.business.priceInr))}</strong> / month
             </div>
             <div className="muted" style={{ marginTop: 4, fontSize: 12 }}>
-              Renews automatically via Razorpay. Cancel any time.
+              Renews automatically via Razorpay · Cancel any time
             </div>
           </div>
           <div style={{ textAlign: 'right' }}>
-            <div style={{ fontWeight: 800, fontSize: 22, color: '#12343b' }}>₹0</div>
+            <div style={{ fontWeight: 800, fontSize: 24, color: '#12343b', lineHeight: 1 }}>₹0</div>
             <div className="muted" style={{ fontSize: 11 }}>commission on all sales</div>
           </div>
         </div>
-        <p className="muted" style={{ marginTop: 10, fontSize: 12, borderTop: '1px solid var(--border)', paddingTop: 10 }}>
+
+        {/* What's included */}
+        <div style={{ display: 'flex', gap: 12, marginTop: 12, flexWrap: 'wrap', paddingTop: 12, borderTop: '1px solid var(--border)' }}>
+          {[
+            'Unlimited listings', 'Full shop page', 'Booking calendar',
+            'Driver dispatch', 'Analytics', 'Direct UPI/COD payments',
+          ].map((f) => (
+            <span key={f} style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12, color: 'var(--text-2)' }}>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+              {f}
+            </span>
+          ))}
+        </div>
+
+        <p className="muted" style={{ marginTop: 10, fontSize: 12 }}>
           All customer payments (UPI, card, wallet, COD) go directly to you. My KKR is only the connector.
         </p>
       </div>
 
-      {/* Recent activity */}
+      {/* ── Recent orders & bookings ──────────────────────────────────── */}
       <div className="panel">
-        <h2 className="panel-title">Recent orders &amp; bookings</h2>
-        <p className="muted" style={{ fontSize: 12, marginBottom: 12 }}>
-          Sample preview — your real orders appear here after sign-in is connected.
-        </p>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+          <h2 className="panel-title" style={{ marginBottom: 0 }}>Recent orders &amp; bookings</h2>
+          <span className="muted" style={{ fontSize: 11 }}>Sample preview</span>
+        </div>
         <Table
-          head={['Order ID', 'What', 'Fulfilment', 'Status']}
+          head={['Order ID', 'Item / Service', 'Fulfilment', 'Amount', 'Status']}
           rows={[
-            ['#KKR-7Q2M', 'Groceries (3 items)', 'Partner driver', <StatusBadge key="1" status="Out for delivery" />],
-            ['#KKR-3HXP', 'House painting — 24 Oct', 'On-site service', <StatusBadge key="2" status="Confirmed" />],
-            ['#KKR-9LKA', 'Stationery bundle', 'Customer pickup', <StatusBadge key="3" status="Ready for pickup" />],
-            ['#KKR-2BNQ', 'Vegetables (daily box)', 'Self-delivery', <StatusBadge key="4" status="Delivered" />],
+            ['#KKR-7Q2M', 'Groceries (3 items)',      'Partner driver',   '₹380', <StatusBadge key="1" status="Out for delivery" />],
+            ['#KKR-3HXP', 'House painting — 24 Oct',  'On-site service',  '₹4,500', <StatusBadge key="2" status="Confirmed" />],
+            ['#KKR-9LKA', 'Stationery bundle',        'Customer pickup',  '₹210', <StatusBadge key="3" status="Ready for pickup" />],
+            ['#KKR-2BNQ', 'Vegetables (daily box)',   'Self-delivery',    '₹145', <StatusBadge key="4" status="Delivered" />],
           ]}
         />
       </div>
 
-      {/* Quick actions */}
+      {/* ── Weekly hours preview ─────────────────────────────────────── */}
+      <div className="panel">
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+          <h2 className="panel-title" style={{ marginBottom: 0 }}>Operating hours</h2>
+          <Link href="/register?role=business" className="btn btn-outline btn-sm" style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 12 }}>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            Edit
+          </Link>
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 4 }}>
+          {DAYS_SHORT.map((day) => {
+            const h = SAMPLE_HOURS[day]
+            return (
+              <div key={day} style={{
+                padding: '8px 4px', borderRadius: 8, textAlign: 'center',
+                background: h.open ? '#12343b12' : 'var(--bg-2)',
+                border: `1.5px solid ${h.open ? '#12343b30' : 'var(--border)'}`,
+              }}>
+                <div style={{ fontSize: 11, fontWeight: 700, color: h.open ? 'var(--night-d)' : 'var(--text-3)', marginBottom: 4 }}>{day}</div>
+                {h.open ? (
+                  <>
+                    <div style={{ fontSize: 10, color: 'var(--text-2)', lineHeight: 1.4 }}>{h.start}</div>
+                    <div style={{ fontSize: 9, color: 'var(--text-3)' }}>—</div>
+                    <div style={{ fontSize: 10, color: 'var(--text-2)', lineHeight: 1.4 }}>{h.end}</div>
+                  </>
+                ) : (
+                  <div style={{ fontSize: 10, color: 'var(--text-3)' }}>Closed</div>
+                )}
+              </div>
+            )
+          })}
+        </div>
+        <p className="muted" style={{ fontSize: 11, marginTop: 8 }}>Sample hours — update in your profile settings after signing in.</p>
+      </div>
+
+      {/* ── Quick actions ─────────────────────────────────────────────── */}
       <div className="panel">
         <h2 className="panel-title">Manage your business</h2>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: 10 }}>
-          <Link href="/register?role=business" className="btn btn-outline btn-sm" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-            Edit profile
-          </Link>
-          <Link href="/register?role=business" className="btn btn-outline btn-sm" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-            Add a listing
-          </Link>
-          <Link href="/register?role=business" className="btn btn-outline btn-sm" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-            Manage hours
-          </Link>
-          <Link href="/business/sharma-kirana-store" className="btn btn-outline btn-sm" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-            View public page
-          </Link>
+          {[
+            { label: 'Edit profile',    href: '/register?role=business', icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg> },
+            { label: 'Add a listing',   href: '/register?role=business', icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> },
+            { label: 'Manage hours',    href: '/register?role=business', icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> },
+            { label: 'View public page',href: '/business/sharma-kirana-store', icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg> },
+            { label: 'Post a task/gig', href: '/post',                    icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/></svg> },
+            { label: 'See your shop',   href: '/shop/sharma-kirana-store', icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg> },
+          ].map((a) => (
+            <Link key={a.label} href={a.href} className="btn btn-outline btn-sm" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+              {a.icon}{a.label}
+            </Link>
+          ))}
         </div>
       </div>
     </>
@@ -243,21 +359,36 @@ function CustomerDash() {
   return (
     <>
       <Kpis items={[
-        ['Trial days left', String(PLANS.customer.trialDays), 'free trial'],
-        ['Active bookings', '2', 'sample data'],
-        ['Open requirements', '1', 'sample data'],
-        ['Favourites saved', '5', 'sample data'],
+        { label: 'Trial days left',      value: String(PLANS.customer.trialDays), sub: 'free trial — no card needed' },
+        { label: 'Active bookings',      value: '2',  sub: 'sample data'          },
+        { label: 'Open requirements',    value: '1',  sub: 'awaiting bids'        },
+        { label: 'Favourites saved',     value: '5',  sub: 'sample data'          },
       ]} />
 
       {/* Subscription */}
       <div className="panel" style={{ marginTop: 14, borderLeft: '4px solid #0f766e' }}>
-        <h2 className="panel-title">Your Subscription</h2>
-        <div style={{ fontWeight: 700, fontSize: 15, marginBottom: 4 }}>
-          Customer Plan — <span style={{ color: '#d97706' }}>Free Trial ({PLANS.customer.trialDays} days)</span>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 10 }}>
+          <div>
+            <h2 className="panel-title" style={{ marginBottom: 4 }}>
+              Customer Plan — <span style={{ color: '#d97706' }}>Free Trial</span>
+            </h2>
+            <div className="muted">
+              After trial: {formatInr(PLANS.customer.priceInr)} + GST = <strong>{formatInr(withGst(PLANS.customer.priceInr))}</strong> / month
+            </div>
+            <div className="muted" style={{ fontSize: 12, marginTop: 3 }}>No card needed during trial · Cancel any time</div>
+          </div>
+          <div style={{ textAlign: 'right' }}>
+            <div style={{ fontWeight: 800, fontSize: 24, color: '#d97706', lineHeight: 1 }}>{PLANS.customer.trialDays}</div>
+            <div className="muted" style={{ fontSize: 11 }}>days free</div>
+          </div>
         </div>
-        <div className="muted">
-          After trial: {formatInr(PLANS.customer.priceInr)} + GST = {formatInr(withGst(PLANS.customer.priceInr))} / month.
-          Unlimited browsing and booking.
+        <div style={{ display: 'flex', gap: 12, marginTop: 12, flexWrap: 'wrap', paddingTop: 12, borderTop: '1px solid var(--border)' }}>
+          {['Browse all businesses', 'Book services', 'Order goods', 'Post requirements', 'In-app chat', 'Order tracking'].map((f) => (
+            <span key={f} style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12, color: 'var(--text-2)' }}>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#0f766e" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+              {f}
+            </span>
+          ))}
         </div>
       </div>
 
@@ -317,10 +448,10 @@ function DriverDash() {
   return (
     <>
       <Kpis items={[
-        ['Jobs today', '6', 'sample data'],
-        ['Earnings today', '₹1,140', 'sample data'],
-        ['Rating', '4.8 / 5', 'sample data'],
-        ['Commission to My KKR', '₹0', 'keep everything'],
+        { label: 'Jobs today',           value: '6',      trend: '+2',    trendUp: true  },
+        { label: 'Earnings today',       value: '₹1,140', trend: '+₹140', trendUp: true  },
+        { label: 'Rating',               value: '4.8 / 5',sub: '48 reviews'              },
+        { label: 'Commission to My KKR', value: '₹0',     sub: 'keep everything'         },
       ]} />
 
       <div className="panel" style={{ marginTop: 14, borderLeft: '4px solid #b45309' }}>
@@ -371,26 +502,26 @@ function AdminDash({ stats }: { stats: AdminStats | null }) {
 
       <h3 style={{ fontWeight: 700, marginBottom: 8, fontSize: 14 }}>Businesses</h3>
       <Kpis items={[
-        ['Total registered', String(totalBiz)],
-        ['GST verified',     String(verifiedBiz)],
-        ['Pending KYC',      String(pending)],
-        ['Active subs',      String(activeSubs)],
+        { label: 'Total registered', value: String(totalBiz)    },
+        { label: 'GST verified',     value: String(verifiedBiz) },
+        { label: 'Pending KYC',      value: String(pending),      sub: pending > 0 ? 'needs review' : 'all clear' },
+        { label: 'Active subs',      value: String(activeSubs)  },
       ]} />
 
       <h3 style={{ fontWeight: 700, margin: '16px 0 8px', fontSize: 14 }}>Customers &amp; Drivers</h3>
       <Kpis items={[
-        ['Customers',       String(totalCust)],
-        ['Active subs',     String(custSubs)],
-        ['On trial',        String(trials)],
-        ['Drivers',         String(drivers)],
+        { label: 'Customers',    value: String(totalCust) },
+        { label: 'Active subs',  value: String(custSubs)  },
+        { label: 'On trial',     value: String(trials),     sub: 'free 7-day trial' },
+        { label: 'Drivers',      value: String(drivers)   },
       ]} />
 
       <h3 style={{ fontWeight: 700, margin: '16px 0 8px', fontSize: 14 }}>Jobs (Rides &amp; Deliveries)</h3>
       <Kpis items={[
-        ['Total all-time',  String(jobs)],
-        ['Open now',        String(openJobs)],
-        ['Completed',       String(completed)],
-        ['Sub revenue',     `₹${revInr}`],
+        { label: 'Total all-time', value: String(jobs)      },
+        { label: 'Open now',       value: String(openJobs)  },
+        { label: 'Completed',      value: String(completed) },
+        { label: 'Sub revenue',    value: `₹${revInr}`,      sub: '0% commission kept' },
       ]} />
 
       {!isLive && (
