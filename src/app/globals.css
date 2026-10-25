@@ -243,7 +243,8 @@ img, svg { max-width: 100%; display: block; }
 }
 .drawer-nav-item.secondary { font-size: 13px; color: var(--text-3); }
 .drawer-nav-item.secondary:hover { color: var(--text-2); }
-.drawer-nav-icon { width: 22px; text-align: center; font-size: 16px; flex-shrink: 0; }
+.drawer-nav-icon { width: 22px; height: 22px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+.drawer-nav-icon svg { width: 18px; height: 18px; }
 .drawer-divider { height: 1px; background: var(--border); margin: 8px 4px; }
 
 /* Mobile drawer */
@@ -284,7 +285,8 @@ img, svg { max-width: 100%; display: block; }
   transition: color var(--t);
 }
 .bnav-item.active { color: var(--night-d); }
-.bnav-icon { font-size: 17px; line-height: 1; }
+.bnav-icon { width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; }
+.bnav-icon svg { width: 20px; height: 20px; }
 .bnav-post {
   width: 42px; height: 42px; border-radius: 50%;
   background: linear-gradient(135deg, var(--tan) 0%, var(--tan-d) 100%);
@@ -320,10 +322,11 @@ img, svg { max-width: 100%; display: block; }
 .footer-social-btn {
   width: 36px; height: 36px; border-radius: var(--r);
   background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.12);
-  display: grid; place-items: center; font-size: 14px;
+  display: grid; place-items: center;
   color: rgba(255,255,255,.72);
   transition: background var(--t), color var(--t);
 }
+.footer-social-btn svg { width: 16px; height: 16px; }
 .footer-social-btn:hover { background: rgba(255,255,255,.16); color: #fff; }
 .footer-bottom {
   max-width: 1120px; margin: 24px auto 0; padding-top: 16px;
@@ -343,6 +346,7 @@ img, svg { max-width: 100%; display: block; }
   display: flex; align-items: center; gap: 6px;
   transition: transform var(--t), box-shadow var(--t);
 }
+.floating-help svg { width: 16px; height: 16px; }
 .floating-help:hover { transform: translateY(-1px); box-shadow: var(--shadow-lg); }
 @media (min-width: 900px) { .floating-help { bottom: 20px; } }
 
@@ -908,11 +912,12 @@ img, svg { max-width: 100%; display: block; }
   font-size: 11px; font-weight: 700; letter-spacing: .3px;
 }
 
-/* Hero stats row */
+/* Hero stats row — single line, no wrap */
 .hero-stats {
-  display: flex; align-items: center; justify-content: center; flex-wrap: wrap;
-  gap: 6px 12px; margin-top: 16px;
+  display: flex; align-items: center; justify-content: center; flex-wrap: nowrap;
+  gap: 0 10px; margin-top: 14px;
   font-size: 12px; color: rgba(255,255,255,.62);
+  overflow: hidden; white-space: nowrap;
 }
 .hero-stat strong { color: rgba(255,255,255,.92); font-weight: 700; }
 .hero-stat-sep { color: rgba(255,255,255,.3); }

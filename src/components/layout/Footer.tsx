@@ -1,12 +1,13 @@
 import Link from 'next/link'
 import { DISCLAIMER, SITE } from '@/config/platform'
 import { CircularLogo } from './Logo'
+import { IconFacebook, IconInstagram, IconYouTube, IconWhatsApp } from './NavIcons'
 
 const SOCIAL = [
-  { href: 'https://facebook.com', label: 'Facebook', icon: 'f' },
-  { href: 'https://instagram.com', label: 'Instagram', icon: '📸' },
-  { href: 'https://youtube.com', label: 'YouTube', icon: '▶' },
-  { href: SITE.supportWhatsApp, label: 'WhatsApp', icon: '💬' },
+  { href: 'https://facebook.com', label: 'Facebook', icon: <IconFacebook /> },
+  { href: 'https://instagram.com', label: 'Instagram', icon: <IconInstagram /> },
+  { href: 'https://youtube.com', label: 'YouTube', icon: <IconYouTube /> },
+  { href: SITE.supportWhatsApp, label: 'WhatsApp', icon: <IconWhatsApp /> },
 ]
 
 export default function Footer() {

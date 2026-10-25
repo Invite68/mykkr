@@ -1,18 +1,17 @@
 import type { Metadata } from 'next'
 import LegalPage from '@/components/legal/LegalPage'
-import { DIRECT_PAYMENT_METHODS, DISCLAIMER, GST_RATE, PLANS, SITE, formatInr } from '@/config/platform'
+import { PLANS, SITE, formatInr } from '@/config/platform'
 
 export const metadata: Metadata = { title: 'Terms of Service' }
 
 export default function TermsPage() {
-  const gst = Math.round(GST_RATE * 100)
   return (
     <LegalPage
       title="Terms of Service"
       effective="1 November 2025"
       summary={
         <>
-          <strong>Summary:</strong> {DISCLAIMER} My KKR is not a party to any transaction and takes zero commission.
+          <strong>Plain English:</strong> My KKR connects local businesses with customers. We are not a party to any sale, service or delivery. All payments go directly between buyers and sellers. We only charge a small monthly subscription to businesses and customers for using the platform.
         </>
       }
       sections={[
@@ -20,20 +19,30 @@ export default function TermsPage() {
           title: 'What My KKR is',
           body: (
             <p>
-              My KKR is an online listing and booking connector for Kurukshetra, Haryana. Businesses list goods, services, venues and
-              properties; customers discover and contact them; independent drivers accept ride and delivery jobs. My KKR does not provide
-              any listed goods or services and is not responsible for their quality, safety or legality.
+              My KKR is an online directory and booking connector for local businesses in Kurukshetra, Haryana. We help businesses get discovered and help customers find, book and contact them. We are <strong>not a shop, agent, seller or service provider</strong> — we are the platform that brings them together.
             </p>
           ),
         },
         {
-          title: 'Subscriptions',
+          title: 'Your account',
           body: (
             <ul>
-              <li><strong>Customer plan:</strong> {formatInr(PLANS.customer.priceInr)}/month + {gst}% GST, with a {PLANS.customer.trialDays}-day free trial. Cancel before the trial ends to pay nothing.</li>
-              <li><strong>Business plan:</strong> {formatInr(PLANS.business.priceInr)}/month + {gst}% GST, unlimited listings.</li>
-              <li><strong>Drivers / partners:</strong> no subscription.</li>
-              <li>Subscriptions are billed monthly via Razorpay and auto-renew until cancelled. Used months are non-refundable.</li>
+              <li>You must be 18 or older to create an account.</li>
+              <li>You are responsible for keeping your login details safe.</li>
+              <li>You must provide accurate information when registering.</li>
+              <li>We may suspend or remove accounts that violate these terms.</li>
+            </ul>
+          ),
+        },
+        {
+          title: 'Subscriptions and payments to My KKR',
+          body: (
+            <ul>
+              <li><strong>Businesses</strong> pay {formatInr(PLANS.business.priceInr)} + GST per month for unlimited listings.</li>
+              <li><strong>Customers</strong> pay {formatInr(PLANS.customer.priceInr)} + GST per month after a 7-day free trial.</li>
+              <li>Subscriptions renew automatically. You can cancel any time from your account page.</li>
+              <li>We do not issue refunds for partial months once a billing period has started.</li>
+              <li><strong>My KKR takes zero commission</strong> on any sale, booking or delivery between users.</li>
             </ul>
           ),
         },
@@ -41,59 +50,83 @@ export default function TermsPage() {
           title: 'Payments between users',
           body: (
             <p>
-              All payments for goods, services, bookings, rides and deliveries go <strong>directly</strong> from the customer to the
-              business or driver ({DIRECT_PAYMENT_METHODS.join(', ')}). My KKR does not hold, escrow or refund these payments and takes
-              no commission on them.
+              All payments for goods, services, rides or deliveries are made <strong>directly between the customer and the business</strong> — by UPI, card, wallet or cash as agreed between them. My KKR is not involved in those transactions, does not hold any funds, and takes no cut.
             </p>
           ),
         },
         {
-          title: 'Business listings',
+          title: 'No liability for transactions',
+          body: (
+            <>
+              <p>
+                My KKR is a connector only. We do not verify the quality of goods or services listed, and we are not responsible for:
+              </p>
+              <ul>
+                <li>Disputes between buyers and sellers</li>
+                <li>Refunds, returns or cancellations</li>
+                <li>Delivery delays or damage</li>
+                <li>Accuracy of business listings</li>
+              </ul>
+              <p>Any issue with a purchase or booking must be resolved directly between the parties involved.</p>
+            </>
+          ),
+        },
+        {
+          title: 'Rules for businesses',
           body: (
             <ul>
-              <li>Information must be accurate and kept up to date</li>
-              <li>You must be legally allowed to offer what you list</li>
-              <li>No illegal, counterfeit, adult or harmful items</li>
-              <li>My KKR may remove any listing at any time</li>
+              <li>List only goods and services you genuinely offer.</li>
+              <li>Keep your contact details, prices and availability accurate.</li>
+              <li>Do not list anything illegal, harmful or misleading.</li>
+              <li>Respond to customer enquiries in good faith.</li>
             </ul>
           ),
         },
         {
-          title: 'Rides & delivery',
+          title: 'Rules for customers',
+          body: (
+            <ul>
+              <li>Use the platform to discover and contact local businesses honestly.</li>
+              <li>Do not spam businesses or post false reviews.</li>
+              <li>Honour bookings you make.</li>
+            </ul>
+          ),
+        },
+        {
+          title: 'Content you post',
           body: (
             <p>
-              Drivers are independent partners, not employees of My KKR. My KKR is not a transport company and is not liable for any
-              accident, loss, damage or delay.
+              By uploading photos, descriptions or reviews, you confirm you own or have the right to use that content, and you allow My KKR to display it on the platform. We may remove content that is false, harmful or reported by others.
             </p>
           ),
         },
         {
-          title: 'Prohibited conduct',
-          body: (
-            <ul>
-              <li>Posting phone numbers, emails or links in public requirements</li>
-              <li>Fake reviews or fake profiles</li>
-              <li>Bypassing the subscription</li>
-              <li>Harassing other users</li>
-            </ul>
-          ),
-        },
-        {
-          title: 'Limitation of liability',
+          title: 'Changes to these terms',
           body: (
             <p>
-              My KKR is not liable for disputes between users, the quality of goods or services, losses from rides or deliveries, or
-              downtime. Our maximum liability is the subscription fee you paid in the preceding month.
+              We may update these terms from time to time. If we make significant changes we will notify you by email or through the app. Continuing to use My KKR after an update means you accept the new terms.
             </p>
           ),
         },
         {
           title: 'Governing law',
-          body: <p>Indian law applies. Courts in Kurukshetra, Haryana have exclusive jurisdiction.</p>,
+          body: (
+            <p>
+              These terms are governed by the laws of India. Any disputes will be subject to the jurisdiction of courts in Kurukshetra, Haryana.
+            </p>
+          ),
         },
         {
           title: 'Contact',
-          body: <p><strong>My KKR</strong>, Kurukshetra, Haryana 136118 · {SITE.legalEmail}</p>,
+          body: (
+            <p>
+              Questions about these terms? Reach us on WhatsApp at{' '}
+              <a href={SITE.supportWhatsApp} target="_blank" rel="noopener noreferrer">
+                {SITE.supportWhatsApp.replace('https://wa.me/', '+').replace('91', '91 ')}
+              </a>{' '}
+              or email <a href={`mailto:${SITE.legalEmail}`}>{SITE.legalEmail}</a>.
+            </p>
+          ),
         },
       ]}
     />

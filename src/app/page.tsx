@@ -73,15 +73,6 @@ export default function HomePage() {
           </h1>
           <p className="hero-sub" lang="hi">कुरुक्षेत्र की हर ज़रूरत — एक जगह</p>
           <SearchForm variant="hero" />
-          <p className="hero-hint">
-            Popular:{' '}
-            {POPULAR.map((p, i) => (
-              <span key={p.q}>
-                {i > 0 && ' · '}
-                <Link href={`/search?q=${encodeURIComponent(p.q)}`}>{p.label}</Link>
-              </span>
-            ))}
-          </p>
           {/* Quick-nav pill row */}
           <div className="hero-pills">
             {HERO_PILLS.map((p) => (

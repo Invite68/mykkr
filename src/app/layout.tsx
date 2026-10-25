@@ -5,6 +5,7 @@ import NavList from '@/components/layout/NavList'
 import BottomNav from '@/components/layout/BottomNav'
 import Footer from '@/components/layout/Footer'
 import SubscriptionProvider from '@/components/subscription/SubscriptionProvider'
+import { IconWhatsApp } from '@/components/layout/NavIcons'
 import Link from 'next/link'
 import { DISCLAIMER, SITE } from '@/config/platform'
 
@@ -62,7 +63,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body>
         <SubscriptionProvider>
           <TopNav />
-          <div className="disclaimer-bar" role="note">{DISCLAIMER}</div>
           <div className="app-body">
             <aside className="sidebar" aria-label="Site navigation">
               <NavList />
@@ -83,7 +83,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             className="floating-help"
             aria-label="WhatsApp support"
           >
-            💬 Help
+            <IconWhatsApp /> Help
           </a>
         </SubscriptionProvider>
       </body>

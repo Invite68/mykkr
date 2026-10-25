@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 import LegalPage from '@/components/legal/LegalPage'
-import { PLANS, SITE, formatInr } from '@/config/platform'
+import { SITE } from '@/config/platform'
 
 export const metadata: Metadata = { title: 'Privacy Policy' }
 
@@ -9,81 +9,100 @@ export default function PrivacyPage() {
     <LegalPage
       title="Privacy Policy"
       effective="1 November 2025"
+      summary={
+        <>
+          <strong>Plain English:</strong> We collect only what we need to run the platform. We never sell your data. You can ask us to delete your account and data at any time.
+        </>
+      }
       sections={[
         {
-          title: 'What data we collect',
+          title: 'What we collect',
           body: (
             <ul>
-              <li><strong>Customers:</strong> name, mobile number (verified by OTP), optional email, area/locality.</li>
-              <li><strong>Businesses:</strong> business and owner name, mobile, email, address, categories, optional GSTIN and photos.</li>
-              <li><strong>Delivery drivers / partners:</strong> name, mobile, vehicle details, licence number and the last 4 characters of an Aadhaar or PAN for verification.</li>
-              <li><strong>Ride & delivery requests:</strong> name, mobile, pickup and drop-off, vehicle type. Your number is hidden from drivers until one is assigned.</li>
-              <li><strong>Automatically:</strong> no tracking cookies, pixels or analytics scripts.</li>
+              <li><strong>Customers:</strong> name, mobile number (OTP-verified), optional email and locality.</li>
+              <li><strong>Businesses:</strong> business name, owner name, mobile, email, address, categories, optional GSTIN and photos.</li>
+              <li><strong>Drivers:</strong> name, mobile, vehicle details and a government ID number for verification.</li>
+              <li><strong>Usage:</strong> which pages you visit and searches you make, so we can improve the app.</li>
             </ul>
           ),
         },
         {
-          title: 'Why we collect it',
+          title: 'How we use it',
           body: (
             <ul>
-              <li>To connect customers with local businesses and drivers in Kurukshetra</li>
-              <li>To verify identity via OTP</li>
-              <li>To run subscriptions ({formatInr(PLANS.customer.priceInr)} or {formatInr(PLANS.business.priceInr)} per month + GST) via Razorpay</li>
-              <li>To send booking, order and job notifications</li>
+              <li>To show your profile or listings to other users.</li>
+              <li>To send you booking confirmations and important account notices.</li>
+              <li>To verify your identity and prevent fraud.</li>
+              <li>To improve the platform based on how people use it.</li>
             </ul>
           ),
         },
         {
           title: 'Who we share it with',
           body: (
-            <ul>
-              <li><strong>Razorpay</strong> — subscription payments (PCI-DSS). We never see card or UPI details.</li>
-              <li><strong>Firebase (Google)</strong> — phone OTP authentication.</li>
-              <li><strong>OpenStreetMap / Nominatim / OSRM</strong> — maps, address lookup and route estimates. Only the address or coordinates you enter are sent.</li>
-              <li><strong>Assigned drivers / businesses</strong> — only what’s needed to complete your order or job.</li>
-              <li>We do <strong>not</strong> sell your data.</li>
-            </ul>
-          ),
-        },
-        {
-          title: 'Data retention',
-          body: (
-            <ul>
-              <li>Account data: while your account is active, plus 3 years after deletion</li>
-              <li>Subscription payment records: 7 years (GST / income-tax rules)</li>
-              <li>Server logs: 30 days, without personal data</li>
-              <li>Ride/delivery locations: deleted 30 days after the job is completed</li>
-            </ul>
-          ),
-        },
-        {
-          title: 'Your rights (DPDP Act 2023)',
-          body: (
             <>
-              <p>You can request access to, correction of, or deletion of your personal data, and raise a grievance with our Data Protection Officer.</p>
-              <p>Contact <strong>{SITE.privacyEmail}</strong>. We respond within 30 days.</p>
+              <p>We do <strong>not sell</strong> your personal data to anyone.</p>
+              <p>We share limited data only when necessary:</p>
+              <ul>
+                <li>Your name and contact details are visible to the business or customer you book with.</li>
+                <li>Payment processing is handled by our payment provider — we do not store card numbers.</li>
+                <li>We may share data if required by Indian law or a court order.</li>
+              </ul>
             </>
           ),
         },
         {
-          title: 'Security',
+          title: 'Cookies',
+          body: (
+            <p>
+              We use cookies only to keep you logged in and remember your preferences. We do not use advertising cookies or tracking cookies from third parties.
+            </p>
+          ),
+        },
+        {
+          title: 'Your rights',
           body: (
             <ul>
-              <li>HTTPS (TLS 1.2+) everywhere, strict Content-Security-Policy</li>
-              <li>Phone numbers encrypted at rest</li>
-              <li>Breaches reported to affected users and CERT-In within 6 hours of discovery</li>
+              <li><strong>Access:</strong> You can view your account details at any time in the app.</li>
+              <li><strong>Correction:</strong> You can update your details from your profile page.</li>
+              <li><strong>Deletion:</strong> You can delete your account by contacting us. We will remove your personal data within 30 days.</li>
+              <li><strong>Opt-out:</strong> You can turn off marketing messages from your account settings.</li>
             </ul>
           ),
         },
         {
-          title: 'Cookies',
-          body: <p>My KKR does not use tracking, advertising or analytics cookies, so no cookie banner is needed.</p>,
+          title: 'Data security',
+          body: (
+            <p>
+              We take reasonable steps to protect your information. Sensitive details like phone numbers are stored in encrypted form. No system is 100% secure, so please keep your login details safe.
+            </p>
+          ),
+        },
+        {
+          title: 'How long we keep data',
+          body: (
+            <p>
+              We keep your account data for as long as your account is active. If you delete your account, we remove your personal data within 30 days except where we are required by law to keep it longer (for example, transaction records for tax purposes).
+            </p>
+          ),
+        },
+        {
+          title: 'Changes to this policy',
+          body: (
+            <p>
+              If we make significant changes to this policy, we will notify you through the app or by email before the changes take effect.
+            </p>
+          ),
         },
         {
           title: 'Contact',
           body: (
             <p>
-              <strong>My KKR</strong>, Kurukshetra, Haryana 136118, India · {SITE.privacyEmail}
+              For any privacy questions or a data deletion request, contact us on WhatsApp at{' '}
+              <a href={SITE.supportWhatsApp} target="_blank" rel="noopener noreferrer">
+                {SITE.supportWhatsApp.replace('https://wa.me/', '+').replace('91', '91 ')}
+              </a>{' '}
+              or email <a href={`mailto:${SITE.legalEmail}`}>{SITE.legalEmail}</a>.
             </p>
           ),
         },
