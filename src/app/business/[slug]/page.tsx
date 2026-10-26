@@ -271,97 +271,129 @@ export default async function BusinessPage({ params }: { params: Params }) {
           )}
         </div>
 
-        {/* ── Hero lower zone — Logo + Name + CTAs ────────────────────── */}
+        {/* ── Hero lower zone — white card with logo overlap ──────────── */}
         <div className="container" style={{ maxWidth: 1000, paddingTop: 0, paddingBottom: 0 }}>
+
+          {/* White card that overlaps the cover bottom */}
           <div style={{
-            display: 'flex',
-            alignItems: 'flex-end',
-            justifyContent: 'space-between',
-            gap: 16,
-            marginTop: -42,
-            flexWrap: 'wrap',
+            background: '#fff',
+            borderRadius: 16,
+            marginTop: -28,
+            padding: '14px 16px 16px',
+            boxShadow: '0 2px 16px rgba(0,0,0,.10)',
+            position: 'relative',
           }}>
 
-            {/* Logo + Name + Meta */}
-            <div style={{ display: 'flex', alignItems: 'flex-end', gap: 16 }}>
-              {/* Logo — full circle */}
+            {/* Row 1: Logo + Name + CTA buttons */}
+            <div style={{ display: 'flex', alignItems: 'flex-start', gap: 14, flexWrap: 'wrap' }}>
+
+              {/* Circular logo — lifted slightly above the card top edge */}
               <div style={{
-                width: 84, height: 84, borderRadius: '50%',
-                border: '3px solid var(--white)',
+                width: 72, height: 72, borderRadius: '50%',
+                border: '3px solid #fff',
                 background: '#12343b',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 flexShrink: 0,
                 overflow: 'hidden',
-                boxShadow: '0 2px 16px rgba(0,0,0,.22)',
+                boxShadow: '0 2px 12px rgba(0,0,0,.18)',
+                marginTop: -38,   /* lift logo above card edge */
               }}>
                 <IconBusiness />
               </div>
 
-              {/* Name + sub + rating */}
-              <div style={{ paddingBottom: 4 }}>
-                <h1 style={{ fontSize: 22, fontWeight: 900, color: 'var(--night-d)', margin: 0, lineHeight: 1.2 }}>
-                  {business.name}
-                </h1>
-                <div style={{ color: 'var(--text-3)', fontSize: 13, marginTop: 3 }}>
-                  {business.sub}
-                  {' · '}
-                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
-                    <IconPin />{business.area}, Kurukshetra
-                  </span>
+              {/* Name + meta — fills remaining width */}
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 8, flexWrap: 'wrap' }}>
+                  <h1 style={{ fontSize: 20, fontWeight: 900, color: '#0f172a', margin: 0, lineHeight: 1.25 }}>
+                    {business.name}
+                  </h1>
+                  {/* CTAs — top-right */}
+                  <div style={{ display: 'flex', gap: 8, flexShrink: 0, flexWrap: 'wrap' }}>
+                    {waHref ? (
+                      <a href={waHref} target="_blank" rel="noopener noreferrer"
+                        className="btn btn-whatsapp"
+                        style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '7px 14px', fontSize: 13 }}>
+                        <IconWhatsApp /> WhatsApp
+                      </a>
+                    ) : (
+                      <ContactButton businessName={business.name} label="WhatsApp" className="btn btn-whatsapp" />
+                    )}
+                    {business.hasShop && (
+                      <Link href={`/shop/${business.slug}`} className="btn btn-primary"
+                        style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '7px 14px', fontSize: 13 }}>
+                        <IconShop />
+                        {isVenue ? 'View venue' : isService ? 'Explore services' : 'Visit shop'}
+                      </Link>
+                    )}
+                    {isRide && (
+                      <Link href="/rides" className="btn btn-primary"
+                        style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '7px 14px', fontSize: 13 }}>
+                        <IconTaxi /> Book ride
+                      </Link>
+                    )}
+                  </div>
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 5, flexWrap: 'wrap' }}>
-                  <Stars rating={business.rating} />
-                  <span style={{ fontWeight: 800, fontSize: 14, color: '#92400e' }}>{business.rating.toFixed(1)}</span>
-                  <span style={{ color: 'var(--text-3)', fontSize: 13 }}>({business.reviews.toLocaleString()} reviews)</span>
-                  <span style={{ color: 'var(--text-3)' }}>·</span>
-                  <span style={{ fontSize: 13, color: 'var(--text-3)' }}>{business.priceRange}</span>
+
+                {/* Compact meta line */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 6, flexWrap: 'wrap', fontSize: 13, color: '#64748b' }}>
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: 3 }}>
+                    <IconPin />{business.sub}
+                  </span>
+                  <span style={{ color: '#cbd5e1' }}>·</span>
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: 3 }}>
+                    {business.area}, KKR
+                  </span>
+                  <span style={{ color: '#cbd5e1' }}>·</span>
+                  <span style={{ display: 'inline-flex', alignItems: 'center', gap: 3 }}>
+                    <Stars rating={business.rating} />
+                    <span style={{ fontWeight: 700, color: '#92400e', marginLeft: 3 }}>{business.rating.toFixed(1)}</span>
+                    <span style={{ color: '#94a3b8' }}>({business.reviews})</span>
+                  </span>
+                  <span style={{ color: '#cbd5e1' }}>·</span>
+                  <span>{business.priceRange}</span>
+                  {isService && (
+                    <>
+                      <span style={{ color: '#cbd5e1' }}>·</span>
+                      <a href={`/post?cat=${business.cat}`} style={{ color: '#12343b', fontWeight: 600, textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                        <IconQuote /> Get quote
+                      </a>
+                    </>
+                  )}
+                  {business.website && (
+                    <>
+                      <span style={{ color: '#cbd5e1' }}>·</span>
+                      <a href={business.website} target="_blank" rel="noopener noreferrer" style={{ color: '#12343b', fontWeight: 600, textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                        <IconGlobe /> Website
+                      </a>
+                    </>
+                  )}
                 </div>
               </div>
             </div>
 
-            {/* Primary CTAs — always visible in hero zone */}
-            <div style={{ display: 'flex', gap: 8, paddingBottom: 4, flexWrap: 'wrap' }}>
-              {waHref ? (
-                <a
-                  href={waHref}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="btn btn-whatsapp"
-                  style={{ display: 'inline-flex', alignItems: 'center', gap: 7 }}
-                >
-                  <IconWhatsApp /> WhatsApp
-                </a>
-              ) : (
-                <ContactButton businessName={business.name} label="Call / WhatsApp" className="btn btn-accent" />
-              )}
-
-              {isRide && (
-                <Link href="/rides" className="btn btn-primary" style={{ display: 'inline-flex', alignItems: 'center', gap: 7 }}>
-                  <IconTaxi /> Request ride
-                </Link>
-              )}
-              {isService && (
-                <Link href={`/post?cat=${business.cat}`} className="btn btn-outline" style={{ display: 'inline-flex', alignItems: 'center', gap: 7 }}>
-                  <IconQuote /> Get a quote
-                </Link>
-              )}
-              {business.hasShop && (
-                <Link href={`/shop/${business.slug}`} className="btn btn-primary" style={{ display: 'inline-flex', alignItems: 'center', gap: 7 }}>
-                  <IconShop /> Visit shop
-                </Link>
-              )}
-              {business.website && (
-                <a href={business.website} target="_blank" rel="noopener noreferrer" className="btn btn-outline" style={{ display: 'inline-flex', alignItems: 'center', gap: 7 }}>
-                  <IconGlobe /> Website
-                </a>
+            {/* Badges row */}
+            <div style={{ display: 'flex', gap: 8, marginTop: 12, flexWrap: 'wrap' }}>
+              <span style={{
+                display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 12, fontWeight: 700,
+                background: open ? '#dcfce7' : '#fee2e2', color: open ? '#15803d' : '#dc2626',
+                borderRadius: 20, padding: '3px 10px',
+              }}>
+                <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'currentColor', display: 'inline-block' }} />
+                {open ? 'Open now' : 'Closed'} · {business.hours}
+              </span>
+              {business.verified && (
+                <span style={{
+                  display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 12, fontWeight: 700,
+                  background: 'rgba(18,52,59,.08)', color: '#12343b',
+                  borderRadius: 20, padding: '3px 10px',
+                }}>
+                  <IconVerified /> Verified
+                </span>
               )}
             </div>
           </div>
         </div>
       </div>
-
-      {/* ── Divider ───────────────────────────────────────────────────── */}
-      <div style={{ borderBottom: '1px solid var(--border)', marginTop: 20 }} />
 
       {/* ── Sticky tab nav ────────────────────────────────────────────── */}
       <div style={{
