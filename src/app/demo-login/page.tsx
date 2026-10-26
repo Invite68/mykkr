@@ -28,6 +28,7 @@ const ACCOUNTS = [
     avatar: 'RS',
     avatarBg: '#12343b',
     href: '/dashboard/business',
+    // portal is the new multi-page business portal
     secondaryHref: '/business/sharma-kirana-store',
     secondaryLabel: 'View public shop page',
     bullets: [
