@@ -43,12 +43,12 @@ function isOpenNow(hours: string): boolean {
   return nowMins >= open && nowMins < close
 }
 
-// Cover gradient fallbacks (no emojis)
+// Cover gradient fallbacks — teal/navy palette only, NO purple, NO orange
 const COVER_GRADIENTS = [
   'linear-gradient(135deg, #0d3b44 0%, #12343b 60%, #1a4a54 100%)',
-  'linear-gradient(135deg, #1a3a2a 0%, #1e4d36 60%, #265c42 100%)',
-  'linear-gradient(135deg, #2d1b4e 0%, #3d2460 60%, #4a2d74 100%)',
-  'linear-gradient(135deg, #4a1c1c 0%, #5c2424 60%, #6b2c2c 100%)',
+  'linear-gradient(135deg, #0c2228 0%, #12343b 60%, #2d545e 100%)',
+  'linear-gradient(135deg, #12343b 0%, #1a4a54 60%, #0e3540 100%)',
+  'linear-gradient(135deg, #0e2a36 0%, #163642 60%, #1e4454 100%)',
   'linear-gradient(135deg, #1a2a4a 0%, #1e3460 60%, #253e74 100%)',
 ]
 function pickGradient(slug: string) {
@@ -284,16 +284,15 @@ export default async function BusinessPage({ params }: { params: Params }) {
 
             {/* Logo + Name + Meta */}
             <div style={{ display: 'flex', alignItems: 'flex-end', gap: 16 }}>
-              {/* Logo circle */}
+              {/* Logo — full circle */}
               <div style={{
-                width: 84, height: 84, borderRadius: 18,
+                width: 84, height: 84, borderRadius: '50%',
                 border: '3px solid var(--white)',
-                background: coverPhoto ? '#12343b' : 'rgba(255,255,255,.15)',
+                background: '#12343b',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 flexShrink: 0,
                 overflow: 'hidden',
-                boxShadow: '0 2px 12px rgba(0,0,0,.18)',
-                backdropFilter: coverPhoto ? undefined : 'blur(8px)',
+                boxShadow: '0 2px 16px rgba(0,0,0,.22)',
               }}>
                 <IconBusiness />
               </div>
@@ -389,8 +388,8 @@ export default async function BusinessPage({ params }: { params: Params }) {
       {/* ── Body ──────────────────────────────────────────────────────── */}
       <div className="container" style={{ maxWidth: 1000 }}>
 
-        {/* ── Photo strip ─────────────────────────────────────── */}
-        <div id="overview" style={{ marginTop: 28, marginBottom: 28 }}>
+        {/* ── Photo strip — only rendered when photos exist ────── */}
+        <div id="overview" style={{ marginTop: photos.length > 0 ? 28 : 0, marginBottom: photos.length > 0 ? 28 : 0 }}>
           {photos.length > 0 ? (
             <div style={{
               display: 'grid',
@@ -411,20 +410,7 @@ export default async function BusinessPage({ params }: { params: Params }) {
                 />
               ))}
             </div>
-          ) : (
-            /* No photos placeholder — clean, no emojis */
-            <div style={{
-              height: 120,
-              background: 'var(--bg)',
-              border: '1.5px dashed var(--border)',
-              borderRadius: 14,
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              gap: 10, color: 'var(--text-4)',
-            }}>
-              <IconImage />
-              <span style={{ fontSize: 13 }}>No photos added yet</span>
-            </div>
-          )}
+          ) : null /* No photos — hide strip entirely, no empty gap */}
         </div>
 
         {/* ── About ────────────────────────────────────────────── */}

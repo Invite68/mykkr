@@ -293,8 +293,8 @@ function AvailCalendar() {
 
 // ── Main page ─────────────────────────────────────────────────────────────────
 export default function EditProfilePage() {
-  // In production this comes from auth/user record. Hardcoded for demo.
-  const bizType = ('goods' as BizType)
+  // In production this comes from auth/user record. Dropdown lets demo users switch type.
+  const [bizType, setBizType] = useState<BizType>('goods')
 
   const [saved,    setSaved]    = useState(false)
   const [products, setProducts] = useState<ProductEntry[]>(INIT_PRODUCTS)
@@ -420,15 +420,41 @@ export default function EditProfilePage() {
         </div>
       </div>
 
-      {/* Business type pill (read-only — set at registration) */}
-      <div style={{
-        display:'inline-flex', alignItems:'center', gap:8, marginBottom:18,
-        padding:'7px 14px', borderRadius:99, border:`1.5px solid ${C.goldB}`,
-        background:C.goldBg, fontSize:12, color:C.goldDim, fontWeight:700,
-      }}>
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16"/></svg>
-        {BIZ_LABEL[bizType]}
-        <span style={{ fontWeight:400, color:C.text3, fontSize:11 }}>· set at registration</span>
+      {/* Business type selector — changing this updates all tabs & forms below */}
+      <div style={{ marginBottom:20 }}>
+        <label style={{ display:'block', fontSize:12, fontWeight:700, color:C.teal, marginBottom:6, textTransform:'uppercase', letterSpacing:0.5 }}>
+          Business Type
+          <span style={{ fontWeight:400, color:C.text3, textTransform:'none', letterSpacing:0, marginLeft:6 }}>— select to update your profile form</span>
+        </label>
+        <div style={{ position:'relative', maxWidth:340 }}>
+          <svg
+            width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={C.teal}
+            strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+            aria-hidden="true"
+            style={{ position:'absolute', left:12, top:'50%', transform:'translateY(-50%)', pointerEvents:'none' }}
+          >
+            <rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16"/>
+          </svg>
+          <select
+            value={bizType}
+            onChange={e => { setBizType(e.target.value as BizType); setTab('profile') }}
+            style={{
+              ...SEL,
+              paddingLeft: 36,
+              fontWeight: 700,
+              color: C.teal,
+              border: `2px solid ${C.goldB}`,
+              background: C.goldBg,
+            }}
+          >
+            <option value="goods">Goods / Shop — sell products online</option>
+            <option value="services">Services business — bookings &amp; gigs</option>
+            <option value="venues">Venues &amp; Hospitality — bookings &amp; events</option>
+          </select>
+        </div>
+        <div style={{ fontSize:11, color:C.text3, marginTop:5 }}>
+          Changing business type updates the tabs and fields shown below.
+        </div>
       </div>
 
       {/* Scrollable tabs */}
@@ -629,10 +655,14 @@ export default function EditProfilePage() {
 
           {products.map((p) => (
             <div key={p.id} style={{ marginBottom:10, border:`1.5px solid ${C.border}`, borderRadius:12, background:C.white, overflow:'hidden' }}>
-              {/* Collapsed row */}
-              <div style={{ display:'flex', alignItems:'center', gap:12, padding:'12px 14px' }}>
-                {/* Thumbnail */}
-                <div style={{ width:48, height:48, borderRadius:8, overflow:'hidden', flexShrink:0, background:C.bg, border:`1px solid ${C.border}` }}>
+              {/* Collapsed row — fixed grid for symmetry */}
+              <div style={{
+                display:'grid',
+                gridTemplateColumns:'56px 1fr auto auto auto auto',
+                alignItems:'center', gap:10, padding:'11px 14px',
+              }}>
+                {/* Thumbnail — fixed 56×56 */}
+                <div style={{ width:56, height:56, borderRadius:8, overflow:'hidden', flexShrink:0, background:C.bg, border:`1px solid ${C.border}` }}>
                   {p.photos[0]
                     ? <img src={p.photos[0]} alt="" style={{ width:'100%', height:'100%', objectFit:'cover' }} />
                     : <div style={{ width:'100%', height:'100%', display:'flex', alignItems:'center', justifyContent:'center' }}>
@@ -640,27 +670,33 @@ export default function EditProfilePage() {
                       </div>
                   }
                 </div>
-                <div style={{ flex:1, minWidth:0 }}>
-                  <div style={{ fontWeight:700, fontSize:13, color:C.text1 }}>{p.name || <span style={{ color:C.text3, fontStyle:'italic' }}>New product</span>}</div>
-                  <div style={{ fontSize:12, color:C.text2, marginTop:2 }}>
-                    {p.price && <>₹{p.price}</>}
-                    {p.discountPrice && <span style={{ textDecoration:'line-through', color:C.text3, marginLeft:6 }}>₹{p.discountPrice}</span>}
-                    {p.stockNum && <span style={{ color:C.text3, marginLeft:8 }}>{p.stockNum} in stock</span>}
+                {/* Name + price */}
+                <div style={{ minWidth:0 }}>
+                  <div style={{ fontWeight:700, fontSize:13, color:C.text1, whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>
+                    {p.name || <span style={{ color:C.text3, fontStyle:'italic' }}>New product</span>}
+                  </div>
+                  <div style={{ fontSize:12, color:C.text2, marginTop:2, display:'flex', gap:6, alignItems:'center', flexWrap:'wrap' }}>
+                    {p.price && <span style={{ fontWeight:700, color:C.teal }}>₹{p.price}</span>}
+                    {p.discountPrice && <span style={{ textDecoration:'line-through', color:C.text3 }}>₹{p.discountPrice}</span>}
+                    {p.stockNum && <span style={{ color:C.text3 }}>{p.stockNum} units</span>}
                   </div>
                 </div>
-                <div style={{ display:'flex', gap:6, alignItems:'center', flexShrink:0 }}>
+                {/* Toggle + label */}
+                <div style={{ display:'flex', alignItems:'center', gap:6 }}>
                   <Toggle on={p.active} onChange={v => updateProduct(p.id, { active:v })} />
-                  <span style={{ fontSize:11, color: p.active ? C.teal : C.text3, fontWeight:600, width:38 }}>{p.active ? 'Live' : 'Off'}</span>
-                  <button onClick={() => updateProduct(p.id, { expanded:!p.expanded })} style={{
-                    padding:'6px 12px', borderRadius:7, border:`1.5px solid ${C.border}`,
-                    background: p.expanded ? C.teal : C.white,
-                    color: p.expanded ? C.gold : C.text2,
-                    cursor:'pointer', fontSize:12, fontWeight:600,
-                  }}>{p.expanded ? 'Close' : 'Edit'}</button>
-                  <button onClick={() => removeProduct(p.id)} style={{ padding:'6px 8px', borderRadius:7, border:'1px solid #fca5a5', background:'#fff5f5', color:C.error, cursor:'pointer' }}>
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg>
-                  </button>
+                  <span style={{ fontSize:11, color: p.active ? C.teal : C.text3, fontWeight:600, minWidth:30 }}>{p.active ? 'Live' : 'Off'}</span>
                 </div>
+                {/* Edit button */}
+                <button onClick={() => updateProduct(p.id, { expanded:!p.expanded })} style={{
+                  padding:'6px 14px', borderRadius:7, border:`1.5px solid ${C.border}`,
+                  background: p.expanded ? C.teal : C.white,
+                  color: p.expanded ? C.gold : C.text2,
+                  cursor:'pointer', fontSize:12, fontWeight:600, whiteSpace:'nowrap',
+                }}>{p.expanded ? 'Close' : 'Edit'}</button>
+                {/* Delete button */}
+                <button onClick={() => removeProduct(p.id)} style={{ padding:'6px 10px', borderRadius:7, border:'1px solid #fca5a5', background:'#fff5f5', color:C.error, cursor:'pointer', flexShrink:0 }}>
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg>
+                </button>
               </div>
 
               {/* Expanded edit form */}
