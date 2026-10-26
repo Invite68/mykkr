@@ -394,8 +394,8 @@ function CustomerOrders() {
 function CustomerExplore() {
   const actions = [
     {
-      label: 'Browse businesses', href: '/categories', desc: 'Shops, food, services near you',
-      icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>,
+      label: 'Shop Locals', href: '/shop-locals', desc: 'Groceries, food, fashion & more',
+      icon: <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>,
     },
     {
       label: 'Book a service', href: '/find-book', desc: 'Plumber, painter, venue, cab…',

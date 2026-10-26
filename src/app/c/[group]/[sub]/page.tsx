@@ -48,7 +48,9 @@ export default async function SubCategoryPage({ params }: { params: Params }) {
           { label: subLabel },
         ]}
       />
-      <h1 className="page-title">{subLabel}</h1>
+      <h1 className="page-title">
+        {subLabel.replace(/^[\p{Emoji_Presentation}\p{Extended_Pictographic}‍️⃣·\s]+/gu, '').trim()}
+      </h1>
       <p className="page-sub">
         {businesses.length} listed in Kurukshetra
       </p>

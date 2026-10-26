@@ -5,6 +5,7 @@ import Breadcrumbs from '@/components/ui/Breadcrumbs'
 import { BusinessGrid } from '@/components/business/BusinessCard'
 import { CATEGORY_GROUPS } from '@/data/categories'
 import { BUSINESSES } from '@/data/businesses'
+import { getGroupIcon } from '@/data/categoryIcons'
 
 type Params = Promise<{ group: string }>
 
@@ -26,11 +27,17 @@ export default async function GroupPage({ params }: { params: Params }) {
   if (!group) notFound()
 
   const allInGroup = BUSINESSES.filter((b) => b.cat === slug)
+  const GroupIcon = getGroupIcon(slug)
 
   return (
     <div className="container">
       <Breadcrumbs items={[{ href: '/categories', label: 'Categories' }, { label: group.label }]} />
-      <h1 className="page-title">{group.icon} {group.label}</h1>
+      <h1 className="page-title" style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+        <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 36, height: 36, borderRadius: 10, background: 'rgba(18,52,59,.1)', flexShrink: 0 }}>
+          <GroupIcon size={20} strokeWidth={1.8} color="#12343b" />
+        </span>
+        {group.label}
+      </h1>
 
       {/* Sub-sections per subcategory */}
       {group.subcategories.slice(1).map((sub) => {
