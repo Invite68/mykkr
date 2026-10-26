@@ -413,7 +413,7 @@ export default function JobBoard() {
         <div style={{ color: 'var(--text-3)', marginBottom: 8 }}><svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>
         <p style={{ fontWeight: 700, marginTop: 8 }}>Sign in to see jobs</p>
         <p className="muted">Please sign in with your driver account to view and accept jobs.</p>
-        <a href="/login?role=driver" className="btn btn-primary" style={{ marginTop: 16, display: 'inline-block' }}>
+        <a href="/register?role=driver" className="btn btn-primary" style={{ marginTop: 16, display: 'inline-block' }}>
           Sign in
         </a>
       </div>

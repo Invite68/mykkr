@@ -116,15 +116,15 @@ export default function DashboardIndex() {
       </div>
 
       {/* Admin link */}
-      <div className="panel" style={{ borderTop: '4px solid #7c3aed' }}>
+      <div className="panel" style={{ borderTop: '4px solid #12343b' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 8 }}>
-          <div style={{ color: '#7c3aed' }}><IconAdmin /></div>
-          <div style={{ fontWeight: 700, fontSize: 15, color: '#7c3aed' }}>Platform Admin</div>
+          <div style={{ color: '#12343b' }}><IconAdmin /></div>
+          <div style={{ fontWeight: 700, fontSize: 15, color: '#12343b' }}>Platform Admin</div>
         </div>
         <p className="muted" style={{ fontSize: 13, marginBottom: 12 }}>
           Platform-wide analytics, business KYC approvals, subscription revenue. Admins are invited only — not self-registered.
         </p>
-        <Link href="/dashboard/admin" className="btn btn-outline btn-sm" style={{ borderColor: '#7c3aed', color: '#7c3aed' }}>
+        <Link href="/dashboard/admin" className="btn btn-outline btn-sm">
           View Admin Dashboard
         </Link>
       </div>

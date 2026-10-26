@@ -162,7 +162,7 @@ function StatusBadge({ status }: { status: string }) {
   const map: Record<string, string> = {
     'Delivered': '#16a34a',
     'Out for delivery': '#0ea5e9',
-    'Confirmed': '#7c3aed',
+    'Confirmed': '#0e7490',
     'Ready for pickup': '#d97706',
     'Pending': '#6b7280',
   }
@@ -323,8 +323,8 @@ function BusinessDash() {
         <h2 className="panel-title">Manage your business</h2>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: 10 }}>
           {[
-            { label: 'Edit profile',     href: '/register?role=business',        icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg> },
-            { label: 'Add a listing',    href: '/register?role=business',        icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> },
+            { label: 'Edit profile',     href: '/dashboard/business/profile',    icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg> },
+            { label: 'Add a listing',    href: '/dashboard/business/services',   icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> },
             { label: 'View public page', href: '/business/sharma-kirana-store',  icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg> },
             { label: 'Your shop',        href: '/shop/sharma-kirana-store',      icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg> },
             { label: 'Post a task/gig',  href: '/post',                          icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/></svg> },
@@ -349,13 +349,13 @@ function CustomerOrders() {
       id: '#KKR-7Q2M', what: 'Groceries (3 items)', biz: 'Sharma Kirana Store',
       status: 'Out for delivery', statusColor: '#0ea5e9',
       detail: 'Driver Raju is 2 km away · Est. 15 min',
-      showTrack: true,
+      showTrack: true, canEdit: false, canCancel: false,
     },
     {
       id: '#KKR-3HXP', what: 'House painting — tomorrow 10am', biz: 'Rangoli Painters',
-      status: 'Confirmed', statusColor: '#7c3aed',
+      status: 'Confirmed', statusColor: '#0e7490',
       detail: 'Painter will arrive at your address at 10:00 AM',
-      showTrack: false,
+      showTrack: false, canEdit: true, canCancel: true,
     },
   ]
   return (
@@ -376,13 +376,27 @@ function CustomerOrders() {
               border: `1px solid ${o.statusColor}44`, whiteSpace: 'nowrap', flexShrink: 0, marginLeft: 8,
             }}>{o.status}</span>
           </div>
-          <div className="muted" style={{ fontSize: 12, marginBottom: o.showTrack ? 10 : 0 }}>{o.detail}</div>
-          {o.showTrack && (
-            <Link href="/track/KKR-7Q2M" className="btn btn-outline btn-sm" style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 12 }}>
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></svg>
-              Live track
-            </Link>
-          )}
+          <div className="muted" style={{ fontSize: 12, marginBottom: 10 }}>{o.detail}</div>
+          <div style={{ display: 'flex', gap: 7, flexWrap: 'wrap' }}>
+            {o.showTrack && (
+              <Link href="/track/KKR-7Q2M" className="btn btn-outline btn-sm" style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 12 }}>
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></svg>
+                Live track
+              </Link>
+            )}
+            {o.canEdit && (
+              <button className="btn btn-outline btn-sm" style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 12 }}>
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                Edit order
+              </button>
+            )}
+            {o.canCancel && (
+              <button className="btn btn-outline btn-sm" style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 12, color: '#dc2626', borderColor: '#fca5a5' }}>
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+                Cancel
+              </button>
+            )}
+          </div>
         </div>
       ))}
       <p className="muted" style={{ fontSize: 11 }}>Sample data — your real orders appear here once signed in.</p>
@@ -434,9 +448,9 @@ function CustomerHistory() {
       <Table
         head={['Business', 'What', 'Amount', 'Status', '']}
         rows={[
-          ['Gupta Sweet House',   'Mithai 1 kg box',     '₹350',   <StatusBadge key="d1" status="Delivered" />, <Link key="r1" href="/categories" className="btn btn-outline btn-sm" style={{ fontSize: 11 }}>Reorder</Link>],
-          ['Sharma Kirana Store', 'Monthly groceries',   '₹1,240', <StatusBadge key="d2" status="Delivered" />, <Link key="r2" href="/categories" className="btn btn-outline btn-sm" style={{ fontSize: 11 }}>Reorder</Link>],
-          ['City Plumbers',       'Tap repair — 14 Oct', '₹600',   <StatusBadge key="d3" status="Delivered" />, <Link key="r3" href="/categories" className="btn btn-outline btn-sm" style={{ fontSize: 11 }}>Book again</Link>],
+          ['Gupta Sweet House',   'Mithai 1 kg box',     '₹350',   <StatusBadge key="d1" status="Delivered" />, <Link key="r1" href="/shop-locals" className="btn btn-outline btn-sm" style={{ fontSize: 11 }}>Reorder</Link>],
+          ['Sharma Kirana Store', 'Monthly groceries',   '₹1,240', <StatusBadge key="d2" status="Delivered" />, <Link key="r2" href="/shop-locals" className="btn btn-outline btn-sm" style={{ fontSize: 11 }}>Reorder</Link>],
+          ['City Plumbers',       'Tap repair — 14 Oct', '₹600',   <StatusBadge key="d3" status="Delivered" />, <Link key="r3" href="/find-book" className="btn btn-outline btn-sm" style={{ fontSize: 11 }}>Book again</Link>],
         ]}
       />
       <p className="muted" style={{ fontSize: 11, marginTop: 8 }}>Sample data — real history loads once signed in.</p>
