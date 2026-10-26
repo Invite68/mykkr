@@ -224,7 +224,7 @@ export default function BusinessPortalLayout({ children }: { children: React.Rea
           display: flex; min-height: 100vh;
           background: #0e2028;
         }
-        .biz-portal-main { flex: 1; min-width: 0; overflow-x: hidden; }
+        .biz-portal-main { flex: 1; min-width: 0; overflow-x: hidden; background: #ffffff; }
         .biz-portal-content {
           max-width: 860px; margin: 0 auto;
           padding: 28px 24px 120px;

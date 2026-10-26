@@ -821,13 +821,13 @@ img, svg { max-width: 100%; display: block; }
 .biz-actions { display: flex; gap: 6px; margin-top: auto; }
 .biz-actions > * { flex: 1; text-align: center; }
 
-/* WhatsApp button */
+/* WhatsApp button — teal brand colour */
 .btn-whatsapp {
-  background: #25D366; color: #fff;
-  border: none;
+  background: #12343b; color: #e1b382;
+  border: 2px solid #12343b;
   display: inline-flex; align-items: center; justify-content: center; gap: 5px;
 }
-.btn-whatsapp:hover:not(:disabled) { background: #1ebe5c; }
+.btn-whatsapp:hover:not(:disabled) { background: #2d545e; border-color: #2d545e; }
 
 /* ══════════════════════════════════════════════════════════════════════════
    BUTTONS
