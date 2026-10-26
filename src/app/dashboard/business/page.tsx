@@ -217,7 +217,7 @@ export default function BusinessHome() {
                   marginBottom: 4,
                 }}>{day}</div>
                 {h.open ? (
-                  <div style={{ fontSize: 9, color: isToday ? C.goldDim : C.text3, lineHeight: 1.5, letterSpacing: 0 }}>
+                  <div style={{ fontSize: 9, color: isToday ? '#c89666' : C.text3, lineHeight: 1.5, letterSpacing: 0 }}>
                     {h.start}<br/>–<br/>{h.end}
                   </div>
                 ) : (
