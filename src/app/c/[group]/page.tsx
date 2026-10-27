@@ -39,26 +39,10 @@ export default async function GroupPage({ params }: { params: Params }) {
         {group.label}
       </h1>
 
-      {/* Sub-sections per subcategory */}
-      {group.subcategories.slice(1).map((sub) => {
-        const biz = allInGroup.filter((b) => b.sub === sub)
-        if (!biz.length) return null
-        return (
-          <section className="sec" key={sub} aria-labelledby={`s-${sub}`}>
-            <div className="sec-head">
-              <h2 className="sec-title" id={`s-${sub}`}>{sub}</h2>
-            </div>
-            <BusinessGrid businesses={biz} />
-          </section>
-        )
-      })}
-
-      {/* Show all if no sub-category breakdown has results */}
-      {allInGroup.length === 0 && (
-        <section className="sec">
-          <BusinessGrid businesses={[]} />
-        </section>
-      )}
+      {/* All businesses in this group — flat 2-col grid, sub shown on each card */}
+      <section className="sec">
+        <BusinessGrid businesses={allInGroup} />
+      </section>
 
       <div className="banner banner-ok" style={{ marginTop: 12 }}>
         <span aria-hidden="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></span>

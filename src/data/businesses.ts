@@ -253,6 +253,110 @@ export const BUSINESSES: Business[] = [
     listings: [{ name: 'AC service (1 ton)', price: '₹600' }, { name: 'Gas refill', price: '₹1,800' }],
   },
 
+  // ── More Services ──
+  {
+    slug: 'deep-clean-pro', name: 'Deep Clean Pro', cat: 'services', sub: 'Domestic & Cleaning',
+    area: 'Model Town',
+    rating: 4.6, reviews: 18, priceRange: '₹799–₹3,999', verified: false, available: 'Available',
+    description: 'Sofa cleaning, carpet dry-wash and post-construction cleanup for homes and offices.',
+    hours: '8:00 AM – 7:00 PM', delivery: [],
+    listings: [{ name: 'Sofa cleaning (3-seater)', price: '₹999' }, { name: 'Post-construction clean', price: '₹3,500' }],
+  },
+  {
+    slug: 'singh-electricals', name: 'Singh Electricals', cat: 'services', sub: 'Electrical',
+    area: 'Kalyan Nagar',
+    rating: 4.4, reviews: 22, priceRange: '₹150–₹2,000', verified: true, available: 'Available',
+    description: 'Full home wiring, switchboard upgrades, ceiling fan fitting and solar panel assistance.',
+    hours: '8:00 AM – 8:00 PM', delivery: [],
+    listings: [{ name: 'Switchboard repair', price: '₹350' }, { name: 'New wiring per room', price: '₹2,000' }],
+  },
+  {
+    slug: 'pawan-plumbers', name: 'Pawan Plumbers', cat: 'services', sub: 'Plumbing',
+    area: 'Sector 13',
+    rating: 4.5, reviews: 19, priceRange: '₹200–₹2,500', verified: true, available: 'Available',
+    description: 'Pipe leaks, geyser installation, flush tank repair and bathroom fittings at best rates.',
+    hours: '7:00 AM – 9:00 PM', delivery: [],
+    listings: [{ name: 'Pipe leak fix', price: '₹200' }, { name: 'Geyser installation', price: '₹800' }],
+  },
+  {
+    slug: 'royal-mehendi-studio', name: 'Royal Mehendi Studio', cat: 'services', sub: 'Artistry · Mehendi',
+    area: 'Dara Kalan',
+    rating: 4.7, reviews: 34, priceRange: '₹400–₹4,000', verified: false, available: 'Available',
+    description: 'Arabic, Rajasthani and Indo-western mehendi for bridal and festive occasions.',
+    hours: '10:00 AM – 9:00 PM', delivery: [],
+    listings: [{ name: 'Bridal full (Arabic)', price: '₹3,000' }, { name: 'Festival hands', price: '₹400' }],
+  },
+  {
+    slug: 'kwik-handyman', name: 'Kwik Handyman Services', cat: 'services', sub: 'Other Handyman',
+    area: 'Sector 7',
+    rating: 4.2, reviews: 11, priceRange: '₹199–₹1,500', verified: false, available: 'Available',
+    description: 'Quick fixes — CCTV setup, shelving, assembly, water purifier service.',
+    hours: '9:00 AM – 7:00 PM', delivery: [],
+    listings: [{ name: 'CCTV installation (2 cam)', price: '₹1,200' }, { name: 'Water purifier service', price: '₹499' }],
+  },
+
+  // ── More Shopping ──
+  {
+    slug: 'kkr-fresh-fruits', name: 'KKR Fresh Fruits', cat: 'shopping', sub: 'Grocery & Supplies',
+    area: 'Pipli',
+    rating: 4.4, reviews: 16, priceRange: '₹20–₹300/kg', verified: false, available: 'Open now',
+    description: 'Seasonal fruits, dry fruits and imported varieties. Bulk orders for events.',
+    hours: '7:00 AM – 9:00 PM', delivery: ['driver', 'pickup'],
+    listings: [{ name: 'Apple box (10 kg)', price: '₹1,200' }, { name: 'Mango (Alphonso 1 kg)', price: '₹180' }],
+  },
+  {
+    slug: 'book-corner-kkr', name: 'Book Corner KKR', cat: 'shopping', sub: 'Stationery',
+    area: 'Thanesar',
+    rating: 4.7, reviews: 29, priceRange: '₹50–₹1,500', verified: false,
+    description: 'School textbooks, competitive exam guides and drawing supplies for students.',
+    hours: '9:00 AM – 8:00 PM', delivery: ['pickup'],
+    listings: [{ name: 'CBSE class 10 set', price: '₹850' }, { name: 'Drawing kit', price: '₹350' }],
+  },
+  {
+    slug: 'trend-fashion-hub', name: 'Trend Fashion Hub', cat: 'shopping', sub: 'Fashion & Clothing',
+    area: 'Gandhi Nagar',
+    rating: 4.4, reviews: 27, priceRange: '₹199–₹3,500', verified: false,
+    description: 'Latest lehengas, sarees and fusion wear. Tailoring available on-site.',
+    hours: '10:30 AM – 9:00 PM', delivery: ['pickup'],
+    listings: [{ name: 'Casual kurti', price: '₹699' }, { name: 'Lehenga set', price: '₹2,500' }],
+  },
+
+  // ── More Food ──
+  {
+    slug: 'kkr-dhaba-junction', name: 'KKR Dhaba Junction', cat: 'food', sub: 'Restaurant',
+    area: 'Pehowa Chowk',
+    rating: 4.5, reviews: 87, priceRange: '₹80–₹300 per person', verified: true, available: 'Open now',
+    description: 'Highway dhaba style food — dal makhani, makki roti and lassi. Takeaway available.',
+    hours: '7:00 AM – 11:00 PM', delivery: ['pickup'],
+    listings: [{ name: 'Dal Makhani + roti', price: '₹120' }, { name: 'Lassi (large)', price: '₹60' }],
+  },
+  {
+    slug: 'amrit-ice-cream', name: 'Amrit Ice Cream', cat: 'food', sub: 'Sweets & Mithai',
+    area: 'Sector 5',
+    rating: 4.8, reviews: 55, priceRange: '₹30–₹350', verified: true, available: 'Open now',
+    description: 'Hand-churned kulfi, natural fruit ice creams and premium scoops. No preservatives.',
+    hours: '11:00 AM – 10:30 PM', delivery: ['self', 'pickup'],
+    listings: [{ name: 'Matka kulfi', price: '₹50' }, { name: 'Fruit ice cream (3 scoops)', price: '₹120' }],
+  },
+
+  // ── More Venues ──
+  {
+    slug: 'sunrise-hotel-kkr', name: 'Sunrise Hotel KKR', cat: 'venues', sub: 'Hotels & Resorts',
+    area: 'Thanesar',
+    rating: 4.1, reviews: 31, priceRange: '₹800–₹2,500/night', verified: false, available: 'Rooms free',
+    description: 'Budget-friendly AC rooms close to the railway station and main market.',
+    hours: '24 hours', delivery: [],
+    listings: [{ name: 'Standard room', price: '₹800/night' }, { name: 'Deluxe AC room', price: '₹1,500/night' }],
+  },
+  {
+    slug: 'shakti-marriage-hall', name: 'Shakti Marriage Hall', cat: 'venues', sub: 'Marriage Hall & Lawn',
+    area: 'Gandhi Nagar',
+    rating: 4.6, reviews: 23, priceRange: '₹25,000–₹1,20,000', verified: true, available: '5 dates open',
+    description: 'AC banquet hall for 400 guests with catering packages and decoration.',
+    hours: 'By appointment', delivery: [],
+    listings: [{ name: 'Hall only (day)', price: '₹25,000' }, { name: 'Hall + catering (200 pax)', price: '₹90,000' }],
+  },
+
   // ── Events ──
   {
     slug: 'beat-djs-kkr', name: 'Beat DJs KKR', cat: 'events', sub: 'DJs & Sound',
