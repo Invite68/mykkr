@@ -1,211 +1,285 @@
 'use client'
 
-import React from 'react'
+import React, { useState, useRef, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { useState } from 'react'
 
 /* ── Colour tokens ──────────────────────────────────────────────── */
 const C = {
   teal: '#12343b', gold: '#e1b382', border: '#e2e8f0',
-  bg: '#f1f5f9', surface: '#fff', muted: '#64748b',
-  danger: '#dc2626', green: '#0f766e',
+  bg: '#f0f4f8', surface: '#fff', muted: '#64748b',
+  danger: '#dc2626', green: '#0f766e', accent: '#1a4a54',
 }
 
 /* ── SVG Icons ──────────────────────────────────────────────────── */
 const Ic = {
-  Overview:      () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>,
-  Businesses:    () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>,
-  Customers:     () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>,
-  Drivers:       () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>,
-  Categories:    () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>,
-  Revenue:       () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>,
-  Subscriptions: () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>,
-  Fares:         () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>,
-  Media:         () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>,
-  SiteSettings:  () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>,
-  Audit:         () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>,
-  Activity:      () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>,
-  Shield:        () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>,
-  Menu:          () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>,
-  Close:         () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>,
+  Overview:      () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>,
+  Businesses:    () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>,
+  Customers:     () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>,
+  Drivers:       () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="1" y="3" width="15" height="13" rx="1"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>,
+  Categories:    () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>,
+  Revenue:       () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>,
+  Subscriptions: () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>,
+  Fares:         () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>,
+  Media:         () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>,
+  SiteSettings:  () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>,
+  Audit:         () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>,
+  Activity:      () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>,
+  Shield:        () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>,
+  Bell:          () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>,
   Logout:        () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>,
-  Chevron:       () => <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><polyline points="9 18 15 12 9 6"/></svg>,
+  ChevL:         () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><polyline points="15 18 9 12 15 6"/></svg>,
+  ChevR:         () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><polyline points="9 18 15 12 9 6"/></svg>,
 }
 
-/* ── Nav structure ──────────────────────────────────────────────── */
+/* ── Nav items ──────────────────────────────────────────────────── */
 const NAV = [
-  { href: '/admin',               label: 'Overview',       Icon: Ic.Overview,      exact: true },
-  { href: '/admin/businesses',    label: 'Businesses',     Icon: Ic.Businesses },
-  { href: '/admin/customers',     label: 'Customers',      Icon: Ic.Customers },
-  { href: '/admin/drivers',       label: 'Drivers & Rides',Icon: Ic.Drivers },
-  { href: '/admin/categories',    label: 'Categories',     Icon: Ic.Categories },
-  {
-    label: 'Money', Icon: Ic.Revenue,
-    children: [
-      { href: '/admin/subscriptions', label: 'Subscriptions' },
-      { href: '/admin/revenue',       label: 'Revenue & Analytics' },
-      { href: '/admin/fares',         label: 'Fares & Pricing' },
-    ],
-  },
-  { href: '/admin/media',         label: 'Media & Ads',   Icon: Ic.Media },
-  { href: '/admin/site',          label: 'Site Settings',  Icon: Ic.SiteSettings },
-  { href: '/admin/activity',      label: 'Activity Feed',  Icon: Ic.Activity },
-  { href: '/admin/audit',         label: 'Audit Log',      Icon: Ic.Audit },
+  { href: '/admin',               label: 'Overview',        Icon: Ic.Overview,      exact: true },
+  { href: '/admin/businesses',    label: 'Businesses',      Icon: Ic.Businesses },
+  { href: '/admin/customers',     label: 'Customers',       Icon: Ic.Customers },
+  { href: '/admin/drivers',       label: 'Drivers',         Icon: Ic.Drivers },
+  { href: '/admin/subscriptions', label: 'Subscriptions',   Icon: Ic.Subscriptions },
+  { href: '/admin/revenue',       label: 'Revenue',         Icon: Ic.Revenue },
+  { href: '/admin/fares',         label: 'Fares',           Icon: Ic.Fares },
+  { href: '/admin/media',         label: 'Media & Ads',     Icon: Ic.Media },
+  { href: '/admin/categories',    label: 'Categories',      Icon: Ic.Categories },
+  { href: '/admin/site',          label: 'Site Settings',   Icon: Ic.SiteSettings },
+  { href: '/admin/activity',      label: 'Activity',        Icon: Ic.Activity },
+  { href: '/admin/audit',         label: 'Audit Log',       Icon: Ic.Audit },
 ]
+
+/* ── Page title map ─────────────────────────────────────────────── */
+const PAGE_TITLE: Record<string, string> = {
+  '/admin': 'Overview',
+  '/admin/businesses': 'Businesses',
+  '/admin/customers': 'Customers',
+  '/admin/drivers': 'Drivers & Rides',
+  '/admin/subscriptions': 'Subscriptions',
+  '/admin/revenue': 'Revenue & Analytics',
+  '/admin/fares': 'Fares & Pricing',
+  '/admin/media': 'Media & Ads',
+  '/admin/categories': 'Categories',
+  '/admin/site': 'Site Settings',
+  '/admin/activity': 'Activity Feed',
+  '/admin/audit': 'Audit Log',
+  '/admin/settings': 'Platform Settings',
+}
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
-  const [sideOpen, setSideOpen] = useState(false)
-  const [moneyOpen, setMoneyOpen] = useState(
-    pathname.startsWith('/admin/subscriptions') ||
-    pathname.startsWith('/admin/revenue') ||
-    pathname.startsWith('/admin/fares')
-  )
+  const scrollRef = useRef<HTMLDivElement>(null)
+  const activeTabRef = useRef<HTMLAnchorElement>(null)
+  const [canScrollLeft, setCanScrollLeft] = useState(false)
+  const [canScrollRight, setCanScrollRight] = useState(false)
 
   function isActive(href: string, exact?: boolean) {
     return exact ? pathname === href : pathname === href || pathname.startsWith(href + '/')
   }
 
-  const SidebarContent = () => (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-      {/* Logo */}
-      <div style={{ padding: '18px 16px 14px', borderBottom: `1px solid ${C.border}` }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 32, height: 32, borderRadius: 8, background: C.teal, color: '#fff', flexShrink: 0 }}>
-            <Ic.Shield />
-          </span>
-          <div>
-            <div style={{ fontWeight: 800, fontSize: 14, color: C.teal, lineHeight: 1.1 }}>My KKR</div>
-            <div style={{ fontSize: 10, color: C.muted, fontWeight: 600, textTransform: 'uppercase', letterSpacing: .5 }}>Admin Panel</div>
-          </div>
-        </div>
-      </div>
+  // Get current page title
+  const currentTitle = Object.entries(PAGE_TITLE).find(([key]) =>
+    key === '/admin' ? pathname === '/admin' : pathname === key || pathname.startsWith(key + '/')
+  )?.[1] ?? 'Admin'
 
-      {/* Nav */}
-      <nav style={{ flex: 1, padding: '10px 8px', overflowY: 'auto' }}>
-        {NAV.map((item) => {
-          // Group item with children
-          if ('children' in item && item.children) {
-            const groupActive = item.children.some(c => pathname.startsWith(c.href))
-            return (
-              <div key={item.label}>
-                <button
-                  onClick={() => setMoneyOpen(v => !v)}
-                  style={{
-                    display: 'flex', alignItems: 'center', gap: 10, width: '100%',
-                    padding: '9px 10px', borderRadius: 7, marginBottom: 2,
-                    background: groupActive ? 'rgba(18,52,59,.08)' : 'transparent',
-                    color: groupActive ? C.teal : C.muted,
-                    fontWeight: groupActive ? 700 : 500, fontSize: 13.5,
-                    border: 'none', cursor: 'pointer', textAlign: 'left',
-                  }}
-                >
-                  <span style={{ opacity: groupActive ? 1 : .65 }}><item.Icon /></span>
-                  <span style={{ flex: 1 }}>{item.label}</span>
-                  <span style={{ transform: moneyOpen ? 'rotate(90deg)' : 'none', transition: 'transform .15s' }}><Ic.Chevron /></span>
-                </button>
-                {moneyOpen && (
-                  <div style={{ marginLeft: 22, marginBottom: 4 }}>
-                    {item.children.map(child => {
-                      const ca = pathname === child.href || pathname.startsWith(child.href + '/')
-                      return (
-                        <Link key={child.href} href={child.href} onClick={() => setSideOpen(false)} style={{
-                          display: 'flex', alignItems: 'center', gap: 8, padding: '7px 10px', borderRadius: 6, marginBottom: 1,
-                          color: ca ? C.teal : C.muted, background: ca ? 'rgba(18,52,59,.07)' : 'transparent',
-                          fontWeight: ca ? 700 : 500, fontSize: 13, textDecoration: 'none',
-                        }}>
-                          <span style={{ width: 4, height: 4, borderRadius: '50%', background: ca ? C.teal : '#cbd5e1', flexShrink: 0 }} />
-                          {child.label}
-                        </Link>
-                      )
-                    })}
-                  </div>
-                )}
-              </div>
-            )
-          }
+  // Update scroll indicators
+  function updateScrollIndicators() {
+    const el = scrollRef.current
+    if (!el) return
+    setCanScrollLeft(el.scrollLeft > 4)
+    setCanScrollRight(el.scrollLeft + el.clientWidth < el.scrollWidth - 4)
+  }
 
-          // Regular nav item
-          const navItem = item as { href: string; label: string; Icon: () => React.ReactElement; exact?: boolean }
-          const active = isActive(navItem.href, navItem.exact)
-          return (
-            <Link
-              key={navItem.href}
-              href={navItem.href}
-              onClick={() => setSideOpen(false)}
-              style={{
-                display: 'flex', alignItems: 'center', gap: 10,
-                padding: '9px 10px', borderRadius: 7, marginBottom: 2,
-                color: active ? C.teal : C.muted,
-                background: active ? 'rgba(18,52,59,.09)' : 'transparent',
-                fontWeight: active ? 700 : 500, fontSize: 13.5,
-                textDecoration: 'none', transition: 'background .1s, color .1s',
-              }}
-            >
-              <span style={{ opacity: active ? 1 : .65 }}><navItem.Icon /></span>
-              <span style={{ flex: 1 }}>{navItem.label}</span>
-              {active && <span style={{ width: 6, height: 6, borderRadius: '50%', background: C.teal, flexShrink: 0 }} />}
-            </Link>
-          )
-        })}
-      </nav>
+  // Scroll active tab into view on mount / route change
+  useEffect(() => {
+    setTimeout(() => {
+      activeTabRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' })
+      updateScrollIndicators()
+    }, 80)
+  }, [pathname])
 
-      {/* Footer */}
-      <div style={{ padding: '10px 8px 14px', borderTop: `1px solid ${C.border}` }}>
-        <div style={{ fontSize: 11, color: C.muted, paddingLeft: 10, marginBottom: 6 }}>admin@mykkr.in</div>
-        <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '7px 10px', borderRadius: 7, color: C.danger, fontSize: 13, fontWeight: 600, textDecoration: 'none', background: 'rgba(220,38,38,.06)' }}>
-          <Ic.Logout /> Exit to site
-        </Link>
-      </div>
-    </div>
-  )
+  function scrollTabs(dir: 'left' | 'right') {
+    scrollRef.current?.scrollBy({ left: dir === 'left' ? -200 : 200, behavior: 'smooth' })
+  }
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', background: C.bg, fontFamily: 'inherit' }}>
-      {/* Desktop sidebar */}
-      <aside
-        className="admin-sidebar"
-        style={{ width: 220, background: C.surface, borderRight: `1px solid ${C.border}`, position: 'sticky', top: 0, height: '100vh', flexShrink: 0, display: 'none', flexDirection: 'column' }}
-      >
-        <SidebarContent />
-      </aside>
+    <div style={{ minHeight: '100vh', background: C.bg, fontFamily: 'inherit' }}>
 
-      {/* Mobile overlay */}
-      {sideOpen && (
-        <div onClick={() => setSideOpen(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.45)', zIndex: 99 }} />
-      )}
-      <aside style={{
-        position: 'fixed', top: 0, left: sideOpen ? 0 : -240, width: 240,
-        height: '100vh', background: C.surface, zIndex: 100,
-        boxShadow: sideOpen ? '4px 0 28px rgba(0,0,0,.18)' : 'none',
-        transition: 'left .2s ease', display: 'flex', flexDirection: 'column',
+      {/* ── TOP HEADER ─────────────────────────────────────────── */}
+      <header style={{
+        background: C.teal,
+        position: 'sticky', top: 0, zIndex: 100,
+        boxShadow: '0 2px 20px rgba(0,0,0,.25)',
       }}>
-        <SidebarContent />
-      </aside>
+        {/* Brand row */}
+        <div style={{
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          padding: '0 20px', height: 58,
+        }}>
+          {/* Left: logo + name */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <div style={{
+              width: 36, height: 36, borderRadius: 10,
+              background: C.gold, display: 'flex', alignItems: 'center', justifyContent: 'center',
+              color: C.teal, fontWeight: 900, fontSize: 15, flexShrink: 0,
+              boxShadow: '0 2px 8px rgba(225,179,130,.4)',
+            }}>
+              MK
+            </div>
+            <div>
+              <div style={{ color: '#fff', fontWeight: 900, fontSize: 15, lineHeight: 1.15, letterSpacing: -.2 }}>
+                My KKR
+              </div>
+              <div style={{ color: 'rgba(255,255,255,.55)', fontSize: 10, fontWeight: 600, textTransform: 'uppercase', letterSpacing: .8 }}>
+                Admin Platform
+              </div>
+            </div>
 
-      {/* Main content */}
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
-        {/* Top bar */}
-        <header style={{ background: C.teal, color: '#fff', padding: '0 20px', height: 50, display: 'flex', alignItems: 'center', gap: 12, position: 'sticky', top: 0, zIndex: 50, flexShrink: 0 }}>
-          <button onClick={() => setSideOpen(s => !s)} style={{ background: 'none', border: 'none', color: '#fff', cursor: 'pointer', padding: 4, display: 'flex', alignItems: 'center' }} aria-label="Toggle menu">
-            {sideOpen ? <Ic.Close /> : <Ic.Menu />}
-          </button>
-          <span style={{ fontWeight: 800, fontSize: 14 }}>Admin Control Panel</span>
-          <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 10 }}>
-            <span style={{ background: 'rgba(225,179,130,.3)', color: C.gold, padding: '2px 10px', borderRadius: 99, fontSize: 11, fontWeight: 800, border: '1px solid rgba(225,179,130,.5)' }}>DEMO MODE</span>
+            {/* Divider */}
+            <div style={{ width: 1, height: 28, background: 'rgba(255,255,255,.15)', margin: '0 4px' }} />
+
+            {/* Current page breadcrumb */}
+            <div style={{ color: C.gold, fontWeight: 700, fontSize: 14 }}>{currentTitle}</div>
           </div>
-        </header>
 
-        <main style={{ flex: 1, padding: '20px', maxWidth: 1400, width: '100%' }}>
-          {children}
-        </main>
-      </div>
+          {/* Right: actions */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            {/* Demo badge */}
+            <span style={{
+              background: 'rgba(225,179,130,.18)', color: C.gold,
+              padding: '3px 10px', borderRadius: 99, fontSize: 10, fontWeight: 800,
+              border: '1px solid rgba(225,179,130,.35)', letterSpacing: .6, textTransform: 'uppercase',
+            }}>
+              Demo
+            </span>
+
+            {/* Bell */}
+            <button style={{
+              position: 'relative', background: 'rgba(255,255,255,.1)', border: 'none',
+              borderRadius: 8, width: 36, height: 36, display: 'flex', alignItems: 'center',
+              justifyContent: 'center', cursor: 'pointer', color: 'rgba(255,255,255,.85)',
+            }}>
+              <Ic.Bell />
+              <span style={{
+                position: 'absolute', top: 7, right: 7, width: 7, height: 7,
+                borderRadius: '50%', background: '#f97316', border: '1.5px solid ' + C.teal,
+              }} />
+            </button>
+
+            {/* Admin avatar */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'rgba(255,255,255,.1)', borderRadius: 10, padding: '5px 10px 5px 6px', cursor: 'pointer' }}>
+              <div style={{
+                width: 26, height: 26, borderRadius: 7,
+                background: C.gold, color: C.teal,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                fontWeight: 900, fontSize: 11,
+              }}>
+                A
+              </div>
+              <div>
+                <div style={{ color: '#fff', fontSize: 11.5, fontWeight: 700, lineHeight: 1 }}>Admin</div>
+                <div style={{ color: 'rgba(255,255,255,.45)', fontSize: 10, marginTop: 1 }}>mykkr.in</div>
+              </div>
+            </div>
+
+            {/* Exit to site */}
+            <Link href="/" style={{
+              display: 'flex', alignItems: 'center', gap: 6,
+              background: 'rgba(220,38,38,.2)', border: '1px solid rgba(220,38,38,.4)',
+              borderRadius: 8, padding: '6px 12px', color: '#fca5a5',
+              fontSize: 12, fontWeight: 700, textDecoration: 'none',
+              whiteSpace: 'nowrap',
+            }}>
+              <Ic.Logout />
+              <span className="hide-xs">Exit</span>
+            </Link>
+          </div>
+        </div>
+
+        {/* ── NAV TABS ROW ──────────────────────────────────────── */}
+        <div style={{
+          position: 'relative',
+          borderTop: '1px solid rgba(255,255,255,.08)',
+        }}>
+          {/* Scroll left arrow */}
+          {canScrollLeft && (
+            <button
+              onClick={() => scrollTabs('left')}
+              style={{
+                position: 'absolute', left: 0, top: 0, bottom: 0, zIndex: 2,
+                background: `linear-gradient(to right, ${C.teal} 60%, transparent)`,
+                border: 'none', cursor: 'pointer', color: 'rgba(255,255,255,.7)',
+                padding: '0 12px 0 8px', display: 'flex', alignItems: 'center',
+              }}
+            >
+              <Ic.ChevL />
+            </button>
+          )}
+
+          {/* Scrollable tab strip */}
+          <div
+            ref={scrollRef}
+            onScroll={updateScrollIndicators}
+            style={{
+              display: 'flex', overflowX: 'auto', scrollbarWidth: 'none',
+              padding: '0 16px',
+              msOverflowStyle: 'none',
+            }}
+          >
+            {NAV.map(item => {
+              const active = isActive(item.href, item.exact)
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  ref={active ? activeTabRef : null}
+                  style={{
+                    display: 'flex', alignItems: 'center', gap: 7,
+                    padding: '10px 16px', whiteSpace: 'nowrap', flexShrink: 0,
+                    color: active ? '#fff' : 'rgba(255,255,255,.55)',
+                    fontWeight: active ? 700 : 500, fontSize: 13,
+                    textDecoration: 'none', position: 'relative',
+                    transition: 'color .15s',
+                    borderBottom: active ? `2.5px solid ${C.gold}` : '2.5px solid transparent',
+                    paddingBottom: active ? 9 : 10,
+                    background: active ? 'rgba(255,255,255,.06)' : 'transparent',
+                  }}
+                >
+                  <span style={{ opacity: active ? 1 : .7, transition: 'opacity .15s' }}>
+                    <item.Icon />
+                  </span>
+                  {item.label}
+                </Link>
+              )
+            })}
+          </div>
+
+          {/* Scroll right arrow */}
+          {canScrollRight && (
+            <button
+              onClick={() => scrollTabs('right')}
+              style={{
+                position: 'absolute', right: 0, top: 0, bottom: 0, zIndex: 2,
+                background: `linear-gradient(to left, ${C.teal} 60%, transparent)`,
+                border: 'none', cursor: 'pointer', color: 'rgba(255,255,255,.7)',
+                padding: '0 8px 0 12px', display: 'flex', alignItems: 'center',
+              }}
+            >
+              <Ic.ChevR />
+            </button>
+          )}
+        </div>
+      </header>
+
+      {/* ── PAGE CONTENT ─────────────────────────────────────────── */}
+      <main style={{ padding: '24px 20px', maxWidth: 1400, margin: '0 auto' }}>
+        {children}
+      </main>
 
       <style>{`
-        @media (min-width: 768px) {
-          .admin-sidebar { display: flex !important; }
-        }
+        ::-webkit-scrollbar { display: none; }
+        .hide-xs { display: inline; }
+        @media (max-width: 480px) { .hide-xs { display: none; } }
+        a:hover { opacity: .85; }
       `}</style>
     </div>
   )
