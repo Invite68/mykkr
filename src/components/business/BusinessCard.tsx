@@ -35,7 +35,7 @@ function PinIcon() {
 
 function ShopIcon() {
   return (
-    <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" style={{ opacity: 0.25 }}>
+    <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.1" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" style={{ opacity: 0.18 }}>
       <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
       <polyline points="9 22 9 12 15 12 15 22"/>
     </svg>
@@ -153,7 +153,7 @@ export default function BusinessCard({ business }: { business: Business }) {
 
         {/* ── Actions ─────────────────────────────────────── */}
         <div className="biz-actions">
-          <Link href={href} className="btn btn-outline btn-sm">View profile</Link>
+          <Link href={href} className="btn btn-outline btn-sm">View</Link>
           {waHref ? (
             <a
               href={waHref}

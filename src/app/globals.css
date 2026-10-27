@@ -725,25 +725,45 @@ img, svg { max-width: 100%; display: block; }
 .chip.active { background: var(--night-d); border-color: var(--night-d); color: #fff; }
 
 /* ══════════════════════════════════════════════════════════════════════════
-   BUSINESS CARDS — square boxes with rounded corners
+   BUSINESS CARDS — 2-column grid, square image, compact info below
    ══════════════════════════════════════════════════════════════════════════ */
-.biz-grid { display: grid; gap: 14px; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); }
-@media (min-width: 640px) { .biz-grid { grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); } }
-@media (min-width: 1024px) { .biz-grid { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); } }
+
+/* Always 2 columns on mobile, 3 on tablet, 4 on desktop */
+.biz-grid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(2, 1fr);
+}
+@media (min-width: 640px)  { .biz-grid { grid-template-columns: repeat(3, 1fr); gap: 14px; } }
+@media (min-width: 1024px) { .biz-grid { grid-template-columns: repeat(4, 1fr); gap: 16px; } }
+
 .biz-card {
-  background: var(--white); border: 1.5px solid var(--border);
-  border-radius: 16px; overflow: hidden; display: flex; flex-direction: column;
+  background: var(--white);
+  border: 1.5px solid var(--border);
+  border-radius: 16px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
   transition: box-shadow var(--t-md), transform var(--t-md), border-color var(--t-md);
   cursor: pointer;
-  /* Force square by using aspect-ratio + a fixed height on cover */
+  box-shadow: 0 1px 4px rgba(0,0,0,.05);
 }
-.biz-card:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); border-color: rgba(45,84,94,.25); }
+.biz-card:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+  border-color: rgba(18,52,59,.25);
+}
 
-/* Cover — square aspect, photo or emoji */
+/* Cover — perfect square */
 .biz-cover {
-  display: block; position: relative;
-  aspect-ratio: 1 / 1; width: 100%; overflow: hidden;
-  background: var(--bg); flex-shrink: 0;
+  display: block;
+  position: relative;
+  aspect-ratio: 1 / 1;
+  width: 100%;
+  overflow: hidden;
+  background: var(--bg);
+  flex-shrink: 0;
+  border-radius: 14px 14px 0 0;
 }
 .biz-cover-img {
   width: 100%; height: 100%; object-fit: cover;
@@ -754,33 +774,29 @@ img, svg { max-width: 100%; display: block; }
   width: 100%; height: 100%;
   display: grid; place-items: center;
 }
-.biz-cover-emoji span { font-size: 48px; }
 
 /* Open / Closed badge */
 .biz-open-badge {
-  position: absolute; top: 9px; left: 9px;
-  font-size: 10.5px; font-weight: 700;
-  padding: 3px 9px; border-radius: 99px;
+  position: absolute; top: 8px; left: 8px;
+  font-size: 10px; font-weight: 700;
+  padding: 2px 8px; border-radius: 99px;
   backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
   box-shadow: var(--shadow-xs);
+  display: flex; align-items: center; gap: 4px;
 }
-.biz-open-badge--open {
-  background: rgba(22,163,74,.92); color: #fff;
-}
-.biz-open-badge--closed {
-  background: rgba(0,0,0,.55); color: rgba(255,255,255,.85);
-}
+.biz-open-badge--open  { background: rgba(22,163,74,.92); color: #fff; }
+.biz-open-badge--closed { background: rgba(0,0,0,.55); color: rgba(255,255,255,.85); }
 
 /* Verified badge */
 .biz-cover-verified {
-  position: absolute; top: 9px; right: 9px;
+  position: absolute; top: 8px; right: 8px;
   font-size: 10px; font-weight: 700;
   background: var(--night-d); color: #fff;
-  padding: 3px 8px; border-radius: 99px;
-  backdrop-filter: blur(4px);
+  padding: 2px 8px; border-radius: 99px;
+  display: flex; align-items: center; gap: 3px;
 }
 
-/* Legacy compat (still used in older search results etc.) */
+/* Legacy compat */
 .biz-top {
   height: 140px; display: grid; place-items: center; font-size: 56px;
   position: relative;
@@ -792,34 +808,57 @@ img, svg { max-width: 100%; display: block; }
   position: absolute; top: 8px; left: 8px;
   font-size: 10.5px; font-weight: 700;
   background: rgba(22,163,74,.92); color: #fff; padding: 3px 9px; border-radius: 99px;
-  display: flex; gap: 5px; align-items: center;
-  box-shadow: var(--shadow-xs);
+  display: flex; gap: 5px; align-items: center; box-shadow: var(--shadow-xs);
 }
 .biz-avail::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: #fff; }
 .badge-verified {
   position: absolute; top: 8px; right: 8px;
   font-size: 10px; font-weight: 700;
-  background: var(--night-d); color: #fff;
-  padding: 3px 8px; border-radius: 99px;
+  background: var(--night-d); color: #fff; padding: 3px 8px; border-radius: 99px;
 }
 
-.biz-body { padding: 10px 12px 12px; display: flex; flex-direction: column; gap: 3px; flex: 1; }
-.biz-cat { font-size: 9.5px; font-weight: 800; text-transform: uppercase; letter-spacing: .6px; color: var(--tan-d); }
-.biz-name { font-size: 13.5px; font-weight: 700; color: var(--night-d); line-height: 1.25; }
+/* Card body — compact info section below the square image */
+.biz-body {
+  padding: 9px 10px 11px;
+  display: flex; flex-direction: column; gap: 2px;
+  flex: 1;
+}
+.biz-cat {
+  font-size: 9px; font-weight: 800; text-transform: uppercase;
+  letter-spacing: .5px; color: var(--tan-d);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.biz-name {
+  font-size: 13px; font-weight: 800; color: var(--night-d);
+  line-height: 1.2; margin: 1px 0;
+  /* max 2 lines */
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+  overflow: hidden;
+}
 .biz-name a:hover { text-decoration: underline; }
 .biz-desc {
-  font-size: 11.5px; color: var(--text-3); line-height: 1.4;
-  /* Exactly 2 lines with ellipsis */
+  font-size: 11px; color: var(--text-3); line-height: 1.35;
   display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
-  overflow: hidden; margin: 3px 0 2px;
+  overflow: hidden; margin: 1px 0;
 }
-.biz-area { font-size: 10.5px; color: var(--text-4); }
-.biz-meta { font-size: 11px; color: var(--text-2); display: flex; gap: 5px; align-items: center; flex-wrap: wrap; }
+.biz-area {
+  font-size: 10px; color: var(--text-4);
+  display: flex; align-items: center; gap: 3px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.biz-meta {
+  font-size: 10.5px; color: var(--text-2);
+  display: flex; gap: 4px; align-items: center; flex-wrap: wrap;
+  margin: 1px 0;
+}
 .biz-rev-count { color: var(--text-4); font-weight: 400; }
-.stars { color: #f59e0b; letter-spacing: 1.5px; font-size: 10.5px; }
-.biz-price { font-size: 12px; font-weight: 700; color: var(--text); margin: 4px 0 6px; }
-.biz-actions { display: flex; gap: 6px; margin-top: auto; }
-.biz-actions > * { flex: 1; text-align: center; }
+.stars { color: #f59e0b; font-size: 10px; }
+.biz-price {
+  font-size: 11.5px; font-weight: 700; color: var(--night-d);
+  margin: 3px 0 6px;
+}
+.biz-actions { display: flex; gap: 5px; margin-top: auto; }
+.biz-actions > * { flex: 1; text-align: center; font-size: 11px; padding: 5px 6px; }
 
 /* WhatsApp button — teal brand colour */
 .btn-whatsapp {
