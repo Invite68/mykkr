@@ -213,62 +213,47 @@ export default function AdminOverview() {
         ))}
       </div>
 
-      {/* ── Bottom two-column layout ─────────────────────────────── */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1fr) 280px', gap: 20, alignItems: 'start' }}>
-
-        {/* Quick Access Grid */}
-        <div>
-          <div style={{ fontSize: 12, fontWeight: 800, color: C.muted, textTransform: 'uppercase', letterSpacing: .8, marginBottom: 14 }}>Quick Access</div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(170px, 1fr))', gap: 10 }}>
-            {ACTIONS.map(a => (
-              <Link key={a.href} href={a.href} style={{
-                textDecoration: 'none', background: C.surface,
-                border: `1px solid ${C.border}`, borderRadius: 12,
-                padding: '16px', display: 'flex', flexDirection: 'column', gap: 10,
-                position: 'relative', overflow: 'hidden',
-                boxShadow: '0 1px 3px rgba(0,0,0,.04)',
-                transition: 'box-shadow .15s, transform .15s',
-              }}
-              onMouseEnter={e => { (e.currentTarget as HTMLElement).style.boxShadow = '0 6px 20px rgba(0,0,0,.1)'; (e.currentTarget as HTMLElement).style.transform = 'translateY(-2px)' }}
-              onMouseLeave={e => { (e.currentTarget as HTMLElement).style.boxShadow = '0 1px 3px rgba(0,0,0,.04)'; (e.currentTarget as HTMLElement).style.transform = 'none' }}
-              >
-                {/* Icon circle */}
-                <div style={{
-                  width: 40, height: 40, borderRadius: 10,
-                  background: a.lightBg, border: `1px solid ${a.color}20`,
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  color: a.color, flexShrink: 0,
+      {/* ── Quick Access Grid (2-col) then Activity below ────────── */}
+      <div>
+        <div style={{ fontSize: 12, fontWeight: 800, color: C.muted, textTransform: 'uppercase', letterSpacing: .8, marginBottom: 14 }}>Quick Access</div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 10, marginBottom: 20 }}>
+          {ACTIONS.map(a => (
+            <Link key={a.href} href={a.href} style={{
+              textDecoration: 'none', background: C.surface,
+              border: `1px solid ${C.border}`, borderRadius: 12,
+              padding: '14px', display: 'flex', alignItems: 'center', gap: 12,
+              position: 'relative', overflow: 'hidden',
+              boxShadow: '0 1px 3px rgba(0,0,0,.04)',
+            }}>
+              {/* Icon circle */}
+              <div style={{
+                width: 38, height: 38, borderRadius: 9, flexShrink: 0,
+                background: a.lightBg, border: `1px solid ${a.color}20`,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                color: a.color,
+              }}>
+                {a.icon}
+              </div>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ fontWeight: 800, fontSize: 13, color: '#1e293b', marginBottom: 2 }}>{a.label}</div>
+                <div style={{ fontSize: 11, color: C.muted, lineHeight: 1.3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{a.desc}</div>
+              </div>
+              {/* Badge */}
+              {a.badge && (
+                <span style={{
+                  flexShrink: 0,
+                  background: a.color, color: '#fff',
+                  fontSize: 9, fontWeight: 800, padding: '2px 6px', borderRadius: 99,
+                  textTransform: 'uppercase', letterSpacing: .3,
                 }}>
-                  {a.icon}
-                </div>
-
-                <div style={{ flex: 1 }}>
-                  <div style={{ fontWeight: 800, fontSize: 13.5, color: '#1e293b', marginBottom: 3 }}>{a.label}</div>
-                  <div style={{ fontSize: 11.5, color: C.muted, lineHeight: 1.4 }}>{a.desc}</div>
-                </div>
-
-                {/* Badge */}
-                {a.badge && (
-                  <span style={{
-                    position: 'absolute', top: 12, right: 12,
-                    background: a.color, color: '#fff',
-                    fontSize: 9.5, fontWeight: 800, padding: '2px 7px', borderRadius: 99,
-                    textTransform: 'uppercase', letterSpacing: .4,
-                  }}>
-                    {a.badge}
-                  </span>
-                )}
-
-                {/* Arrow */}
-                <div style={{ position: 'absolute', bottom: 14, right: 14, color: a.color, opacity: .4 }}>
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><polyline points="9 18 15 12 9 6"/></svg>
-                </div>
-              </Link>
-            ))}
-          </div>
+                  {a.badge}
+                </span>
+              )}
+            </Link>
+          ))}
         </div>
 
-        {/* Activity Feed sidebar */}
+        {/* Recent Activity — full width below */}
         <div style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 14, overflow: 'hidden', boxShadow: '0 1px 4px rgba(0,0,0,.05)' }}>
           <div style={{ padding: '14px 16px', borderBottom: `1px solid ${C.border}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: C.teal }}>
             <span style={{ fontWeight: 800, fontSize: 13, color: '#fff' }}>Recent Activity</span>
@@ -280,18 +265,17 @@ export default function AdminOverview() {
               borderBottom: i < ACTIVITY.length - 1 ? `1px solid ${C.border}` : 'none',
               display: 'flex', gap: 10, alignItems: 'flex-start',
             }}>
-              <div style={{ flexShrink: 0, marginTop: 1 }}>
-                <span style={{
-                  fontSize: 9.5, fontWeight: 800, color: a.color,
-                  background: `${a.color}15`, border: `1px solid ${a.color}30`,
-                  borderRadius: 5, padding: '2px 6px', display: 'block',
-                  whiteSpace: 'nowrap', textTransform: 'uppercase', letterSpacing: .4,
-                }}>
-                  {a.type}
-                </span>
-              </div>
+              <span style={{
+                flexShrink: 0, marginTop: 1,
+                fontSize: 9.5, fontWeight: 800, color: a.color,
+                background: `${a.color}15`, border: `1px solid ${a.color}30`,
+                borderRadius: 5, padding: '2px 6px',
+                whiteSpace: 'nowrap', textTransform: 'uppercase', letterSpacing: .4,
+              }}>
+                {a.type}
+              </span>
               <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontSize: 12, color: '#334155', lineHeight: 1.45, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{a.text}</div>
+                <div style={{ fontSize: 12, color: '#334155', lineHeight: 1.45 }}>{a.text}</div>
                 <div style={{ fontSize: 10.5, color: C.muted, marginTop: 2 }}>{a.time} ago</div>
               </div>
             </div>

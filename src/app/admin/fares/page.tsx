@@ -109,33 +109,60 @@ export default function AdminFares() {
           {cats.map(cat => (
             <div key={cat} style={{ marginBottom: 20 }}>
               <div style={{ fontSize: 13, fontWeight: 800, color: C.teal, textTransform: 'uppercase', letterSpacing: .5, marginBottom: 10 }}>{cat}</div>
-              <div style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 12, overflow: 'hidden' }}>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 110px 120px 110px 80px 100px', gap: 8, padding: '9px 14px', background: C.bg, borderBottom: `1px solid ${C.border}`, fontSize: 11, fontWeight: 700, color: C.muted, textTransform: 'uppercase', letterSpacing: .4 }}>
-                  <span>Vehicle</span><span>Base Fare</span><span>Per KM Rate</span><span>Load Based</span><span>Active</span><span>Actions</span>
-                </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                 {vehicles.filter(v => v.category === cat).map(v => (
-                  <div key={v.id} style={{ display: 'grid', gridTemplateColumns: '1fr 110px 120px 110px 80px 100px', gap: 8, padding: '11px 14px', borderBottom: `1px solid ${C.border}`, alignItems: 'center' }}>
-                    <div style={{ fontWeight: 700, fontSize: 13.5, color: C.teal }}>{v.name}</div>
+                  <div key={v.id} style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 12, padding: '14px 16px' }}>
+                    {/* Vehicle name + active toggle */}
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+                      <span style={{ fontWeight: 800, fontSize: 14, color: C.teal }}>{v.name}</span>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <span style={{ fontSize: 11, color: v.active ? C.green : C.muted, fontWeight: 700 }}>{v.active ? 'Active' : 'Inactive'}</span>
+                        <Toggle checked={v.active} onChange={() => { updateV(v.id, { active: !v.active }); showToast(v.active ? 'Vehicle deactivated' : 'Vehicle activated') }} />
+                      </div>
+                    </div>
+
                     {editingV === v.id ? (
-                      <>
-                        <NumInp value={v.baseFare} onChange={val => updateV(v.id, { baseFare: val })} prefix="₹" />
-                        <NumInp value={v.perKm} onChange={val => updateV(v.id, { perKm: val })} prefix="₹" suffix="/km" />
-                        <Toggle checked={v.loadBased} onChange={() => updateV(v.id, { loadBased: !v.loadBased })} />
-                        <Toggle checked={v.active} onChange={() => updateV(v.id, { active: !v.active })} />
-                        <div style={{ display: 'flex', gap: 6 }}>
-                          <button onClick={() => { setEditingV(null); showToast('Fare saved') }} style={{ background: C.green, border: 'none', color: '#fff', padding: '5px 10px', borderRadius: 6, fontSize: 12, fontWeight: 700, cursor: 'pointer' }}>Save</button>
-                          <button onClick={() => setEditingV(null)} style={{ background: C.bg, border: `1px solid ${C.border}`, color: C.muted, padding: '5px 8px', borderRadius: 6, fontSize: 12, cursor: 'pointer' }}>Cancel</button>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+                          <div>
+                            <div style={{ fontSize: 11, fontWeight: 700, color: C.muted, marginBottom: 5 }}>Base Fare</div>
+                            <NumInp value={v.baseFare} onChange={val => updateV(v.id, { baseFare: val })} prefix="₹" />
+                          </div>
+                          <div>
+                            <div style={{ fontSize: 11, fontWeight: 700, color: C.muted, marginBottom: 5 }}>Per KM Rate</div>
+                            <NumInp value={v.perKm} onChange={val => updateV(v.id, { perKm: val })} prefix="₹" suffix="/km" />
+                          </div>
                         </div>
-                      </>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                          <span style={{ fontSize: 12, color: C.muted, fontWeight: 600 }}>Load-based pricing</span>
+                          <Toggle checked={v.loadBased} onChange={() => updateV(v.id, { loadBased: !v.loadBased })} />
+                          <span style={{ fontSize: 11, color: C.muted }}>{v.loadBased ? 'Yes' : 'No'}</span>
+                        </div>
+                        <div style={{ display: 'flex', gap: 8 }}>
+                          <button onClick={() => { setEditingV(null); showToast('Fare saved') }} style={{ background: C.green, border: 'none', color: '#fff', padding: '8px 18px', borderRadius: 8, fontSize: 13, fontWeight: 700, cursor: 'pointer' }}>Save</button>
+                          <button onClick={() => setEditingV(null)} style={{ background: C.bg, border: `1px solid ${C.border}`, color: C.muted, padding: '8px 14px', borderRadius: 8, fontSize: 13, cursor: 'pointer' }}>Cancel</button>
+                        </div>
+                      </div>
                     ) : (
                       <>
-                        <span style={{ fontSize: 13, fontWeight: 700, color: '#334155' }}>₹{v.baseFare}</span>
-                        <span style={{ fontSize: 13, fontWeight: 700, color: '#334155' }}>₹{v.perKm}/km</span>
-                        <span style={{ fontSize: 12, color: v.loadBased ? C.green : C.muted }}>{v.loadBased ? 'Yes' : 'No'}</span>
-                        <Toggle checked={v.active} onChange={() => { updateV(v.id, { active: !v.active }); showToast(v.active ? 'Vehicle deactivated' : 'Vehicle activated') }} />
-                        <div style={{ display: 'flex', gap: 6 }}>
-                          <button onClick={() => setEditingV(v.id)} style={{ background: 'rgba(18,52,59,.07)', border: 'none', color: C.teal, padding: '5px 10px', borderRadius: 6, fontSize: 12, fontWeight: 700, cursor: 'pointer' }}>Edit</button>
-                          <button onClick={() => removeV(v.id)} style={{ background: 'rgba(220,38,38,.08)', border: 'none', color: C.red, padding: '5px 8px', borderRadius: 6, fontSize: 12, cursor: 'pointer' }}>Remove</button>
+                        {/* Fare stats */}
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8, marginBottom: 12 }}>
+                          <div style={{ background: C.bg, borderRadius: 8, padding: '10px', textAlign: 'center' }}>
+                            <div style={{ fontWeight: 900, fontSize: 18, color: C.teal }}>₹{v.baseFare}</div>
+                            <div style={{ fontSize: 10, color: C.muted, fontWeight: 700, textTransform: 'uppercase', letterSpacing: .3, marginTop: 2 }}>Base Fare</div>
+                          </div>
+                          <div style={{ background: C.bg, borderRadius: 8, padding: '10px', textAlign: 'center' }}>
+                            <div style={{ fontWeight: 900, fontSize: 18, color: C.teal }}>₹{v.perKm}<span style={{ fontSize: 12, fontWeight: 600 }}>/km</span></div>
+                            <div style={{ fontSize: 10, color: C.muted, fontWeight: 700, textTransform: 'uppercase', letterSpacing: .3, marginTop: 2 }}>Per KM</div>
+                          </div>
+                          <div style={{ background: C.bg, borderRadius: 8, padding: '10px', textAlign: 'center' }}>
+                            <div style={{ fontWeight: 900, fontSize: 15, color: v.loadBased ? C.green : C.muted }}>{v.loadBased ? 'Yes' : 'No'}</div>
+                            <div style={{ fontSize: 10, color: C.muted, fontWeight: 700, textTransform: 'uppercase', letterSpacing: .3, marginTop: 2 }}>Load Based</div>
+                          </div>
+                        </div>
+                        <div style={{ display: 'flex', gap: 8 }}>
+                          <button onClick={() => setEditingV(v.id)} style={{ background: `${C.teal}10`, border: 'none', color: C.teal, padding: '7px 16px', borderRadius: 7, fontSize: 12, fontWeight: 700, cursor: 'pointer' }}>Edit Rates</button>
+                          <button onClick={() => removeV(v.id)} style={{ background: `${C.red}10`, border: 'none', color: C.red, padding: '7px 14px', borderRadius: 7, fontSize: 12, fontWeight: 700, cursor: 'pointer' }}>Remove</button>
                         </div>
                       </>
                     )}
@@ -176,18 +203,36 @@ export default function AdminFares() {
 
       {tab === 'fixed' && (
         <div>
-          <div style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 12, overflow: 'hidden', marginBottom: 16 }}>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 140px 100px 80px 80px', gap: 8, padding: '10px 14px', background: C.bg, borderBottom: `1px solid ${C.border}`, fontSize: 11, fontWeight: 700, color: C.muted, textTransform: 'uppercase', letterSpacing: .4 }}>
-              <span>From</span><span>To</span><span>Vehicle</span><span>Fixed Price</span><span>Active</span><span>Remove</span>
-            </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 16 }}>
             {fixed.map(f => (
-              <div key={f.id} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 140px 100px 80px 80px', gap: 8, padding: '11px 14px', borderBottom: `1px solid ${C.border}`, alignItems: 'center' }}>
-                <span style={{ fontWeight: 600, fontSize: 13, color: '#334155' }}>{f.from}</span>
-                <span style={{ fontWeight: 600, fontSize: 13, color: '#334155' }}>{f.to}</span>
-                <span style={{ fontSize: 12, color: C.muted }}>{f.vehicle}</span>
-                <span style={{ fontWeight: 800, fontSize: 14, color: C.teal }}>₹{f.price}</span>
-                <Toggle checked={f.active} onChange={() => { setFixed(fx => fx.map(x => x.id === f.id ? { ...x, active: !x.active } : x)); showToast(f.active ? 'Route deactivated' : 'Route activated') }} />
-                <button onClick={() => { if (!confirm('Remove this fixed route?')) return; setFixed(fx => fx.filter(x => x.id !== f.id)); showToast('Route removed') }} style={{ background: 'rgba(220,38,38,.08)', border: 'none', color: C.red, padding: '5px 8px', borderRadius: 6, fontSize: 12, fontWeight: 700, cursor: 'pointer' }}>Remove</button>
+              <div key={f.id} style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 12, padding: '14px 16px' }}>
+                {/* Route */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginBottom: 12 }}>
+                  <div style={{ display: 'flex', alignItems: 'flex-start', gap: 8 }}>
+                    <div style={{ width: 8, height: 8, borderRadius: '50%', background: C.green, marginTop: 4, flexShrink: 0 }} />
+                    <div>
+                      <div style={{ fontSize: 10, color: C.muted, fontWeight: 700, textTransform: 'uppercase', letterSpacing: .3 }}>From</div>
+                      <div style={{ fontWeight: 700, fontSize: 14, color: '#334155' }}>{f.from}</div>
+                    </div>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'flex-start', gap: 8 }}>
+                    <div style={{ width: 8, height: 8, borderRadius: '50%', background: C.red, marginTop: 4, flexShrink: 0 }} />
+                    <div>
+                      <div style={{ fontSize: 10, color: C.muted, fontWeight: 700, textTransform: 'uppercase', letterSpacing: .3 }}>To</div>
+                      <div style={{ fontWeight: 700, fontSize: 14, color: '#334155' }}>{f.to}</div>
+                    </div>
+                  </div>
+                </div>
+                {/* Stats row */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12, paddingTop: 10, borderTop: `1px solid ${C.border}` }}>
+                  <span style={{ fontSize: 11, color: C.muted, background: C.bg, borderRadius: 6, padding: '3px 8px', fontWeight: 600 }}>{f.vehicle}</span>
+                  <span style={{ fontWeight: 900, fontSize: 18, color: C.teal, marginLeft: 'auto' }}>₹{f.price}</span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <span style={{ fontSize: 11, color: f.active ? C.green : C.muted, fontWeight: 700 }}>{f.active ? 'Active' : 'Off'}</span>
+                    <Toggle checked={f.active} onChange={() => { setFixed(fx => fx.map(x => x.id === f.id ? { ...x, active: !x.active } : x)); showToast(f.active ? 'Route deactivated' : 'Route activated') }} />
+                  </div>
+                  <button onClick={() => { if (!confirm('Remove this fixed route?')) return; setFixed(fx => fx.filter(x => x.id !== f.id)); showToast('Route removed') }} style={{ background: `${C.red}10`, border: 'none', color: C.red, padding: '7px 12px', borderRadius: 7, fontSize: 12, fontWeight: 700, cursor: 'pointer' }}>Remove</button>
+                </div>
               </div>
             ))}
           </div>
@@ -220,22 +265,31 @@ export default function AdminFares() {
       )}
 
       {tab === 'history' && (
-        <div style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 12, overflow: 'hidden' }}>
-          <div style={{ padding: '12px 16px', borderBottom: `1px solid ${C.border}`, fontSize: 13, color: C.muted, background: 'rgba(225,179,130,.1)', borderLeft: `4px solid ${C.gold}` }}>
+        <div>
+          <div style={{ padding: '12px 16px', marginBottom: 12, fontSize: 13, color: C.muted, background: 'rgba(225,179,130,.1)', borderLeft: `4px solid ${C.gold}`, borderRadius: 8 }}>
             Change history is read-only. All fare edits are recorded automatically.
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: '120px 1fr 160px 100px 100px', gap: 8, padding: '10px 14px', background: C.bg, borderBottom: `1px solid ${C.border}`, fontSize: 11, fontWeight: 700, color: C.muted, textTransform: 'uppercase', letterSpacing: .4 }}>
-            <span>Date</span><span>Change</span><span>By</span><span>Old Value</span><span>New Value</span>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            {HISTORY.map((h, i) => (
+              <div key={i} style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 12, padding: '14px 16px' }}>
+                <div style={{ fontWeight: 700, fontSize: 14, color: '#334155', marginBottom: 8 }}>{h.change}</div>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 8, marginBottom: 10 }}>
+                  <div style={{ background: `${C.red}08`, border: `1px solid ${C.red}20`, borderRadius: 8, padding: '8px 12px' }}>
+                    <div style={{ fontSize: 10, fontWeight: 700, color: C.muted, textTransform: 'uppercase', letterSpacing: .3, marginBottom: 3 }}>Before</div>
+                    <div style={{ fontSize: 13, fontWeight: 700, color: C.red, textDecoration: 'line-through' }}>{h.old}</div>
+                  </div>
+                  <div style={{ background: `${C.green}08`, border: `1px solid ${C.green}20`, borderRadius: 8, padding: '8px 12px' }}>
+                    <div style={{ fontSize: 10, fontWeight: 700, color: C.muted, textTransform: 'uppercase', letterSpacing: .3, marginBottom: 3 }}>After</div>
+                    <div style={{ fontSize: 13, fontWeight: 700, color: C.green }}>{h.new_}</div>
+                  </div>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, color: C.muted }}>
+                  <span>{h.by}</span>
+                  <span>{h.date}</span>
+                </div>
+              </div>
+            ))}
           </div>
-          {HISTORY.map((h, i) => (
-            <div key={i} style={{ display: 'grid', gridTemplateColumns: '120px 1fr 160px 100px 100px', gap: 8, padding: '12px 14px', borderBottom: `1px solid ${C.border}`, alignItems: 'center', fontSize: 13 }}>
-              <span style={{ fontSize: 11, color: C.muted }}>{h.date}</span>
-              <span style={{ fontWeight: 600, color: '#334155' }}>{h.change}</span>
-              <span style={{ fontSize: 11, color: C.muted }}>{h.by}</span>
-              <span style={{ color: C.red, textDecoration: 'line-through', fontSize: 12 }}>{h.old}</span>
-              <span style={{ color: C.green, fontWeight: 700, fontSize: 12 }}>{h.new_}</span>
-            </div>
-          ))}
         </div>
       )}
     </div>

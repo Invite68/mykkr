@@ -92,62 +92,69 @@ export default function AdminAudit() {
       </div>
 
       <div style={{ marginBottom: 12 }}>
-        <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search actions, targets, actors..." style={{ border: `1px solid ${C.border}`, borderRadius: 8, padding: '7px 14px', fontSize: 13, outline: 'none', width: 300 }} />
+        <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search actions, targets, actors..." style={{ width: '100%', border: `1px solid ${C.border}`, borderRadius: 8, padding: '9px 14px', fontSize: 13, outline: 'none', boxSizing: 'border-box' }} />
       </div>
 
-      <div style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 12, overflow: 'hidden' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: '100px 90px 1fr 120px 110px 110px', gap: 8, padding: '9px 14px', background: C.bg, borderBottom: `1px solid ${C.border}`, fontSize: 11, fontWeight: 700, color: C.muted, textTransform: 'uppercase', letterSpacing: .4 }}>
-          <span>Audit ID</span><span>Category</span><span>Action &amp; Target</span><span>Actor</span><span>Timestamp</span><span>Rollback</span>
-        </div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+        {filtered.length === 0 && <div style={{ padding: 30, textAlign: 'center', color: C.muted, fontSize: 13 }}>No audit entries match the current filters.</div>}
 
         {filtered.map(entry => {
           const rb = rbStatus(entry)
           const catColor = CAT_COLOR[entry.category]
+          const isOpen = expanded === entry.id
           return (
-            <div key={entry.id}>
-              <div style={{ display: 'grid', gridTemplateColumns: '100px 90px 1fr 120px 110px 110px', gap: 8, padding: '11px 14px', borderBottom: `1px solid ${C.border}`, alignItems: 'center', cursor: 'pointer' }} onClick={() => setExpanded(expanded === entry.id ? null : entry.id)}>
-                <code style={{ fontSize: 11, fontWeight: 700, color: C.muted, fontFamily: 'monospace' }}>{entry.id}</code>
-                <span style={{ fontSize: 11, fontWeight: 700, color: catColor, background: `${catColor}15`, border: `1px solid ${catColor}30`, borderRadius: 99, padding: '2px 8px', textAlign: 'center' }}>{entry.category}</span>
-                <div>
-                  <div style={{ fontWeight: 700, fontSize: 12.5, color: '#1e293b' }}>{entry.action}</div>
-                  <div style={{ fontSize: 11, color: C.muted }}>{entry.target} <span style={{ fontFamily: 'monospace', color: C.teal }}>{entry.targetId}</span></div>
+            <div key={entry.id} style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 12, overflow: 'hidden' }}>
+              {/* Card header — tap to expand */}
+              <div onClick={() => setExpanded(isOpen ? null : entry.id)} style={{ padding: '14px 16px', cursor: 'pointer' }}>
+                {/* Top row: ID + category badge + rollback */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8, flexWrap: 'wrap' }}>
+                  <code style={{ fontSize: 11, fontWeight: 800, color: C.muted, background: C.bg, padding: '2px 7px', borderRadius: 5 }}>{entry.id}</code>
+                  <span style={{ fontSize: 11, fontWeight: 700, color: catColor, background: `${catColor}15`, border: `1px solid ${catColor}30`, borderRadius: 99, padding: '2px 9px' }}>{entry.category}</span>
+                  <span style={{ fontSize: 10, color: C.muted, marginLeft: 'auto' }}>{entry.timestamp.split(' ').slice(0,3).join(' ')}</span>
                 </div>
-                <span style={{ fontSize: 11, color: C.muted }}>{entry.actor}</span>
-                <span style={{ fontSize: 10, color: C.muted }}>{entry.timestamp}</span>
-                {rb === 'rolled_back' && <span style={{ fontSize: 11, fontWeight: 700, color: C.muted, background: C.bg, borderRadius: 6, padding: '3px 8px', textAlign: 'center' }}>Rolled back</span>}
-                {rb === 'not_applicable' && <span style={{ fontSize: 11, color: C.muted, textAlign: 'center' }}>N/A</span>}
-                {rb === 'available' && (
-                  <button onClick={e => { e.stopPropagation(); doRollback(entry) }} style={{ background: 'rgba(220,38,38,.09)', border: `1px solid ${C.red}30`, color: C.red, borderRadius: 6, padding: '4px 10px', fontSize: 11, fontWeight: 700, cursor: 'pointer' }}>Rollback</button>
-                )}
+                {/* Action + target */}
+                <div style={{ fontWeight: 700, fontSize: 14, color: '#1e293b', marginBottom: 4 }}>{entry.action}</div>
+                <div style={{ fontSize: 12, color: C.muted, marginBottom: 10 }}>
+                  {entry.target} &nbsp;
+                  <code style={{ fontSize: 11, color: C.teal }}>{entry.targetId}</code>
+                </div>
+                {/* Bottom row: actor + rollback button */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, paddingTop: 10, borderTop: `1px solid ${C.border}` }}>
+                  <span style={{ fontSize: 11, color: C.muted, flex: 1 }}>{entry.actor}</span>
+                  {rb === 'rolled_back' && <span style={{ fontSize: 11, fontWeight: 700, color: C.muted, background: C.bg, borderRadius: 6, padding: '4px 10px' }}>Rolled back</span>}
+                  {rb === 'not_applicable' && <span style={{ fontSize: 11, color: C.muted }}>N/A</span>}
+                  {rb === 'available' && (
+                    <button onClick={e => { e.stopPropagation(); doRollback(entry) }} style={{ background: `${C.red}10`, border: `1px solid ${C.red}30`, color: C.red, borderRadius: 7, padding: '5px 12px', fontSize: 12, fontWeight: 700, cursor: 'pointer' }}>Rollback</button>
+                  )}
+                  <span style={{ fontSize: 11, color: C.teal, fontWeight: 700 }}>{isOpen ? 'Hide' : 'Details'}</span>
+                </div>
               </div>
 
-              {expanded === entry.id && (
-                <div style={{ background: 'rgba(18,52,59,.03)', borderBottom: `1px solid ${C.border}`, padding: '14px 18px', display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 14, fontSize: 12 }}>
-                  <div>
-                    <div style={{ fontSize: 10, fontWeight: 700, color: C.muted, textTransform: 'uppercase', letterSpacing: .4, marginBottom: 6 }}>Before</div>
-                    <code style={{ display: 'block', background: C.bg, border: `1px solid ${C.border}`, borderRadius: 6, padding: '8px 10px', color: C.red, fontFamily: 'monospace', fontSize: 12 }}>{entry.before}</code>
+              {isOpen && (
+                <div style={{ background: `${C.teal}04`, borderTop: `1px solid ${C.border}`, padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: 10 }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+                    <div>
+                      <div style={{ fontSize: 10, fontWeight: 700, color: C.muted, textTransform: 'uppercase', letterSpacing: .4, marginBottom: 6 }}>Before</div>
+                      <code style={{ display: 'block', background: C.bg, border: `1px solid ${C.border}`, borderRadius: 6, padding: '8px 10px', color: C.red, fontFamily: 'monospace', fontSize: 11, wordBreak: 'break-word' }}>{entry.before}</code>
+                    </div>
+                    <div>
+                      <div style={{ fontSize: 10, fontWeight: 700, color: C.muted, textTransform: 'uppercase', letterSpacing: .4, marginBottom: 6 }}>After</div>
+                      <code style={{ display: 'block', background: C.bg, border: `1px solid ${C.border}`, borderRadius: 6, padding: '8px 10px', color: C.green, fontFamily: 'monospace', fontSize: 11, wordBreak: 'break-word' }}>{entry.after}</code>
+                    </div>
                   </div>
-                  <div>
-                    <div style={{ fontSize: 10, fontWeight: 700, color: C.muted, textTransform: 'uppercase', letterSpacing: .4, marginBottom: 6 }}>After</div>
-                    <code style={{ display: 'block', background: C.bg, border: `1px solid ${C.border}`, borderRadius: 6, padding: '8px 10px', color: C.green, fontFamily: 'monospace', fontSize: 12 }}>{entry.after}</code>
-                  </div>
-                  <div>
-                    <div style={{ fontSize: 10, fontWeight: 700, color: C.muted, textTransform: 'uppercase', letterSpacing: .4, marginBottom: 6 }}>Context</div>
-                    <div style={{ color: C.muted }}>IP: {entry.ip}</div>
-                    <div style={{ color: C.muted, marginTop: 3 }}>{entry.timestamp}</div>
-                    {rb === 'rolled_back' && <div style={{ color: C.amber, fontWeight: 700, marginTop: 6 }}>Rolled back in this session</div>}
+                  <div style={{ fontSize: 11, color: C.muted }}>
+                    IP: {entry.ip} &nbsp;·&nbsp; {entry.timestamp}
+                    {rb === 'rolled_back' && <span style={{ color: C.amber, fontWeight: 700 }}> · Rolled back this session</span>}
                   </div>
                 </div>
               )}
             </div>
           )
         })}
-
-        {filtered.length === 0 && <div style={{ padding: 30, textAlign: 'center', color: C.muted, fontSize: 13 }}>No audit entries match the current filters.</div>}
       </div>
 
       <div style={{ marginTop: 10, fontSize: 12, color: C.muted, textAlign: 'right' }}>
-        Showing {filtered.length} of {AUDIT.length} entries · Click any row to see before/after detail
+        Showing {filtered.length} of {AUDIT.length} entries · Tap any card to see before/after detail
       </div>
     </div>
   )
