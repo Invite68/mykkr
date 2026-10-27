@@ -110,7 +110,7 @@ export default function AdminActivity() {
         ))}
       </div>
 
-      <div style={{ display: 'flex', gap: 8, marginBottom: 12, flexWrap: 'wrap' }}>
+      <div style={{ display: 'flex', gap: 8, marginBottom: 6, flexWrap: 'wrap' }}>
         {SEVS.map(s => {
           const color = s === 'all' ? C.muted : SEV_COLOR[s]
           return (
@@ -119,27 +119,32 @@ export default function AdminActivity() {
             </button>
           )
         })}
-        <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search events..." style={{ marginLeft: 'auto', border: `1px solid ${C.border}`, borderRadius: 8, padding: '5px 12px', fontSize: 12, outline: 'none', width: 220 }} />
+      </div>
+      <div style={{ marginBottom: 12 }}>
+        <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search events..." style={{ width: '100%', border: `1px solid ${C.border}`, borderRadius: 8, padding: '7px 14px', fontSize: 13, outline: 'none', boxSizing: 'border-box' }} />
       </div>
 
       {/* Feed */}
-      <div style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 12, overflow: 'hidden' }}>
-        {filtered.length === 0 && <div style={{ padding: 30, textAlign: 'center', color: C.muted, fontSize: 13 }}>No events match the current filters.</div>}
-        {filtered.map((a, i) => {
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+        {filtered.length === 0 && <div style={{ padding: 30, textAlign: 'center', color: C.muted, fontSize: 13, background: C.surface, border: `1px solid ${C.border}`, borderRadius: 12 }}>No events match the current filters.</div>}
+        {filtered.map((a) => {
           const tc = TYPE_COLOR[a.type]
           const sc = SEV_COLOR[a.severity]
           return (
-            <div key={a.id} style={{ display: 'grid', gridTemplateColumns: '90px 90px 90px 1fr 120px', gap: 10, padding: '11px 14px', borderBottom: i < filtered.length - 1 ? `1px solid ${C.border}` : 'none', alignItems: 'center', background: a.severity === 'critical' ? 'rgba(220,38,38,.03)' : a.severity === 'warning' ? 'rgba(180,83,9,.02)' : 'transparent' }}>
-              <span style={{ fontSize: 11, color: C.muted, whiteSpace: 'nowrap' }}>{a.time}</span>
-              <span style={{ fontSize: 11, fontWeight: 700, color: tc, background: `${tc}15`, border: `1px solid ${tc}30`, borderRadius: 99, padding: '2px 8px', textAlign: 'center' }}>{TYPE_LABEL[a.type]}</span>
-              <span style={{ fontSize: 11, fontWeight: 700, color: sc, background: `${sc}15`, border: `1px solid ${sc}30`, borderRadius: 99, padding: '2px 8px', textAlign: 'center' }}>{a.severity}</span>
-              <div>
-                <div style={{ fontWeight: 700, fontSize: 12.5, color: '#1e293b', marginBottom: 2 }}>{a.title}</div>
-                <div style={{ fontSize: 11, color: C.muted, lineHeight: 1.4 }}>{a.detail}</div>
-              </div>
-              <div style={{ fontSize: 11, color: C.muted, textAlign: 'right' }}>
-                {a.actor && <div style={{ fontWeight: 600, color: '#334155' }}>{a.actor}</div>}
-                {a.actorId && <div style={{ fontFamily: 'monospace', color: C.muted }}>{a.actorId}</div>}
+            <div key={a.id} style={{ background: C.surface, border: `1px solid ${a.severity === 'critical' ? `${C.red}40` : a.severity === 'warning' ? `${C.amber}40` : C.border}`, borderRadius: 12, padding: '12px 14px', background: a.severity === 'critical' ? 'rgba(220,38,38,.03)' : a.severity === 'warning' ? 'rgba(180,83,9,.02)' : C.surface }}>
+              {/* Title + detail */}
+              <div style={{ fontWeight: 700, fontSize: 13.5, color: '#1e293b', marginBottom: 3 }}>{a.title}</div>
+              <div style={{ fontSize: 12, color: C.muted, lineHeight: 1.5, marginBottom: 10 }}>{a.detail}</div>
+              {/* Footer: badges + time + actor */}
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, alignItems: 'center' }}>
+                <span style={{ fontSize: 11, fontWeight: 700, color: tc, background: `${tc}15`, border: `1px solid ${tc}30`, borderRadius: 99, padding: '2px 9px' }}>{TYPE_LABEL[a.type]}</span>
+                <span style={{ fontSize: 11, fontWeight: 700, color: sc, background: `${sc}15`, border: `1px solid ${sc}30`, borderRadius: 99, padding: '2px 9px' }}>{a.severity}</span>
+                <span style={{ fontSize: 11, color: C.muted, marginLeft: 2 }}>{a.time}</span>
+                {a.actor && (
+                  <span style={{ fontSize: 11, fontWeight: 600, color: '#334155', marginLeft: 'auto' }}>
+                    {a.actor}{a.actorId && <span style={{ fontFamily: 'monospace', color: C.muted, fontWeight: 400 }}> · {a.actorId}</span>}
+                  </span>
+                )}
               </div>
             </div>
           )

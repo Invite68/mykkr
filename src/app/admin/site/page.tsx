@@ -107,23 +107,23 @@ All platform design and code is proprietary to My KKR. Business listings remain 
         </button>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '200px 1fr', gap: 20, alignItems: 'start' }}>
-        {/* Left nav */}
-        <div style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 12, overflow: 'hidden', position: 'sticky', top: 70 }}>
-          {SECTIONS.map(s => (
-            <button key={s.id} onClick={() => setSection(s.id)} style={{ display: 'block', width: '100%', textAlign: 'left', padding: '12px 16px', border: 'none', borderBottom: `1px solid ${C.border}`, background: section === s.id ? 'rgba(18,52,59,.06)' : 'transparent', color: section === s.id ? C.teal : C.muted, fontWeight: section === s.id ? 800 : 500, fontSize: 13, cursor: 'pointer', borderLeft: section === s.id ? `3px solid ${C.teal}` : '3px solid transparent' }}>
-              {s.label}
-            </button>
-          ))}
-        </div>
+      {/* Section nav — horizontal pill row */}
+      <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 16 }}>
+        {SECTIONS.map(s => (
+          <button key={s.id} onClick={() => setSection(s.id)} style={{ padding: '7px 15px', borderRadius: 99, fontSize: 13, fontWeight: section === s.id ? 800 : 500, cursor: 'pointer', border: `1.5px solid ${section === s.id ? C.teal : C.border}`, background: section === s.id ? C.teal : C.surface, color: section === s.id ? '#fff' : C.muted, whiteSpace: 'nowrap' }}>
+            {s.label}
+          </button>
+        ))}
+      </div>
 
+      <div>
         {/* Content */}
         <div style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 12, padding: 20 }}>
 
           {section === 'branding' && (
             <div>
               <div style={{ fontWeight: 800, fontSize: 15, color: C.teal, marginBottom: 18 }}>Branding &amp; Logo</div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 20 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 16, marginBottom: 20 }}>
                 <div>
                   <label style={{ fontSize: 12, fontWeight: 700, color: C.muted, display: 'block', marginBottom: 6 }}>App / Platform Name</label>
                   <input value={appName} onChange={e => setAppName(e.target.value)} style={{ width: '100%', border: `1px solid ${C.border}`, borderRadius: 8, padding: '9px 14px', fontSize: 14, fontWeight: 700, outline: 'none', boxSizing: 'border-box' }} />
@@ -161,7 +161,7 @@ All platform design and code is proprietary to My KKR. Business listings remain 
           {section === 'about' && (
             <div>
               <div style={{ fontWeight: 800, fontSize: 15, color: C.teal, marginBottom: 18 }}>About &amp; Platform Info</div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 16, marginBottom: 16 }}>
                 <div>
                   <label style={{ fontSize: 12, fontWeight: 700, color: C.muted, display: 'block', marginBottom: 6 }}>City / Region</label>
                   <input value={city} onChange={e => setCity(e.target.value)} style={{ width: '100%', border: `1px solid ${C.border}`, borderRadius: 8, padding: '9px 14px', fontSize: 13, outline: 'none', boxSizing: 'border-box' }} />
@@ -187,13 +187,13 @@ All platform design and code is proprietary to My KKR. Business listings remain 
               <div style={{ fontWeight: 800, fontSize: 15, color: C.teal, marginBottom: 18 }}>Social Media Links</div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                 {SOCIAL_PLATFORMS.map(platform => (
-                  <div key={platform} style={{ display: 'grid', gridTemplateColumns: '160px 1fr', gap: 12, alignItems: 'center' }}>
-                    <label style={{ fontSize: 13, fontWeight: 700, color: '#334155' }}>{platform}</label>
+                  <div key={platform} style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
+                    <label style={{ fontSize: 12, fontWeight: 700, color: C.muted }}>{platform}</label>
                     <input
                       value={socials[platform] || ''}
                       onChange={e => setSocials(s => ({ ...s, [platform]: e.target.value }))}
                       placeholder={platform === 'WhatsApp' ? '+91 XXXXX XXXXX' : `https://${platform.toLowerCase().split(' ')[0]}.com/yourpage`}
-                      style={{ border: `1px solid ${C.border}`, borderRadius: 8, padding: '9px 14px', fontSize: 13, outline: 'none' }}
+                      style={{ width: '100%', border: `1px solid ${C.border}`, borderRadius: 8, padding: '9px 14px', fontSize: 13, outline: 'none', boxSizing: 'border-box' }}
                     />
                   </div>
                 ))}
@@ -246,4 +246,5 @@ All platform design and code is proprietary to My KKR. Business listings remain 
       </div>
     </div>
   )
+
 }
