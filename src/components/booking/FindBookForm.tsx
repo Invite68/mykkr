@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useMemo, useState, type FormEvent } from 'react'
+import { useEffect, useRef, useMemo, useState, useCallback, type FormEvent } from 'react'
 import AreaSelect from '@/components/ui/AreaSelect'
 import { BusinessGrid } from '@/components/business/BusinessCard'
 import { CATEGORY_GROUPS } from '@/data/categories'
@@ -27,81 +27,66 @@ function formatDate(iso: string) {
   return d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })
 }
 
-// Mini Leaflet map component (loads lazily, no API key needed)
+// Mini map using iframe — no Next.js/Leaflet SSR conflicts, marker always visible
 function LocationMap({ lat, lon, onPin }: { lat: number; lon: number; onPin: (lat: number, lon: number) => void }) {
-  const mapRef = useRef<HTMLDivElement>(null)
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const mapInstance = useRef<any>(null)
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const markerRef = useRef<any>(null)
+  const frameRef = useRef<HTMLIFrameElement>(null)
+  const lastLatLon = useRef({ lat, lon })
 
+  // Listen for pin movements from iframe
   useEffect(() => {
-    if (typeof window === 'undefined' || !mapRef.current) return
-
-    // Dynamically load Leaflet CSS
-    if (!document.getElementById('leaflet-css')) {
-      const link = document.createElement('link')
-      link.id = 'leaflet-css'
-      link.rel = 'stylesheet'
-      link.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css'
-      document.head.appendChild(link)
+    function onMessage(e: MessageEvent) {
+      if (e.data?.type !== 'LOCATION_CHANGED') return
+      lastLatLon.current = { lat: e.data.lat, lon: e.data.lng }
+      onPin(e.data.lat, e.data.lng)
     }
+    window.addEventListener('message', onMessage)
+    return () => window.removeEventListener('message', onMessage)
+  }, [onPin])
 
-    // Dynamically load Leaflet JS
-    const initMap = async () => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const L = (await import('leaflet' as any)).default ?? (await import('leaflet' as any))
-
-      // Fix default icon path issue with webpack
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      delete (L.Icon.Default.prototype as any)._getIconUrl
-      L.Icon.Default.mergeOptions({
-        iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
-        iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
-        shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
-      })
-
-      if (mapInstance.current) {
-        mapInstance.current.setView([lat, lon], 13)
-        markerRef.current?.setLatLng([lat, lon])
-        return
-      }
-
-      const map = L.map(mapRef.current!, { zoomControl: true, scrollWheelZoom: false }).setView([lat, lon], 13)
-      mapInstance.current = map
-
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-        maxZoom: 19,
-      }).addTo(map)
-
-      const marker = L.marker([lat, lon], { draggable: true }).addTo(map)
-      markerRef.current = marker
-
-      marker.on('dragend', () => {
-        const pos = marker.getLatLng()
-        onPin(pos.lat, pos.lng)
-      })
-
-      map.on('click', (e: { latlng: { lat: number; lng: number } }) => {
-        marker.setLatLng([e.latlng.lat, e.latlng.lng])
-        onPin(e.latlng.lat, e.latlng.lng)
-      })
-    }
-
-    initMap()
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
-
-  // Update map view when coords change externally
+  // Push external coord changes into iframe
   useEffect(() => {
-    if (mapInstance.current && markerRef.current) {
-      mapInstance.current.setView([lat, lon], 13)
-      markerRef.current.setLatLng([lat, lon])
-    }
+    if (lat === lastLatLon.current.lat && lon === lastLatLon.current.lon) return
+    lastLatLon.current = { lat, lon }
+    frameRef.current?.contentWindow?.postMessage({ type: 'SET_LOCATION', lat, lng: lon }, '*')
   }, [lat, lon])
 
-  return <div ref={mapRef} className="findbk-map" aria-label="Pin your location on the map" />
+  const html = `<!DOCTYPE html>
+<html><head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<style>html,body,#map{margin:0;padding:0;width:100%;height:100%;}#map{cursor:crosshair;}</style>
+</head><body>
+<div id="map"></div>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+(function(){
+  var map=L.map('map',{zoomControl:true,scrollWheelZoom:false}).setView([${lat},${lon}],13);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
+    attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',maxZoom:19
+  }).addTo(map);
+  var mk=L.marker([${lat},${lon}],{draggable:true}).addTo(map);
+  function notify(lt,ln){window.parent.postMessage({type:'LOCATION_CHANGED',lat:lt,lng:ln},'*');}
+  mk.on('dragend',function(){var p=mk.getLatLng();notify(p.lat,p.lng);});
+  map.on('click',function(e){mk.setLatLng(e.latlng);notify(e.latlng.lat,e.latlng.lng);});
+  window.addEventListener('message',function(e){
+    if(e.data&&e.data.type==='SET_LOCATION'){mk.setLatLng([e.data.lat,e.data.lng]);map.setView([e.data.lat,e.data.lng],13);}
+  });
+})();
+</script>
+</body></html>`
+
+  return (
+    <iframe
+      ref={frameRef}
+      srcDoc={html}
+      className="findbk-map"
+      aria-label="Pin your location on the map"
+      sandbox="allow-scripts allow-same-origin"
+      style={{ border: 'none', display: 'block', width: '100%' }}
+      title="Location map"
+    />
+  )
 }
 
 export default function FindBookForm({ initialSub = '' }: { initialSub?: string }) {
@@ -235,7 +220,7 @@ export default function FindBookForm({ initialSub = '' }: { initialSub?: string 
           <LocationMap
             lat={coords.lat}
             lon={coords.lon}
-            onPin={(lat, lon) => setCoords({ lat, lon })}
+            onPin={useCallback((lat: number, lon: number) => setCoords({ lat, lon }), [])}
           />
           <p className="findbk-map-hint">Drag the pin or tap the map to set exact location</p>
         </div>
