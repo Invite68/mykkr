@@ -131,7 +131,7 @@ export default function AdminActivity() {
           const tc = TYPE_COLOR[a.type]
           const sc = SEV_COLOR[a.severity]
           return (
-            <div key={a.id} style={{ background: C.surface, border: `1px solid ${a.severity === 'critical' ? `${C.red}40` : a.severity === 'warning' ? `${C.amber}40` : C.border}`, borderRadius: 12, padding: '12px 14px', background: a.severity === 'critical' ? 'rgba(220,38,38,.03)' : a.severity === 'warning' ? 'rgba(180,83,9,.02)' : C.surface }}>
+            <div key={a.id} style={{ borderRadius: 12, padding: '12px 14px', border: `1px solid ${a.severity === 'critical' ? `${C.red}40` : a.severity === 'warning' ? `${C.amber}40` : C.border}`, background: a.severity === 'critical' ? 'rgba(220,38,38,.03)' : a.severity === 'warning' ? 'rgba(180,83,9,.02)' : C.surface }}>
               {/* Title + detail */}
               <div style={{ fontWeight: 700, fontSize: 13.5, color: '#1e293b', marginBottom: 3 }}>{a.title}</div>
               <div style={{ fontSize: 12, color: C.muted, lineHeight: 1.5, marginBottom: 10 }}>{a.detail}</div>

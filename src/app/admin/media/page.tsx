@@ -145,7 +145,7 @@ export default function AdminMedia() {
 
       {/* Add form */}
       {showAdd && (
-        <div style={{ background: C.surface, border: `1.5px dashed ${C.teal}`, borderRadius: 12, padding: 16, marginBottom: 16, display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12 }}>
+        <div style={{ background: C.surface, border: `1.5px dashed ${C.teal}`, borderRadius: 12, padding: 16, marginBottom: 16, display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px,1fr))', gap: 12 }}>
           <div style={{ gridColumn: '1/-1', fontSize: 13, fontWeight: 800, color: C.teal }}>Add New Media Item</div>
           <div>
             <div style={{ fontSize: 11, fontWeight: 700, color: C.muted, marginBottom: 4 }}>Title *</div>
@@ -185,60 +185,63 @@ export default function AdminMedia() {
       <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
         {filtered.map((item, idx) => (
           <div key={item.id} style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 12, overflow: 'hidden' }}>
-            <div style={{ display: 'grid', gridTemplateColumns: '40px 140px 1fr 80px 100px 100px 120px', gap: 10, padding: '12px 14px', alignItems: 'center' }}>
-              {/* Position controls */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 3, alignItems: 'center' }}>
-                <button onClick={() => moveUp(item.id)} disabled={idx === 0} style={{ background: 'none', border: `1px solid ${C.border}`, borderRadius: 4, width: 22, height: 18, cursor: 'pointer', fontSize: 10, color: C.muted, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>▲</button>
-                <span style={{ fontSize: 11, fontWeight: 800, color: C.teal }}>{item.position}</span>
-                <button onClick={() => moveDown(item.id)} disabled={idx === filtered.length - 1} style={{ background: 'none', border: `1px solid ${C.border}`, borderRadius: 4, width: 22, height: 18, cursor: 'pointer', fontSize: 10, color: C.muted, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>▼</button>
+            <div style={{ padding: '12px 14px' }}>
+              {/* Top row: position controls + thumbnail + title block */}
+              <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start', marginBottom: 10 }}>
+                {/* Position controls */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 3, alignItems: 'center', flexShrink: 0 }}>
+                  <button onClick={() => moveUp(item.id)} disabled={idx === 0} style={{ background: 'none', border: `1px solid ${C.border}`, borderRadius: 4, width: 22, height: 18, cursor: 'pointer', fontSize: 10, color: C.muted, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>▲</button>
+                  <span style={{ fontSize: 11, fontWeight: 800, color: C.teal }}>{item.position}</span>
+                  <button onClick={() => moveDown(item.id)} disabled={idx === filtered.length - 1} style={{ background: 'none', border: `1px solid ${C.border}`, borderRadius: 4, width: 22, height: 18, cursor: 'pointer', fontSize: 10, color: C.muted, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>▼</button>
+                </div>
+                {/* Thumbnail */}
+                <div style={{ width: 72, height: 52, flexShrink: 0, background: `${TYPE_COLOR[item.type]}15`, border: `1px solid ${TYPE_COLOR[item.type]}30`, borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <span style={{ fontSize: 10, fontWeight: 700, color: TYPE_COLOR[item.type], textTransform: 'uppercase' }}>{item.type}</span>
+                </div>
+                {/* Title + meta */}
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontWeight: 700, fontSize: 13.5, color: '#1e293b', marginBottom: 2 }}>{item.title}</div>
+                  <div style={{ fontSize: 11, color: C.muted }}>{item.description}</div>
+                  {item.expires && <div style={{ fontSize: 11, color: C.amber, marginTop: 2 }}>Expires: {item.expires}</div>}
+                  {item.link && <div style={{ fontSize: 11, color: C.teal, marginTop: 1 }}>→ {item.link}</div>}
+                </div>
               </div>
 
-              {/* Thumbnail placeholder */}
-              <div style={{ height: 60, background: `${TYPE_COLOR[item.type]}15`, border: `1px solid ${TYPE_COLOR[item.type]}30`, borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <span style={{ fontSize: 11, fontWeight: 700, color: TYPE_COLOR[item.type], textTransform: 'uppercase' }}>{item.type}</span>
-              </div>
-
-              <div>
-                <div style={{ fontWeight: 700, fontSize: 13.5, color: '#1e293b', marginBottom: 2 }}>{item.title}</div>
-                <div style={{ fontSize: 11, color: C.muted }}>{item.description}</div>
-                {item.expires && <div style={{ fontSize: 11, color: C.amber, marginTop: 2 }}>Expires: {item.expires}</div>}
-                {item.link && <div style={{ fontSize: 11, color: C.teal, marginTop: 1 }}>→ {item.link}</div>}
-              </div>
-
-              <div style={{ textAlign: 'right' }}>
-                <div style={{ fontSize: 13, fontWeight: 700, color: C.teal }}>{item.clicks.toLocaleString()}</div>
-                <div style={{ fontSize: 10, color: C.muted }}>clicks</div>
-                <div style={{ fontSize: 11, color: C.muted }}>{item.impressions.toLocaleString()} views</div>
-              </div>
-
-              <div style={{ textAlign: 'center' }}>
-                <Toggle checked={item.active} onChange={() => toggleActive(item.id)} />
-                <div style={{ fontSize: 10, color: item.active ? C.green : C.muted, marginTop: 3, fontWeight: 700 }}>{item.active ? 'Live' : 'Hidden'}</div>
-              </div>
-
-              <div style={{ fontSize: 11, color: C.muted, textAlign: 'center' }}>Added {item.added}</div>
-
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
-                <button onClick={() => editingId === item.id ? setEditingId(null) : startEdit(item)} style={{ background: 'rgba(18,52,59,.07)', border: 'none', color: C.teal, borderRadius: 6, padding: '5px 12px', fontSize: 12, fontWeight: 700, cursor: 'pointer' }}>Edit</button>
-                <button onClick={() => removeItem(item.id)} style={{ background: 'rgba(220,38,38,.08)', border: 'none', color: C.red, borderRadius: 6, padding: '5px 12px', fontSize: 12, fontWeight: 700, cursor: 'pointer' }}>Remove</button>
+              {/* Stats + toggle + actions row */}
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, alignItems: 'center', paddingTop: 10, borderTop: `1px solid ${C.border}` }}>
+                <div style={{ fontSize: 12 }}>
+                  <span style={{ fontWeight: 700, color: C.teal }}>{item.clicks.toLocaleString()}</span>
+                  <span style={{ color: C.muted }}> clicks · </span>
+                  <span style={{ fontWeight: 600, color: '#334155' }}>{item.impressions.toLocaleString()}</span>
+                  <span style={{ color: C.muted }}> views</span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginLeft: 'auto' }}>
+                  <Toggle checked={item.active} onChange={() => toggleActive(item.id)} />
+                  <span style={{ fontSize: 11, fontWeight: 700, color: item.active ? C.green : C.muted }}>{item.active ? 'Live' : 'Hidden'}</span>
+                </div>
+                <div style={{ fontSize: 11, color: C.muted }}>Added {item.added}</div>
+                <button onClick={() => editingId === item.id ? setEditingId(null) : startEdit(item)} style={{ background: 'rgba(18,52,59,.07)', border: 'none', color: C.teal, borderRadius: 6, padding: '5px 14px', fontSize: 12, fontWeight: 700, cursor: 'pointer' }}>Edit</button>
+                <button onClick={() => removeItem(item.id)} style={{ background: 'rgba(220,38,38,.08)', border: 'none', color: C.red, borderRadius: 6, padding: '5px 14px', fontSize: 12, fontWeight: 700, cursor: 'pointer' }}>Remove</button>
               </div>
             </div>
 
             {editingId === item.id && (
-              <div style={{ background: 'rgba(18,52,59,.03)', borderTop: `1px solid ${C.border}`, padding: '14px 16px', display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: 12 }}>
-                <div>
-                  <div style={{ fontSize: 11, fontWeight: 700, color: C.muted, marginBottom: 4 }}>Title</div>
-                  <input value={editData.title || ''} onChange={e => setEditData(d => ({ ...d, title: e.target.value }))} style={{ width: '100%', border: `1px solid ${C.border}`, borderRadius: 7, padding: '7px 12px', fontSize: 13, outline: 'none', boxSizing: 'border-box' }} />
+              <div style={{ background: 'rgba(18,52,59,.03)', borderTop: `1px solid ${C.border}`, padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: 10 }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px,1fr))', gap: 10 }}>
+                  <div>
+                    <div style={{ fontSize: 11, fontWeight: 700, color: C.muted, marginBottom: 4 }}>Title</div>
+                    <input value={editData.title || ''} onChange={e => setEditData(d => ({ ...d, title: e.target.value }))} style={{ width: '100%', border: `1px solid ${C.border}`, borderRadius: 7, padding: '7px 12px', fontSize: 13, outline: 'none', boxSizing: 'border-box' }} />
+                  </div>
+                  <div>
+                    <div style={{ fontSize: 11, fontWeight: 700, color: C.muted, marginBottom: 4 }}>Description</div>
+                    <input value={editData.description || ''} onChange={e => setEditData(d => ({ ...d, description: e.target.value }))} style={{ width: '100%', border: `1px solid ${C.border}`, borderRadius: 7, padding: '7px 12px', fontSize: 13, outline: 'none', boxSizing: 'border-box' }} />
+                  </div>
+                  <div>
+                    <div style={{ fontSize: 11, fontWeight: 700, color: C.muted, marginBottom: 4 }}>Link URL</div>
+                    <input value={editData.link || ''} onChange={e => setEditData(d => ({ ...d, link: e.target.value }))} style={{ width: '100%', border: `1px solid ${C.border}`, borderRadius: 7, padding: '7px 12px', fontSize: 13, outline: 'none', boxSizing: 'border-box' }} />
+                  </div>
                 </div>
-                <div>
-                  <div style={{ fontSize: 11, fontWeight: 700, color: C.muted, marginBottom: 4 }}>Description</div>
-                  <input value={editData.description || ''} onChange={e => setEditData(d => ({ ...d, description: e.target.value }))} style={{ width: '100%', border: `1px solid ${C.border}`, borderRadius: 7, padding: '7px 12px', fontSize: 13, outline: 'none', boxSizing: 'border-box' }} />
-                </div>
-                <div>
-                  <div style={{ fontSize: 11, fontWeight: 700, color: C.muted, marginBottom: 4 }}>Link URL</div>
-                  <input value={editData.link || ''} onChange={e => setEditData(d => ({ ...d, link: e.target.value }))} style={{ width: '100%', border: `1px solid ${C.border}`, borderRadius: 7, padding: '7px 12px', fontSize: 13, outline: 'none', boxSizing: 'border-box' }} />
-                </div>
-                <div style={{ display: 'flex', alignItems: 'flex-end', gap: 8 }}>
+                <div style={{ display: 'flex', gap: 8 }}>
                   <button onClick={saveEdit} style={{ background: C.green, color: '#fff', border: 'none', borderRadius: 7, padding: '7px 16px', fontWeight: 700, fontSize: 12, cursor: 'pointer' }}>Save</button>
                   <button onClick={() => setEditingId(null)} style={{ background: C.bg, color: C.muted, border: `1px solid ${C.border}`, borderRadius: 7, padding: '7px 12px', fontWeight: 700, fontSize: 12, cursor: 'pointer' }}>Cancel</button>
                 </div>
