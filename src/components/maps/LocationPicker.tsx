@@ -1,19 +1,12 @@
 'use client'
 /**
- * LocationPicker — interactive address search + map pin component.
+ * LocationPicker — address search + interactive map pin.
  *
- * SECURITY: Never imports from @/lib/here — all API calls go through
- * /api/maps/* server routes. The HERE API key never reaches the browser.
- *
- * Usage:
- *   <LocationPicker
- *     value={{ lat: 29.96, lng: 76.84, address: 'Kurukshetra, Haryana' }}
- *     onChange={(loc) => setLocation(loc)}
- *     placeholder="Search your business address..."
- *   />
+ * Uses an <iframe> with a self-contained Leaflet page (no Next.js SSR conflicts).
+ * All HERE geocoding goes through /api/maps/* server routes — key never in browser.
  */
 
-import { useState, useCallback, useRef, useEffect } from 'react'
+import { useState, useCallback, useRef, useEffect, useId } from 'react'
 
 export interface LocationValue {
   lat: number
@@ -31,7 +24,6 @@ interface Props {
   label?: string
   required?: boolean
   disabled?: boolean
-  /** If provided, map tiles are shown (requires Leaflet loaded) */
   showMap?: boolean
   mapHeight?: number
 }
@@ -44,7 +36,10 @@ interface Suggestion {
   lng?: number
 }
 
-const C = { teal: '#12343b', border: '#e2e8f0', muted: '#64748b', bg: '#f8fafc', surface: '#fff', red: '#dc2626' }
+const C = {
+  teal: '#12343b', border: '#e2e8f0', muted: '#64748b',
+  bg: '#f8fafc', surface: '#fff', red: '#dc2626',
+}
 
 export default function LocationPicker({
   value,
@@ -54,16 +49,16 @@ export default function LocationPicker({
   required,
   disabled,
   showMap = true,
-  mapHeight = 220,
+  mapHeight = 240,
 }: Props) {
+  const frameId = useId().replace(/:/g, '')
   const [query, setQuery] = useState(value?.address ?? '')
   const [suggestions, setSuggestions] = useState<Suggestion[]>([])
   const [loading, setLoading] = useState(false)
   const [open, setOpen] = useState(false)
-  const [mapReady, setMapReady] = useState(false)
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const mapRef = useRef<HTMLDivElement>(null)
-  const leafletRef = useRef<{ map: L.Map; marker: L.Marker } | null>(null)
+  const frameRef = useRef<HTMLIFrameElement>(null)
+  const frameReady = useRef(false)
 
   // Keep input in sync if parent changes value
   useEffect(() => {
@@ -71,7 +66,49 @@ export default function LocationPicker({
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [value?.address])
 
-  // ── Autocomplete search ──────────────────────────────────────────────────
+  // Send location to iframe when value changes
+  useEffect(() => {
+    if (!value || !frameRef.current || !frameReady.current) return
+    frameRef.current.contentWindow?.postMessage(
+      { type: 'SET_LOCATION', lat: value.lat, lng: value.lng },
+      '*'
+    )
+  }, [value?.lat, value?.lng])
+
+  // Listen for location changes from iframe (drag/click)
+  useEffect(() => {
+    async function onMessage(e: MessageEvent) {
+      if (e.data?.type !== 'LOCATION_CHANGED') return
+      const { lat, lng } = e.data
+      try {
+        const res = await fetch(`/api/maps/reverse?lat=${lat}&lng=${lng}`)
+        const data = await res.json() as { result?: LocationValue }
+        if (data.result) {
+          setQuery(data.result.address)
+          onChange(data.result)
+        }
+      } catch { /* ignore */ }
+    }
+    function onReady(e: MessageEvent) {
+      if (e.data?.type !== 'MAP_READY') return
+      frameReady.current = true
+      if (value) {
+        frameRef.current?.contentWindow?.postMessage(
+          { type: 'SET_LOCATION', lat: value.lat, lng: value.lng },
+          '*'
+        )
+      }
+    }
+    window.addEventListener('message', onMessage)
+    window.addEventListener('message', onReady)
+    return () => {
+      window.removeEventListener('message', onMessage)
+      window.removeEventListener('message', onReady)
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [onChange])
+
+  // Autocomplete search
   const search = useCallback(async (q: string) => {
     if (q.length < 3) { setSuggestions([]); setOpen(false); return }
     setLoading(true)
@@ -95,119 +132,48 @@ export default function LocationPicker({
     debounceRef.current = setTimeout(() => search(v), 300)
   }
 
-  // ── Select suggestion → lookup full coords ───────────────────────────────
   const selectSuggestion = async (s: Suggestion) => {
     setOpen(false)
     setQuery(s.address)
     setSuggestions([])
 
-    // If autocomplete already includes coords, use them
     if (s.lat && s.lng) {
-      onChange({ lat: s.lat, lng: s.lng, address: s.address })
-      moveMap(s.lat, s.lng)
+      const loc = { lat: s.lat, lng: s.lng, address: s.address }
+      onChange(loc)
+      frameRef.current?.contentWindow?.postMessage({ type: 'SET_LOCATION', lat: s.lat, lng: s.lng }, '*')
       return
     }
 
-    // Otherwise resolve the HERE place ID
     setLoading(true)
     try {
       const res = await fetch(`/api/maps/lookup?id=${encodeURIComponent(s.id)}`)
       const data = await res.json() as { result?: LocationValue }
       if (data.result) {
         onChange(data.result)
-        moveMap(data.result.lat, data.result.lng)
+        frameRef.current?.contentWindow?.postMessage({ type: 'SET_LOCATION', lat: data.result.lat, lng: data.result.lng }, '*')
       }
     } finally {
       setLoading(false)
     }
   }
 
-  // ── Map initialisation (Leaflet loaded dynamically) ──────────────────────
-  useEffect(() => {
-    if (!showMap || !mapRef.current || mapReady) return
-
-    let cancelled = false
-
-    async function initMap() {
-      // Leaflet is loaded via CDN in the page head; wait for it
-      const L = await loadLeaflet()
-      if (cancelled || !mapRef.current) return
-
-      const startLat = value?.lat ?? 29.9695
-      const startLng = value?.lng ?? 76.8783 // Kurukshetra default
-
-      const map = L.map(mapRef.current, { zoomControl: true, attributionControl: true })
-
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-        maxZoom: 19,
-      }).addTo(map)
-
-      map.setView([startLat, startLng], 14)
-      // Force tile repaint after container is painted
-      setTimeout(() => map.invalidateSize(), 100)
-      setTimeout(() => map.invalidateSize(), 400)
-
-      const marker = L.marker([startLat, startLng], { draggable: true }).addTo(map)
-
-      // Drag marker → reverse geocode
-      marker.on('dragend', async () => {
-        const pos = marker.getLatLng()
-        try {
-          const res = await fetch(`/api/maps/reverse?lat=${pos.lat}&lng=${pos.lng}`)
-          const data = await res.json() as { result?: LocationValue }
-          if (data.result) {
-            setQuery(data.result.address)
-            onChange(data.result)
-          }
-        } catch { /* ignore */ }
-      })
-
-      // Click map → move marker + reverse geocode
-      map.on('click', async (e: L.LeafletMouseEvent) => {
-        marker.setLatLng(e.latlng)
-        try {
-          const res = await fetch(`/api/maps/reverse?lat=${e.latlng.lat}&lng=${e.latlng.lng}`)
-          const data = await res.json() as { result?: LocationValue }
-          if (data.result) {
-            setQuery(data.result.address)
-            onChange(data.result)
-          }
-        } catch { /* ignore */ }
-      })
-
-      leafletRef.current = { map, marker }
-      setMapReady(true)
-    }
-
-    initMap()
-    return () => { cancelled = true }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [showMap, mapRef.current])
-
-  function moveMap(lat: number, lng: number) {
-    if (!leafletRef.current) return
-    const { map, marker } = leafletRef.current
-    map.setView([lat, lng], 16)
-    marker.setLatLng([lat, lng])
-  }
-
-  // ── "Use my location" ────────────────────────────────────────────────────
   const useMyLocation = () => {
     if (!navigator.geolocation) return
     navigator.geolocation.getCurrentPosition(async pos => {
       const { latitude: lat, longitude: lng } = pos.coords
-      moveMap(lat, lng)
+      frameRef.current?.contentWindow?.postMessage({ type: 'SET_LOCATION', lat, lng }, '*')
       try {
         const res = await fetch(`/api/maps/reverse?lat=${lat}&lng=${lng}`)
         const data = await res.json() as { result?: LocationValue }
-        if (data.result) {
-          setQuery(data.result.address)
-          onChange(data.result)
-        }
+        if (data.result) { setQuery(data.result.address); onChange(data.result) }
       } catch { /* ignore */ }
     })
   }
+
+  // Build the iframe src as a data URI with self-contained Leaflet HTML
+  const startLat = value?.lat ?? 29.9695
+  const startLng = value?.lng ?? 76.8783
+  const mapSrc = buildMapHtml(startLat, startLng, frameId)
 
   return (
     <div style={{ position: 'relative' }}>
@@ -233,43 +199,25 @@ export default function LocationPicker({
             outline: 'none', background: C.surface,
           }}
         />
-        {/* Location pin icon */}
         <button
           type="button"
           onClick={useMyLocation}
           title="Use my current location"
-          style={{
-            position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)',
-            background: 'none', border: 'none', cursor: 'pointer', padding: 2,
-          }}
+          style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', padding: 2 }}
         >
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={C.teal} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <circle cx="12" cy="12" r="3"/>
-            <path d="M12 1v4M12 19v4M1 12h4M19 12h4"/>
+            <circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M1 12h4M19 12h4"/>
           </svg>
         </button>
-        {loading && (
-          <span style={{ position: 'absolute', right: 36, top: '50%', transform: 'translateY(-50%)', fontSize: 11, color: C.muted }}>...</span>
-        )}
+        {loading && <span style={{ position: 'absolute', right: 36, top: '50%', transform: 'translateY(-50%)', fontSize: 11, color: C.muted }}>...</span>}
       </div>
 
       {/* Autocomplete dropdown */}
       {open && suggestions.length > 0 && (
-        <div style={{
-          position: 'absolute', top: '100%', left: 0, right: 0, zIndex: 999,
-          background: C.surface, border: `1.5px solid ${C.border}`, borderRadius: 8,
-          boxShadow: '0 4px 16px rgba(0,0,0,.10)', marginTop: 3, overflow: 'hidden',
-        }}>
+        <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, zIndex: 999, background: C.surface, border: `1.5px solid ${C.border}`, borderRadius: 8, boxShadow: '0 4px 16px rgba(0,0,0,.10)', marginTop: 3, overflow: 'hidden' }}>
           {suggestions.map(s => (
-            <button
-              key={s.id}
-              type="button"
-              onMouseDown={() => selectSuggestion(s)}
-              style={{
-                width: '100%', textAlign: 'left', padding: '9px 14px',
-                border: 'none', background: 'none', cursor: 'pointer',
-                borderBottom: `1px solid ${C.border}`, fontSize: 13,
-              }}
+            <button key={s.id} type="button" onMouseDown={() => selectSuggestion(s)}
+              style={{ width: '100%', textAlign: 'left', padding: '9px 14px', border: 'none', background: 'none', cursor: 'pointer', borderBottom: `1px solid ${C.border}`, fontSize: 13 }}
               onMouseEnter={e => (e.currentTarget.style.background = C.bg)}
               onMouseLeave={e => (e.currentTarget.style.background = 'none')}
             >
@@ -280,30 +228,20 @@ export default function LocationPicker({
         </div>
       )}
 
-      {/* Map */}
+      {/* Map iframe */}
       {showMap && (
-        <div
-          ref={mapRef}
-          style={{
-            marginTop: 10,
-            height: mapHeight,
-            width: '100%',
-            borderRadius: 10,
-            border: `1.5px solid ${C.border}`,
-            overflow: 'hidden',
-            background: C.bg,
-            display: 'block',
-            position: 'relative',
-          }}
+        <iframe
+          ref={frameRef}
+          srcDoc={mapSrc}
+          style={{ marginTop: 10, width: '100%', height: mapHeight, border: `1.5px solid ${C.border}`, borderRadius: 10, display: 'block' }}
+          title="Location map"
+          sandbox="allow-scripts allow-same-origin"
         />
       )}
 
-      {/* Selected location summary */}
       {value?.lat && value?.lng && (
         <div style={{ marginTop: 5, fontSize: 11, color: C.muted }}>
-          <svg width="10" height="10" viewBox="0 0 24 24" fill={C.teal} style={{ marginRight: 3 }}>
-            <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
-          </svg>
+          <svg width="10" height="10" viewBox="0 0 24 24" fill={C.teal} style={{ marginRight: 3 }}><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
           {value.lat.toFixed(5)}, {value.lng.toFixed(5)}
           {value.city && <span style={{ marginLeft: 6 }}>· {value.city}{value.state ? `, ${value.state}` : ''}</span>}
         </div>
@@ -312,34 +250,49 @@ export default function LocationPicker({
   )
 }
 
-// ── Leaflet loader (CDN, avoids SSR issues) ──────────────────────────────────
-declare const L: typeof import('leaflet')
+function buildMapHtml(lat: number, lng: number, id: string): string {
+  return `<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<style>
+  html,body,#map{margin:0;padding:0;width:100%;height:100%;overflow:hidden;}
+  #map{cursor:crosshair;}
+</style>
+</head>
+<body>
+<div id="map"></div>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+(function(){
+  var lat=${lat}, lng=${lng};
+  var map = L.map('map',{zoomControl:true,attributionControl:true}).setView([lat,lng],14);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
+    attribution:'© OpenStreetMap contributors',maxZoom:19
+  }).addTo(map);
+  var marker = L.marker([lat,lng],{draggable:true}).addTo(map);
 
-function loadLeaflet(): Promise<typeof L> {
-  return new Promise((resolve, reject) => {
-    if (typeof window === 'undefined') return reject(new Error('SSR'))
-    if ((window as unknown as { L?: typeof L }).L) return resolve((window as unknown as { L: typeof L }).L)
-
-    const link = document.createElement('link')
-    link.rel = 'stylesheet'
-    link.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css'
-    document.head.appendChild(link)
-
-    const script = document.createElement('script')
-    script.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js'
-    script.onload = () => {
-      // Fix default marker icons
-      const w = window as unknown as { L: typeof L }
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      delete (w.L.Icon.Default.prototype as any)._getIconUrl
-      w.L.Icon.Default.mergeOptions({
-        iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
-        iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
-        shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
-      })
-      resolve(w.L)
+  function notify(lt,ln){
+    window.parent.postMessage({type:'LOCATION_CHANGED',lat:lt,lng:ln},'*');
+  }
+  marker.on('dragend',function(){
+    var p=marker.getLatLng();notify(p.lat,p.lng);
+  });
+  map.on('click',function(e){
+    marker.setLatLng(e.latlng);
+    notify(e.latlng.lat,e.latlng.lng);
+  });
+  window.addEventListener('message',function(e){
+    if(e.data&&e.data.type==='SET_LOCATION'){
+      marker.setLatLng([e.data.lat,e.data.lng]);
+      map.setView([e.data.lat,e.data.lng],16);
     }
-    script.onerror = reject
-    document.head.appendChild(script)
-  })
+  });
+  window.parent.postMessage({type:'MAP_READY',id:'${id}'},'*');
+})();
+</script>
+</body>
+</html>`
 }
