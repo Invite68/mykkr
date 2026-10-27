@@ -1,13 +1,7 @@
 import type { Metadata, Viewport } from 'next'
 import './globals.css'
-import TopNav from '@/components/layout/TopNav'
-import NavList from '@/components/layout/NavList'
-import BottomNav from '@/components/layout/BottomNav'
-import Footer from '@/components/layout/Footer'
-import SubscriptionProvider from '@/components/subscription/SubscriptionProvider'
-import { IconWhatsApp } from '@/components/layout/NavIcons'
-import Link from 'next/link'
-import { DISCLAIMER, SITE } from '@/config/platform'
+import RootShell from '@/components/layout/RootShell'
+import { SITE } from '@/config/platform'
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE.url),
@@ -61,31 +55,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         />
       </head>
       <body>
-        <SubscriptionProvider>
-          <TopNav />
-          <div className="app-body">
-            <aside className="sidebar" aria-label="Site navigation">
-              <NavList />
-              <div className="sidebar-cta">
-                <Link href="/post" className="btn btn-accent btn-block">+ Post a Requirement</Link>
-              </div>
-            </aside>
-            <div className="main">
-              <main id="main" tabIndex={-1}>{children}</main>
-              <Footer />
-            </div>
-          </div>
-          <BottomNav />
-          <a
-            href={SITE.supportWhatsApp}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="floating-help"
-            aria-label="WhatsApp support"
-          >
-            <IconWhatsApp /> Help
-          </a>
-        </SubscriptionProvider>
+        <RootShell>{children}</RootShell>
       </body>
     </html>
   )
