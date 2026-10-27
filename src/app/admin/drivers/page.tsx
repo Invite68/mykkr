@@ -1,169 +1,295 @@
 'use client'
+import { useState, useMemo } from 'react'
 
-/**
- * Admin — Drivers Management
- * Approve, verify, suspend, track driver accounts
- */
+const C = { teal: '#12343b', gold: '#e1b382', border: '#e2e8f0', muted: '#64748b', green: '#0f766e', red: '#dc2626', amber: '#b45309', bg: '#f1f5f9', surface: '#fff', purple: '#7c3aed' }
 
-import { useState } from 'react'
+type DStatus = 'active' | 'pending' | 'suspended' | 'offline'
+type Vehicle = 'bike' | 'car' | 'auto' | 'truck' | 'tempo'
 
-const C = { teal: '#12343b', gold: '#e1b382', border: '#e2e8f0', muted: '#64748b', green: '#0f766e', red: '#dc2626', amber: '#b45309', bg: '#f8fafc' }
-
-type DriverStatus = 'active' | 'pending' | 'suspended' | 'offline'
-
-interface Driver {
-  id: string; name: string; phone: string; vehicle: string; vehicleNo: string
-  status: DriverStatus; verified: boolean; rating: number; jobs: number
-  joinedDays: number; lastSeen: string; aadhaarSubmitted: boolean
+type Driver = {
+  id: string; name: string; phone: string; vehicle: Vehicle; vehicleNo: string
+  status: DStatus; kyc: 'verified' | 'pending'; rating: number; deliveries: number
+  earnings: number; joined: string; area: string
 }
 
-const DEMO_DRIVERS: Driver[] = [
-  { id: 'd001', name: 'Ramesh Kumar',    phone: '+91 90012 55678', vehicle: 'Car',   vehicleNo: 'HR 07 AB 1234', status: 'active',    verified: true,  rating: 4.8, jobs: 142, joinedDays: 88, lastSeen: '30m ago', aadhaarSubmitted: true },
-  { id: 'd002', name: 'Suresh Yadav',    phone: '+91 88010 12345', vehicle: 'Bike',  vehicleNo: 'HR 07 CD 5678', status: 'offline',   verified: true,  rating: 4.6, jobs: 89,  joinedDays: 55, lastSeen: '2d ago',  aadhaarSubmitted: true },
-  { id: 'd003', name: 'Ravi Singh',      phone: '+91 99123 45678', vehicle: 'Car',   vehicleNo: 'HR 08 EF 9012', status: 'active',    verified: true,  rating: 4.9, jobs: 201, joinedDays: 120, lastSeen: '1h ago', aadhaarSubmitted: true },
-  { id: 'd004', name: 'Deepak Sharma',   phone: '+91 70011 22233', vehicle: 'Bike',  vehicleNo: 'HR 07 GH 3456', status: 'pending',   verified: false, rating: 0,   jobs: 0,   joinedDays: 3,  lastSeen: '3d ago', aadhaarSubmitted: true },
-  { id: 'd005', name: 'Ajay Verma',      phone: '+91 98001 23456', vehicle: 'Auto',  vehicleNo: 'HR 07 IJ 7890', status: 'pending',   verified: false, rating: 0,   jobs: 0,   joinedDays: 1,  lastSeen: '1d ago', aadhaarSubmitted: false },
-  { id: 'd006', name: 'Manoj Thakur',    phone: '+91 85501 34567', vehicle: 'Car',   vehicleNo: 'HR 09 KL 1234', status: 'suspended', verified: false, rating: 3.1, jobs: 22,  joinedDays: 42, lastSeen: '1w ago', aadhaarSubmitted: true },
-  { id: 'd007', name: 'Pradeep Kumar',   phone: '+91 76601 45678', vehicle: 'Bike',  vehicleNo: 'HR 07 MN 5678', status: 'active',    verified: true,  rating: 4.7, jobs: 67,  joinedDays: 66, lastSeen: '20m ago', aadhaarSubmitted: true },
-  { id: 'd008', name: 'Sanjay Gupta',    phone: '+91 99901 56789', vehicle: 'Auto',  vehicleNo: 'HR 07 OP 9012', status: 'offline',   verified: true,  rating: 4.4, jobs: 55,  joinedDays: 77, lastSeen: '3h ago', aadhaarSubmitted: true },
+type Job = {
+  id: string; driver: string; pickup: string; dropoff: string; status: 'active' | 'completed' | 'cancelled'
+  amount: number; distance: string; time: string; type: 'goods' | 'service' | 'taxi'
+}
+
+const DRIVERS: Driver[] = [
+  { id: 'D001', name: 'Ramesh Kumar', phone: '98765-43210', vehicle: 'bike', vehicleNo: 'HR38-AB1234', status: 'active', kyc: 'verified', rating: 4.8, deliveries: 234, earnings: 18600, joined: '10 Jan 2026', area: 'KKR City' },
+  { id: 'D002', name: 'Suresh Yadav', phone: '87654-32109', vehicle: 'car', vehicleNo: 'HR38-CD5678', status: 'active', kyc: 'verified', rating: 4.6, deliveries: 178, earnings: 24200, joined: '15 Feb 2026', area: 'Thanesar' },
+  { id: 'D003', name: 'Mohan Singh', phone: '76543-21098', vehicle: 'auto', vehicleNo: 'HR38-EF9012', status: 'offline', kyc: 'verified', rating: 4.2, deliveries: 89, earnings: 9800, joined: '20 Mar 2026', area: 'Pipli' },
+  { id: 'D004', name: 'Vijay Sharma', phone: '65432-10987', vehicle: 'truck', vehicleNo: 'HR38-GH3456', status: 'pending', kyc: 'pending', rating: 0, deliveries: 0, earnings: 0, joined: '22 Oct 2026', area: 'KKR City' },
+  { id: 'D005', name: 'Rakesh Verma', phone: '54321-09876', vehicle: 'tempo', vehicleNo: 'HR38-IJ7890', status: 'active', kyc: 'verified', rating: 4.9, deliveries: 312, earnings: 41800, joined: '05 Dec 2025', area: 'KKR City' },
+  { id: 'D006', name: 'Deepak Rawat', phone: '43210-98765', vehicle: 'bike', vehicleNo: 'HR38-KL2345', status: 'suspended', kyc: 'verified', rating: 3.1, deliveries: 45, earnings: 3200, joined: '01 Apr 2026', area: 'Shahabad' },
+  { id: 'D007', name: 'Anil Chauhan', phone: '32109-87654', vehicle: 'car', vehicleNo: 'HR38-MN6789', status: 'pending', kyc: 'pending', rating: 0, deliveries: 0, earnings: 0, joined: '25 Oct 2026', area: 'Ladwa' },
+  { id: 'D008', name: 'Prem Gupta', phone: '21098-76543', vehicle: 'bike', vehicleNo: 'HR38-OP1234', status: 'active', kyc: 'verified', rating: 4.5, deliveries: 156, earnings: 13400, joined: '14 Jun 2026', area: 'KKR City' },
+  { id: 'D009', name: 'Harish Nain', phone: '10987-65432', vehicle: 'car', vehicleNo: 'HR38-QR5678', status: 'active', kyc: 'verified', rating: 4.7, deliveries: 203, earnings: 27600, joined: '10 Aug 2026', area: 'Pehowa' },
 ]
 
-const STATUS_CONFIG: Record<DriverStatus, { label: string; color: string; bg: string }> = {
-  active:    { label: 'Active',    color: C.green, bg: '#f0fdf4' },
-  pending:   { label: 'Pending',   color: C.amber, bg: '#fffbeb' },
-  suspended: { label: 'Suspended', color: C.red,   bg: '#fef2f2' },
-  offline:   { label: 'Offline',   color: C.muted, bg: C.bg },
+const JOBS: Job[] = [
+  { id: 'J-2047', driver: 'Ramesh Kumar', pickup: 'Sharma Kirana - KKR City', dropoff: '22 Brahma Colony', status: 'active', amount: 45, distance: '3.2 km', time: '12 min ago', type: 'goods' },
+  { id: 'J-2046', driver: 'Prem Gupta', pickup: 'Sunrise Bakery', dropoff: '14 Model Town', status: 'active', amount: 30, distance: '2.1 km', time: '18 min ago', type: 'goods' },
+  { id: 'J-2045', driver: 'Suresh Yadav', pickup: 'KKR Bus Stand', dropoff: 'KUK Gate No. 3', status: 'active', amount: 120, distance: '8.4 km', time: '25 min ago', type: 'taxi' },
+  { id: 'J-2044', driver: 'Rakesh Verma', pickup: 'City Hardware Store', dropoff: 'Sector 7, KKR', status: 'completed', amount: 280, distance: '5.6 km', time: '1 hr ago', type: 'goods' },
+  { id: 'J-2043', driver: 'Harish Nain', pickup: 'KKR Railway Station', dropoff: 'Brahma Sarovar', status: 'completed', amount: 60, distance: '4.2 km', time: '2 hr ago', type: 'taxi' },
+  { id: 'J-2042', driver: 'Ramesh Kumar', pickup: 'Green Vegetable Store', dropoff: '8 Civil Lines', status: 'cancelled', amount: 35, distance: '2.8 km', time: '3 hr ago', type: 'goods' },
+]
+
+const ST: Record<DStatus, { label: string; color: string }> = {
+  active: { label: 'Active', color: C.green },
+  pending: { label: 'Pending', color: C.amber },
+  suspended: { label: 'Suspended', color: C.red },
+  offline: { label: 'Offline', color: C.muted },
 }
 
-function StatusBadge({ status }: { status: DriverStatus }) {
-  const s = STATUS_CONFIG[status]
-  return <span style={{ fontSize: 11, fontWeight: 700, color: s.color, background: s.bg, border: `1px solid ${s.color}33`, borderRadius: 99, padding: '2px 8px' }}>{s.label}</span>
+const VH: Record<Vehicle, string> = { bike: 'Bike/2W', car: 'Cab/Car', auto: 'Auto', truck: 'Mini Truck', tempo: 'Tempo' }
+
+function Badge({ label, color }: { label: string; color: string }) {
+  return <span style={{ fontSize: 11, fontWeight: 700, color, background: `${color}15`, border: `1px solid ${color}30`, borderRadius: 99, padding: '2px 8px', whiteSpace: 'nowrap' }}>{label}</span>
 }
 
-function ActionBtn({ label, color, onClick }: { label: string; color: string; onClick: () => void }) {
-  return <button onClick={onClick} style={{ fontSize: 11, fontWeight: 600, color, background: `${color}11`, border: `1px solid ${color}44`, borderRadius: 6, padding: '4px 10px', cursor: 'pointer', whiteSpace: 'nowrap' }}>{label}</button>
+function Stars({ n }: { n: number }) {
+  if (n === 0) return <span style={{ fontSize: 12, color: C.muted }}>N/A</span>
+  return <span style={{ fontSize: 13, fontWeight: 700, color: C.amber }}>{n.toFixed(1)} ★</span>
 }
 
 export default function AdminDrivers() {
-  const [drivers, setDrivers]   = useState<Driver[]>(DEMO_DRIVERS)
-  const [filter, setFilter]     = useState<DriverStatus | 'all'>('all')
-  const [q, setQ]               = useState('')
-  const [expandedId, setExpandedId] = useState<string | null>(null)
-  const [toast, setToast]       = useState('')
+  const [tab, setTab] = useState<'drivers' | 'jobs' | 'analytics'>('drivers')
+  const [drivers, setDrivers] = useState(DRIVERS)
+  const [statusFilter, setStatusFilter] = useState<string>('all')
+  const [search, setSearch] = useState('')
+  const [expanded, setExpanded] = useState<string | null>(null)
+  const [toast, setToast] = useState('')
+  const [jobFilter, setJobFilter] = useState<string>('all')
 
   function showToast(msg: string) { setToast(msg); setTimeout(() => setToast(''), 3000) }
 
-  function approve(id: string) {
-    setDrivers(prev => prev.map(d => d.id === id ? { ...d, status: 'active' as DriverStatus, verified: true } : d))
-    showToast('Driver approved and activated')
-  }
-  function suspend(id: string) {
-    setDrivers(prev => prev.map(d => d.id === id ? { ...d, status: 'suspended' as DriverStatus } : d))
-    showToast('Driver suspended')
-  }
-  function deleteDriver(id: string) {
-    if (!confirm('Remove this driver account?')) return
-    setDrivers(prev => prev.filter(d => d.id !== id))
-    showToast('Driver removed')
+  function setStatus(id: string, s: DStatus) {
+    setDrivers(d => d.map(x => x.id === id ? { ...x, status: s } : x))
+    showToast(`Driver status updated to ${ST[s].label}`)
+    setExpanded(null)
   }
 
-  const filtered = drivers.filter(d => {
-    if (filter !== 'all' && d.status !== filter) return false
-    if (q && !d.name.toLowerCase().includes(q.toLowerCase()) && !d.vehicleNo.toLowerCase().includes(q.toLowerCase())) return false
-    return true
-  })
+  const filtered = useMemo(() => {
+    return drivers.filter(d => {
+      if (statusFilter !== 'all' && d.status !== statusFilter) return false
+      const q = search.toLowerCase()
+      return !q || d.name.toLowerCase().includes(q) || d.phone.includes(q) || d.id.toLowerCase().includes(q) || d.area.toLowerCase().includes(q)
+    })
+  }, [drivers, statusFilter, search])
 
-  const counts = { active: drivers.filter(d => d.status === 'active').length, pending: drivers.filter(d => d.status === 'pending').length, suspended: drivers.filter(d => d.status === 'suspended').length }
+  const counts: Record<string, number> = {
+    all: drivers.length,
+    active: drivers.filter(d => d.status === 'active').length,
+    pending: drivers.filter(d => d.status === 'pending').length,
+    suspended: drivers.filter(d => d.status === 'suspended').length,
+    offline: drivers.filter(d => d.status === 'offline').length,
+  }
+
+  const filteredJobs = useMemo(() => {
+    if (jobFilter === 'all') return JOBS
+    return JOBS.filter(j => j.status === jobFilter)
+  }, [jobFilter])
+
+  const jobTypeColor: Record<string, string> = { goods: C.teal, taxi: C.purple, service: C.amber }
 
   return (
     <div>
       {toast && <div style={{ position: 'fixed', bottom: 24, right: 24, background: C.teal, color: '#fff', padding: '10px 18px', borderRadius: 8, fontSize: 13, fontWeight: 600, zIndex: 999, boxShadow: '0 4px 20px rgba(0,0,0,.2)' }}>{toast}</div>}
 
-      <div style={{ marginBottom: 20 }}>
-        <h1 style={{ margin: 0, fontSize: 22, fontWeight: 800, color: C.teal }}>Drivers</h1>
-        <p style={{ margin: '3px 0 0', color: C.muted, fontSize: 13 }}>{drivers.length} total · {counts.active} active · {counts.pending} pending approval</p>
+      <div style={{ marginBottom: 18 }}>
+        <h1 style={{ margin: 0, fontSize: 22, fontWeight: 900, color: C.teal }}>Drivers &amp; Rides</h1>
+        <p style={{ margin: '3px 0 0', color: C.muted, fontSize: 13 }}>Manage driver accounts, approve applications, and monitor deliveries</p>
       </div>
 
-      {/* Summary tiles */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px,1fr))', gap: 12, marginBottom: 20 }}>
-        {([
-          { label: 'Active',   value: counts.active,    color: C.green, f: 'active' as DriverStatus },
-          { label: 'Pending',  value: counts.pending,   color: C.amber, f: 'pending' as DriverStatus },
-          { label: 'Suspended',value: counts.suspended, color: C.red,   f: 'suspended' as DriverStatus },
-          { label: 'Total',    value: drivers.length,   color: C.teal,  f: 'all' as DriverStatus | 'all' },
-        ] as { label: string; value: number; color: string; f: DriverStatus | 'all' }[]).map(({ label, value, color, f }) => (
-          <button key={label} onClick={() => setFilter(f)} style={{ background: '#fff', border: `1px solid ${filter === f ? color : C.border}`, borderRadius: 12, padding: '14px 16px', cursor: 'pointer', textAlign: 'left' }}>
-            <div style={{ fontSize: 11, color: C.muted, fontWeight: 600, textTransform: 'uppercase', letterSpacing: .5 }}>{label}</div>
-            <div style={{ fontSize: 26, fontWeight: 800, color, lineHeight: 1.1 }}>{value}</div>
+      {/* Stat tiles */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px,1fr))', gap: 10, marginBottom: 18 }}>
+        {[
+          { label: 'Total Drivers', val: drivers.length, color: C.teal },
+          { label: 'Active', val: counts.active, color: C.green },
+          { label: 'Pending Approval', val: counts.pending, color: C.amber },
+          { label: 'Suspended', val: counts.suspended, color: C.red },
+          { label: 'Offline', val: counts.offline, color: C.muted },
+          { label: 'Jobs Today', val: JOBS.filter(j=>j.status==='active').length, color: C.purple },
+        ].map(t => (
+          <div key={t.label} style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 10, padding: '12px 14px' }}>
+            <div style={{ fontSize: 10, fontWeight: 700, color: C.muted, textTransform: 'uppercase', letterSpacing: .4, marginBottom: 4 }}>{t.label}</div>
+            <div style={{ fontSize: 26, fontWeight: 900, color: t.color }}>{t.val}</div>
+          </div>
+        ))}
+      </div>
+
+      {/* Tabs */}
+      <div style={{ display: 'flex', gap: 6, marginBottom: 16 }}>
+        {(['drivers', 'jobs', 'analytics'] as const).map(t => (
+          <button key={t} onClick={() => setTab(t)} style={{ padding: '7px 18px', borderRadius: 8, fontSize: 13, fontWeight: 700, cursor: 'pointer', border: tab===t ? 'none' : `1px solid ${C.border}`, background: tab===t ? C.teal : C.surface, color: tab===t ? '#fff' : C.muted }}>
+            {t === 'drivers' ? 'Driver Accounts' : t === 'jobs' ? 'Delivery Jobs' : 'Analytics'}
           </button>
         ))}
       </div>
 
-      {/* Filters */}
-      <div style={{ background: '#fff', border: `1px solid ${C.border}`, borderRadius: 10, padding: '12px 16px', marginBottom: 16, display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center' }}>
-        <input value={q} onChange={e => setQ(e.target.value)} placeholder="Search name or vehicle no…" style={{ border: `1px solid ${C.border}`, borderRadius: 7, padding: '7px 12px', fontSize: 13, width: 220, outline: 'none' }} />
-        <select value={filter} onChange={e => setFilter(e.target.value as DriverStatus | 'all')} style={{ border: `1px solid ${C.border}`, borderRadius: 7, padding: '7px 12px', fontSize: 13, background: '#fff', cursor: 'pointer' }}>
-          <option value="all">All Status</option>
-          <option value="active">Active</option>
-          <option value="pending">Pending</option>
-          <option value="offline">Offline</option>
-          <option value="suspended">Suspended</option>
-        </select>
-        <span style={{ color: C.muted, fontSize: 12, marginLeft: 'auto' }}>{filtered.length} result{filtered.length !== 1 ? 's' : ''}</span>
-      </div>
+      {tab === 'drivers' && (
+        <>
+          {/* Status filter pills */}
+          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 12 }}>
+            {(['all', 'active', 'pending', 'suspended', 'offline'] as const).map(s => (
+              <button key={s} onClick={() => setStatusFilter(s)} style={{ padding: '5px 14px', borderRadius: 99, fontSize: 12, fontWeight: 700, cursor: 'pointer', border: `1.5px solid ${statusFilter===s ? (s==='all' ? C.teal : (ST[s as DStatus]?.color || C.teal)) : C.border}`, background: statusFilter===s ? (s==='all' ? C.teal : (ST[s as DStatus]?.color || C.teal)) : C.surface, color: statusFilter===s ? '#fff' : C.muted }}>
+                {s === 'all' ? 'All' : ST[s as DStatus]?.label} ({counts[s]})
+              </button>
+            ))}
+          </div>
 
-      {/* Table */}
-      <div style={{ background: '#fff', border: `1px solid ${C.border}`, borderRadius: 12, overflow: 'hidden' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 90px 80px 70px 80px 90px 140px', gap: 8, padding: '10px 16px', background: C.bg, borderBottom: `1px solid ${C.border}`, fontSize: 11, fontWeight: 700, color: C.muted, textTransform: 'uppercase', letterSpacing: .5 }}>
-          <span>Driver</span><span>Vehicle</span><span>Status</span><span>Rating</span><span>Jobs</span><span>Verified</span><span>Actions</span>
-        </div>
-        {filtered.length === 0 && <div style={{ padding: 40, textAlign: 'center', color: C.muted }}>No drivers match your filters</div>}
-        {filtered.map(d => (
-          <div key={d.id}>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 90px 80px 70px 80px 90px 140px', gap: 8, padding: '12px 16px', borderBottom: `1px solid ${C.border}`, alignItems: 'center' }}>
-              <div>
-                <button onClick={() => setExpandedId(s => s === d.id ? null : d.id)} style={{ background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left', padding: 0 }}>
-                  <div style={{ fontWeight: 700, fontSize: 13, color: C.teal }}>{d.name}</div>
-                  <div style={{ fontSize: 11, color: C.muted }}>{d.phone} · {d.vehicleNo}</div>
-                </button>
-              </div>
-              <span style={{ fontSize: 12, color: '#334155', fontWeight: 600 }}>{d.vehicle}</span>
-              <StatusBadge status={d.status} />
-              <span style={{ fontSize: 13, color: d.rating >= 4.5 ? C.green : d.rating >= 3 ? C.amber : d.rating === 0 ? C.muted : C.red, fontWeight: 700 }}>
-                {d.rating === 0 ? '—' : d.rating.toFixed(1)}
-              </span>
-              <span style={{ fontSize: 13, color: '#334155' }}>{d.jobs}</span>
-              <span style={{ fontSize: 11, fontWeight: 700, color: d.verified ? C.green : C.amber }}>
-                {d.verified ? 'Verified' : d.aadhaarSubmitted ? 'Pending' : 'No docs'}
-              </span>
-              <div style={{ display: 'flex', gap: 5 }}>
-                {d.status === 'pending' && <ActionBtn label="Approve" color={C.green} onClick={() => approve(d.id)} />}
-                {(d.status === 'active' || d.status === 'offline') && <ActionBtn label="Suspend" color={C.red} onClick={() => suspend(d.id)} />}
-                {d.status === 'suspended' && <ActionBtn label="Activate" color={C.green} onClick={() => approve(d.id)} />}
-              </div>
+          {/* Search */}
+          <div style={{ marginBottom: 12 }}>
+            <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search by name, phone, ID, area..." style={{ width: '100%', maxWidth: 400, border: `1px solid ${C.border}`, borderRadius: 8, padding: '8px 14px', fontSize: 13, outline: 'none', boxSizing: 'border-box' }} />
+          </div>
+
+          {/* Table */}
+          <div style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 12, overflow: 'hidden' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '70px 1fr 100px 100px 80px 80px 80px', gap: 8, padding: '9px 14px', background: C.bg, borderBottom: `1px solid ${C.border}`, fontSize: 11, fontWeight: 700, color: C.muted, textTransform: 'uppercase', letterSpacing: .4 }}>
+              <span>ID</span><span>Driver</span><span>Vehicle</span><span>Status</span><span>Rating</span><span>Jobs</span><span>Manage</span>
             </div>
+            {filtered.map(d => (
+              <div key={d.id}>
+                <div style={{ display: 'grid', gridTemplateColumns: '70px 1fr 100px 100px 80px 80px 80px', gap: 8, padding: '11px 14px', borderBottom: `1px solid ${C.border}`, alignItems: 'center' }}>
+                  <span style={{ fontSize: 11, fontWeight: 700, color: C.muted, fontFamily: 'monospace' }}>{d.id}</span>
+                  <div>
+                    <div style={{ fontWeight: 700, fontSize: 13.5, color: '#1e293b' }}>{d.name}</div>
+                    <div style={{ fontSize: 11, color: C.muted }}>{d.area} · KYC: <span style={{ color: d.kyc==='verified' ? C.green : C.amber, fontWeight: 700 }}>{d.kyc}</span></div>
+                  </div>
+                  <span style={{ fontSize: 12, color: C.muted }}>{VH[d.vehicle]}</span>
+                  <Badge label={ST[d.status].label} color={ST[d.status].color} />
+                  <Stars n={d.rating} />
+                  <span style={{ fontSize: 13, fontWeight: 700, color: '#334155' }}>{d.deliveries}</span>
+                  <button onClick={() => setExpanded(expanded === d.id ? null : d.id)} style={{ background: C.bg, border: `1px solid ${C.border}`, color: C.teal, borderRadius: 6, padding: '5px 10px', fontSize: 12, fontWeight: 700, cursor: 'pointer' }}>
+                    {expanded === d.id ? 'Close' : 'Manage'}
+                  </button>
+                </div>
 
-            {expandedId === d.id && (
-              <div style={{ padding: '12px 20px', background: '#fafafa', borderBottom: `1px solid ${C.border}`, display: 'flex', gap: 20, flexWrap: 'wrap', alignItems: 'flex-start' }}>
-                <div style={{ flex: 1, minWidth: 180 }}>
-                  <div style={{ fontSize: 12, color: C.muted, fontWeight: 600, marginBottom: 6 }}>Driver Details</div>
-                  <div style={{ fontSize: 13, color: '#334155', lineHeight: 1.8 }}>
-                    <div>ID: <code style={{ fontSize: 10 }}>{d.id}</code></div>
-                    <div>Joined: <strong>{d.joinedDays} days ago</strong></div>
-                    <div>Last seen: <strong>{d.lastSeen}</strong></div>
-                    <div>Aadhaar: <strong style={{ color: d.aadhaarSubmitted ? C.green : C.red }}>{d.aadhaarSubmitted ? 'Submitted' : 'Not submitted'}</strong></div>
+                {expanded === d.id && (
+                  <div style={{ background: 'rgba(18,52,59,.03)', borderBottom: `1px solid ${C.border}`, padding: '14px 20px' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, auto)', gap: 16, marginBottom: 14, fontSize: 12, color: C.muted }}>
+                      <div><span style={{ fontWeight: 700, color: '#334155' }}>Phone: </span>{d.phone}</div>
+                      <div><span style={{ fontWeight: 700, color: '#334155' }}>Vehicle No: </span>{d.vehicleNo}</div>
+                      <div><span style={{ fontWeight: 700, color: '#334155' }}>Joined: </span>{d.joined}</div>
+                      <div><span style={{ fontWeight: 700, color: '#334155' }}>Earnings: </span>₹{d.earnings.toLocaleString()}</div>
+                    </div>
+                    <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                      {d.status === 'pending' && <>
+                        <button onClick={() => setStatus(d.id, 'active')} style={{ background: C.green, color: '#fff', border: 'none', borderRadius: 7, padding: '6px 14px', fontWeight: 700, fontSize: 12, cursor: 'pointer' }}>Approve &amp; Activate</button>
+                        <button onClick={() => setStatus(d.id, 'suspended')} style={{ background: C.red, color: '#fff', border: 'none', borderRadius: 7, padding: '6px 14px', fontWeight: 700, fontSize: 12, cursor: 'pointer' }}>Reject</button>
+                      </>}
+                      {d.status === 'active' && <>
+                        <button onClick={() => setStatus(d.id, 'offline')} style={{ background: '#64748b', color: '#fff', border: 'none', borderRadius: 7, padding: '6px 14px', fontWeight: 700, fontSize: 12, cursor: 'pointer' }}>Set Offline</button>
+                        <button onClick={() => setStatus(d.id, 'suspended')} style={{ background: C.red, color: '#fff', border: 'none', borderRadius: 7, padding: '6px 14px', fontWeight: 700, fontSize: 12, cursor: 'pointer' }}>Suspend</button>
+                      </>}
+                      {d.status === 'suspended' && <button onClick={() => setStatus(d.id, 'active')} style={{ background: C.green, color: '#fff', border: 'none', borderRadius: 7, padding: '6px 14px', fontWeight: 700, fontSize: 12, cursor: 'pointer' }}>Reinstate</button>}
+                      {d.status === 'offline' && <button onClick={() => setStatus(d.id, 'active')} style={{ background: C.green, color: '#fff', border: 'none', borderRadius: 7, padding: '6px 14px', fontWeight: 700, fontSize: 12, cursor: 'pointer' }}>Activate</button>}
+                      {d.kyc === 'pending' && <button onClick={() => { setDrivers(drv => drv.map(x => x.id === d.id ? { ...x, kyc: 'verified' } : x)); showToast('KYC verified') }} style={{ background: C.teal, color: '#fff', border: 'none', borderRadius: 7, padding: '6px 14px', fontWeight: 700, fontSize: 12, cursor: 'pointer' }}>Verify KYC</button>}
+                      <button onClick={() => { if (confirm('Delete this driver account?')) { setDrivers(dr => dr.filter(x => x.id !== d.id)); showToast('Driver deleted'); setExpanded(null) } }} style={{ background: 'rgba(220,38,38,.08)', color: C.red, border: `1px solid ${C.red}33`, borderRadius: 7, padding: '6px 14px', fontWeight: 700, fontSize: 12, cursor: 'pointer' }}>Delete Account</button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            ))}
+            {filtered.length === 0 && <div style={{ padding: 30, textAlign: 'center', color: C.muted, fontSize: 13 }}>No drivers match the current filters.</div>}
+          </div>
+        </>
+      )}
+
+      {tab === 'jobs' && (
+        <>
+          <div style={{ display: 'flex', gap: 6, marginBottom: 12 }}>
+            {(['all', 'active', 'completed', 'cancelled'] as const).map(s => (
+              <button key={s} onClick={() => setJobFilter(s)} style={{ padding: '5px 14px', borderRadius: 99, fontSize: 12, fontWeight: 700, cursor: 'pointer', border: `1.5px solid ${jobFilter===s ? C.teal : C.border}`, background: jobFilter===s ? C.teal : C.surface, color: jobFilter===s ? '#fff' : C.muted }}>
+                {s.charAt(0).toUpperCase()+s.slice(1)} ({JOBS.filter(j => s==='all' || j.status===s).length})
+              </button>
+            ))}
+          </div>
+          <div style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 12, overflow: 'hidden' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '80px 120px 1fr 1fr 80px 80px 90px', gap: 8, padding: '9px 14px', background: C.bg, borderBottom: `1px solid ${C.border}`, fontSize: 11, fontWeight: 700, color: C.muted, textTransform: 'uppercase', letterSpacing: .4 }}>
+              <span>Job ID</span><span>Driver</span><span>Pickup</span><span>Dropoff</span><span>Amount</span><span>Distance</span><span>Status</span>
+            </div>
+            {filteredJobs.map(j => {
+              const sc = j.status === 'active' ? C.green : j.status === 'completed' ? C.teal : C.red
+              return (
+                <div key={j.id} style={{ display: 'grid', gridTemplateColumns: '80px 120px 1fr 1fr 80px 80px 90px', gap: 8, padding: '11px 14px', borderBottom: `1px solid ${C.border}`, alignItems: 'center', fontSize: 12 }}>
+                  <div>
+                    <div style={{ fontWeight: 800, color: C.teal, fontFamily: 'monospace', fontSize: 11 }}>{j.id}</div>
+                    <span style={{ fontSize: 10, fontWeight: 700, color: jobTypeColor[j.type], background: `${jobTypeColor[j.type]}15`, borderRadius: 99, padding: '1px 6px' }}>{j.type}</span>
+                  </div>
+                  <span style={{ fontWeight: 600, color: '#334155' }}>{j.driver}</span>
+                  <span style={{ color: C.muted, fontSize: 11 }}>{j.pickup}</span>
+                  <span style={{ color: C.muted, fontSize: 11 }}>{j.dropoff}</span>
+                  <span style={{ fontWeight: 800, color: C.teal }}>₹{j.amount}</span>
+                  <span style={{ color: C.muted }}>{j.distance}</span>
+                  <Badge label={j.status.charAt(0).toUpperCase()+j.status.slice(1)} color={sc} />
+                </div>
+              )
+            })}
+          </div>
+        </>
+      )}
+
+      {tab === 'analytics' && (
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+          {/* Vehicle distribution */}
+          <div style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 12, padding: 16 }}>
+            <div style={{ fontWeight: 800, fontSize: 13, color: C.teal, marginBottom: 14 }}>Vehicle Type Distribution</div>
+            {Object.entries(VH).map(([v, label]) => {
+              const cnt = drivers.filter(d => d.vehicle === v).length
+              const pct = Math.round(cnt / drivers.length * 100)
+              return (
+                <div key={v} style={{ marginBottom: 10 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, fontWeight: 600, marginBottom: 4 }}>
+                    <span style={{ color: '#334155' }}>{label}</span>
+                    <span style={{ color: C.muted }}>{cnt} ({pct}%)</span>
+                  </div>
+                  <div style={{ height: 8, background: C.bg, borderRadius: 99, overflow: 'hidden' }}>
+                    <div style={{ width: `${pct}%`, height: '100%', background: C.purple, borderRadius: 99, transition: 'width .3s' }} />
                   </div>
                 </div>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, paddingTop: 20 }}>
-                  <ActionBtn label="Send Message" color={C.teal} onClick={() => showToast('Message sent (demo)')} />
-                  <ActionBtn label="View Jobs History" color={C.teal} onClick={() => showToast('Jobs history (demo)')} />
-                  <ActionBtn label="Delete Account" color={C.red} onClick={() => deleteDriver(d.id)} />
-                </div>
-              </div>
-            )}
+              )
+            })}
           </div>
-        ))}
-      </div>
+
+          {/* Top earners */}
+          <div style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 12, padding: 16 }}>
+            <div style={{ fontWeight: 800, fontSize: 13, color: C.teal, marginBottom: 14 }}>Top Earners</div>
+            {[...drivers].filter(d => d.earnings > 0).sort((a, b) => b.earnings - a.earnings).slice(0, 5).map((d, i) => (
+              <div key={d.id} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '8px 0', borderBottom: i < 4 ? `1px solid ${C.border}` : 'none' }}>
+                <div style={{ width: 26, height: 26, borderRadius: '50%', background: i === 0 ? C.gold : C.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 800, color: i === 0 ? C.teal : C.muted, flexShrink: 0 }}>{i + 1}</div>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontWeight: 700, fontSize: 13, color: '#334155' }}>{d.name}</div>
+                  <div style={{ fontSize: 11, color: C.muted }}>{d.deliveries} deliveries · {VH[d.vehicle]}</div>
+                </div>
+                <div style={{ fontWeight: 900, fontSize: 14, color: C.green }}>₹{d.earnings.toLocaleString()}</div>
+              </div>
+            ))}
+          </div>
+
+          {/* Status breakdown */}
+          <div style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 12, padding: 16, gridColumn: '1 / -1' }}>
+            <div style={{ fontWeight: 800, fontSize: 13, color: C.teal, marginBottom: 14 }}>Status Breakdown</div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 12 }}>
+              {(['active', 'pending', 'suspended', 'offline'] as const).map(s => {
+                const cnt = drivers.filter(d => d.status === s).length
+                const pct = Math.round(cnt / drivers.length * 100)
+                return (
+                  <div key={s} style={{ background: C.bg, borderRadius: 10, padding: 14, textAlign: 'center' }}>
+                    <div style={{ fontSize: 28, fontWeight: 900, color: ST[s].color }}>{cnt}</div>
+                    <div style={{ fontSize: 12, color: C.muted, marginTop: 2 }}>{ST[s].label}</div>
+                    <div style={{ fontSize: 11, color: ST[s].color, fontWeight: 700 }}>{pct}%</div>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
