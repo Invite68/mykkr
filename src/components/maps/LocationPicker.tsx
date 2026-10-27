@@ -138,15 +138,15 @@ export default function LocationPicker({
 
       const map = L.map(mapRef.current, { zoomControl: true, attributionControl: true })
 
-      // HERE tile layer — raster tiles, no API key in browser URL
-      // We use HERE's free tile URL with the key embedded server-side via a proxy rewrite
-      // For now use OpenStreetMap tiles (no key needed) + HERE geocoding
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
         maxZoom: 19,
       }).addTo(map)
 
       map.setView([startLat, startLng], 14)
+      // Force tile repaint after container is painted
+      setTimeout(() => map.invalidateSize(), 100)
+      setTimeout(() => map.invalidateSize(), 400)
 
       const marker = L.marker([startLat, startLng], { draggable: true }).addTo(map)
 
@@ -285,9 +285,15 @@ export default function LocationPicker({
         <div
           ref={mapRef}
           style={{
-            marginTop: 10, height: mapHeight, borderRadius: 10,
-            border: `1.5px solid ${C.border}`, overflow: 'hidden',
+            marginTop: 10,
+            height: mapHeight,
+            width: '100%',
+            borderRadius: 10,
+            border: `1.5px solid ${C.border}`,
+            overflow: 'hidden',
             background: C.bg,
+            display: 'block',
+            position: 'relative',
           }}
         />
       )}

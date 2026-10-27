@@ -38,6 +38,8 @@ export default function BusinessMap({ lat, lng, name, address, height = 240, zoo
       }).addTo(map)
 
       map.setView([lat, lng], zoom)
+      setTimeout(() => map?.invalidateSize(), 100)
+      setTimeout(() => map?.invalidateSize(), 400)
 
       const marker = Leaflet.marker([lat, lng]).addTo(map)
       marker.bindPopup(`<b>${name}</b>${address ? `<br>${address}` : ''}`)
@@ -52,6 +54,9 @@ export default function BusinessMap({ lat, lng, name, address, height = 240, zoo
       ref={ref}
       style={{
         height,
+        width: '100%',
+        display: 'block',
+        position: 'relative',
         borderRadius: 10,
         border: '1.5px solid #e2e8f0',
         overflow: 'hidden',
