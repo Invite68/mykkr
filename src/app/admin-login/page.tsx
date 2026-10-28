@@ -3,6 +3,15 @@
  *
  * Redirects here when someone tries to access /admin/* without
  * a valid admin session cookie.
+ *
+ * SECURITY — open redirect guard (for when auth is wired up):
+ * The middleware sets ?next=<pathname> for post-login redirect.
+ * When reading that param, you MUST validate it:
+ *   const next = searchParams.get('next') ?? '/admin'
+ *   const safePath = next.startsWith('/admin/') || next === '/admin'
+ *     ? next : '/admin'
+ *   router.push(safePath)
+ * NEVER pass `next` to router.push() without this check — open redirect.
  */
 
 import type { Metadata } from 'next'
