@@ -50,39 +50,14 @@ function LocationMap({ lat, lon, onPin }: { lat: number; lon: number; onPin: (la
     frameRef.current?.contentWindow?.postMessage({ type: 'SET_LOCATION', lat, lng: lon }, '*')
   }, [lat, lon])
 
-  const origin = typeof window !== 'undefined' ? window.location.origin : ''
-  const html = `<!DOCTYPE html>
-<html><head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
-<link rel="stylesheet" href="/leaflet/leaflet.css"/>
-<style>html,body,#map{margin:0;padding:0;width:100%;height:100%;}#map{cursor:crosshair;}</style>
-</head><body>
-<div id="map"></div>
-<script src="/leaflet/leaflet.js"></script>
-<script>
-var TILE_BASE=${JSON.stringify(origin)};
-(function(){
-  var map=L.map('map',{zoomControl:true,scrollWheelZoom:false}).setView([${lat},${lon}],13);
-  L.tileLayer(TILE_BASE+'/api/maps/tiles/{z}/{x}/{y}.png',{
-    attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',maxZoom:19
-  }).addTo(map);
-  var mk=L.marker([${lat},${lon}],{draggable:true}).addTo(map);
-  function notify(lt,ln){window.parent.postMessage({type:'LOCATION_CHANGED',lat:lt,lng:ln},'*');}
-  mk.on('dragend',function(){var p=mk.getLatLng();notify(p.lat,p.lng);});
-  map.on('click',function(e){mk.setLatLng(e.latlng);notify(e.latlng.lat,e.latlng.lng);});
-  window.addEventListener('message',function(e){
-    if(e.data&&e.data.type==='SET_LOCATION'){mk.setLatLng([e.data.lat,e.data.lng]);map.setView([e.data.lat,e.data.lng],13);}
-  });
-})();
-</script>
-</body></html>`
+  // Use a proper route so the frame gets its own CSP headers (allows inline scripts)
+  const src = `/map-frame/location?lat=${lat}&lon=${lon}`
 
   return (
     <div style={{ position: 'relative', isolation: 'isolate', zIndex: 1 }}>
       <iframe
         ref={frameRef}
-        srcDoc={html}
+        src={src}
         className="findbk-map"
         aria-label="Pin your location on the map"
         style={{ border: 'none', display: 'block', width: '100%' }}

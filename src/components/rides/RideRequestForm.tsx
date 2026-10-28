@@ -504,7 +504,7 @@ export default function RideRequestForm() {
   }
 
   const links = pickup && dropoff ? mapsLinks(pickup, dropoff) : null
-  const origin = typeof window !== 'undefined' ? window.location.origin : ''
+  // origin was used for srcDoc map HTML — now served via /map-frame/dual-pin route
 
   return (
     <form className="panel" onSubmit={onSubmit} noValidate>
@@ -563,12 +563,7 @@ export default function RideRequestForm() {
         </div>
 
         {/* Interactive dual-pin map */}
-        <DualPinMap
-          frameRef={frameRef}
-          origin={origin}
-          pickup={pickup}
-          dropoff={dropoff}
-        />
+        <DualPinMap frameRef={frameRef} />
 
         {/* Address inputs below the map */}
         <div className="form-row" style={{ marginTop: 14 }}>
@@ -698,22 +693,15 @@ export default function RideRequestForm() {
  */
 function DualPinMap({
   frameRef,
-  origin,
-  pickup,
-  dropoff,
 }: {
   frameRef: React.RefObject<HTMLIFrameElement | null>
-  origin: string
-  pickup: Point | null
-  dropoff: Point | null
 }) {
-  const html = buildDualPinHtml(origin)
-
+  // Use a proper route so the frame gets its own CSP headers (allows inline scripts)
   return (
     <div style={{ position: 'relative', isolation: 'isolate', zIndex: 1 }}>
       <iframe
         ref={frameRef}
-        srcDoc={html}
+        src="/map-frame/dual-pin"
         className="map-frame"
         title="Pickup and drop-off map — drag green pin for pickup, red for drop-off"
         aria-label="Interactive map: drag green pin to set pickup location, red pin to set drop-off location"
