@@ -54,11 +54,11 @@ function LocationMap({ lat, lon, onPin }: { lat: number; lon: number; onPin: (la
 <html><head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<link rel="stylesheet" href="/leaflet/leaflet.css"/>
 <style>html,body,#map{margin:0;padding:0;width:100%;height:100%;}#map{cursor:crosshair;}</style>
 </head><body>
 <div id="map"></div>
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="/leaflet/leaflet.js"></script>
 <script>
 (function(){
   var map=L.map('map',{zoomControl:true,scrollWheelZoom:false}).setView([${lat},${lon}],13);

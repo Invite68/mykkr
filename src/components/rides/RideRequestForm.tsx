@@ -450,7 +450,7 @@ function buildRouteMapHtml(
       ? `L.marker([${pickup.lat},${pickup.lon}],{title:${JSON.stringify(pickup.label)}}).addTo(map).bindPopup(${JSON.stringify('<b>Pickup:</b> ' + pickup.label)}).openPopup();`
       : '',
     dropoff
-      ? `var di=L.icon({iconUrl:'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',iconRetinaUrl:'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',shadowUrl:'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',iconSize:[25,41],iconAnchor:[12,41],popupAnchor:[1,-34],shadowSize:[41,41]});L.marker([${dropoff.lat},${dropoff.lon}],{title:${JSON.stringify(dropoff.label)},icon:di}).addTo(map).bindPopup(${JSON.stringify('<b>Drop-off:</b> ' + dropoff.label)});`
+      ? `var di=L.icon({iconUrl:'/leaflet/images/marker-icon.png',iconRetinaUrl:'/leaflet/images/marker-icon-2x.png',shadowUrl:'/leaflet/images/marker-shadow.png',iconSize:[25,41],iconAnchor:[12,41],popupAnchor:[1,-34],shadowSize:[41,41]});L.marker([${dropoff.lat},${dropoff.lon}],{title:${JSON.stringify(dropoff.label)},icon:di}).addTo(map).bindPopup(${JSON.stringify('<b>Drop-off:</b> ' + dropoff.label)});`
       : '',
     pickup && dropoff
       ? `map.fitBounds([[${pickup.lat},${pickup.lon}],[${dropoff.lat},${dropoff.lon}]],{padding:[30,30]});`
@@ -462,12 +462,12 @@ function buildRouteMapHtml(
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<link rel="stylesheet" href="/leaflet/leaflet.css"/>
 <style>html,body,#map{margin:0;padding:0;width:100%;height:100%;overflow:hidden;}</style>
 </head>
 <body>
 <div id="map"></div>
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="/leaflet/leaflet.js"></script>
 <script>
 (function(){
   var map=L.map('map',{zoomControl:true,scrollWheelZoom:false}).setView([${lat},${lon}],${zoom});
