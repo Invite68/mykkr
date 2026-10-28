@@ -50,12 +50,10 @@ export async function geocode(query: string, signal?: AbortSignal): Promise<LatL
 
 export function mapsLinks(a: LatLon, b: LatLon) {
   return {
+    // Exact lat/lon coordinates passed — no address guessing by the maps app
     google: `https://www.google.com/maps/dir/?api=1&origin=${a.lat},${a.lon}&destination=${b.lat},${b.lon}&travelmode=driving`,
     apple: `https://maps.apple.com/?saddr=${a.lat},${a.lon}&daddr=${b.lat},${b.lon}&dirflg=d`,
-    // OLA Maps — India's top ride-hailing app deep link (opens OLA app or website)
-    ola: `https://book.olacabs.com/?serviceType=p2p&utm_source=widget&lat=${a.lat}&lng=${a.lon}&drop_lat=${b.lat}&drop_lng=${b.lon}`,
-    waze: `https://waze.com/ul?ll=${b.lat},${b.lon}&navigate=yes`,
-    osm: `https://www.openstreetmap.org/directions?from=${a.lat},${a.lon}&to=${b.lat},${b.lon}&engine=fossgis_osrm_car`,
+    waze: `https://waze.com/ul?ll=${b.lat},${b.lon}&navigate=yes&from=${a.lat},${a.lon}`,
   }
 }
 

@@ -210,25 +210,22 @@ function LocationField({
         )}
       </span>
 
-      {/* Quick-pick popular spots */}
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5, marginBottom: 8 }}>
+      {/* Quick-pick popular spots — dropdown */}
+      <select
+        className="select"
+        value={point && QUICK_LOCATIONS.some(l => l.label === point.label) ? point.label : ''}
+        onChange={e => {
+          const loc = QUICK_LOCATIONS.find(l => l.label === e.target.value)
+          if (loc) pickQuick(loc)
+        }}
+        style={{ marginBottom: 8 }}
+        aria-label={`Popular ${label.toLowerCase()} locations`}
+      >
+        <option value="">— Popular locations —</option>
         {QUICK_LOCATIONS.map(loc => (
-          <button
-            key={loc.label}
-            type="button"
-            onMouseDown={() => pickQuick(loc)}
-            style={{
-              fontSize: 11, padding: '4px 10px', borderRadius: 99,
-              border: `1.5px solid ${point?.label === loc.label ? pinColor : '#e2e8f0'}`,
-              background: point?.label === loc.label ? pinColor : '#f8fafc',
-              color: point?.label === loc.label ? '#fff' : '#334155',
-              cursor: 'pointer', fontWeight: 600, transition: 'all .15s',
-            }}
-          >
-            {loc.label}
-          </button>
+          <option key={loc.label} value={loc.label}>{loc.label}</option>
         ))}
-      </div>
+      </select>
 
       {/* Text input + Search button */}
       <div style={{ display: 'flex', gap: 6 }}>
@@ -596,11 +593,18 @@ export default function RideRequestForm() {
               <strong>Share route with driver:</strong> open in your preferred maps app
             </p>
             <div className="chips">
-              <a className="chip" href={links.google} target="_blank" rel="noopener noreferrer">Google Maps</a>
-              <a className="chip" href={links.ola} target="_blank" rel="noopener noreferrer">OLA</a>
-              <a className="chip" href={links.apple} target="_blank" rel="noopener noreferrer">Apple Maps</a>
-              <a className="chip" href={links.waze} target="_blank" rel="noopener noreferrer">Waze</a>
-              <a className="chip" href={links.osm} target="_blank" rel="noopener noreferrer">OpenStreetMap</a>
+              <a className="chip" href={links.google} target="_blank" rel="noopener noreferrer">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                Google Maps
+              </a>
+              <a className="chip" href={links.apple} target="_blank" rel="noopener noreferrer">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                Apple Maps
+              </a>
+              <a className="chip" href={links.waze} target="_blank" rel="noopener noreferrer">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>
+                Waze
+              </a>
             </div>
           </div>
         )}
@@ -790,15 +794,36 @@ var TILE_BASE=${JSON.stringify(origin)};
   // Track whether each pin has been explicitly positioned
   var pickupSet  = false;
   var dropoffSet = false;
-  var line = null;
+  var routeLayer = null;
 
-  function updateLine() {
-    if(line){ map.removeLayer(line); line=null; }
-    if(pickupSet && dropoffSet){
-      var a = pickupMk.getLatLng();
-      var b = dropoffMk.getLatLng();
-      line = L.polyline([a,b],{color:'#6366f1',weight:3,dashArray:'6 4',opacity:0.7}).addTo(map);
-    }
+  function updateRoute() {
+    if(routeLayer){ map.removeLayer(routeLayer); routeLayer=null; }
+    if(!pickupSet || !dropoffSet) return;
+    var a = pickupMk.getLatLng();
+    var b = dropoffMk.getLatLng();
+    // Try OSRM for real road route
+    var osrmUrl = 'https://router.project-osrm.org/route/v1/driving/'
+      + a.lng+','+a.lat+';'+b.lng+','+b.lat
+      + '?overview=full&geometries=geojson';
+    fetch(osrmUrl)
+      .then(function(r){ return r.json(); })
+      .then(function(data){
+        if(routeLayer){ map.removeLayer(routeLayer); routeLayer=null; }
+        var coords = data && data.routes && data.routes[0] && data.routes[0].geometry && data.routes[0].geometry.coordinates;
+        if(coords && coords.length){
+          // OSRM returns [lng,lat] — Leaflet needs [lat,lng]
+          var latlngs = coords.map(function(c){ return [c[1],c[0]]; });
+          routeLayer = L.polyline(latlngs,{color:'#6366f1',weight:4,opacity:0.85}).addTo(map);
+        } else {
+          // Fallback: straight dashed line
+          routeLayer = L.polyline([a,b],{color:'#6366f1',weight:3,dashArray:'6 4',opacity:0.7}).addTo(map);
+        }
+      })
+      .catch(function(){
+        // Offline fallback
+        if(routeLayer){ map.removeLayer(routeLayer); routeLayer=null; }
+        routeLayer = L.polyline([a,b],{color:'#6366f1',weight:3,dashArray:'6 4',opacity:0.7}).addTo(map);
+      });
   }
 
   function notifyPickup() {
@@ -812,12 +837,12 @@ var TILE_BASE=${JSON.stringify(origin)};
 
   pickupMk.on('dragend', function(){
     pickupSet = true;
-    updateLine();
+    updateRoute();
     notifyPickup();
   });
   dropoffMk.on('dragend', function(){
     dropoffSet = true;
-    updateLine();
+    updateRoute();
     notifyDropoff();
   });
 
@@ -826,12 +851,12 @@ var TILE_BASE=${JSON.stringify(origin)};
     if(!pickupSet){
       pickupMk.setLatLng(e.latlng);
       pickupSet = true;
-      updateLine();
+      updateRoute();
       notifyPickup();
     } else if(!dropoffSet){
       dropoffMk.setLatLng(e.latlng);
       dropoffSet = true;
-      updateLine();
+      updateRoute();
       notifyDropoff();
     }
   });
@@ -850,10 +875,10 @@ var TILE_BASE=${JSON.stringify(origin)};
         } else {
           map.setView(ll, 15);
         }
-        updateLine();
+        updateRoute();
       } else {
         pickupSet = false;
-        updateLine();
+        updateRoute();
       }
     }
 
@@ -867,10 +892,10 @@ var TILE_BASE=${JSON.stringify(origin)};
         } else {
           map.setView(ll2, 15);
         }
-        updateLine();
+        updateRoute();
       } else {
         dropoffSet = false;
-        updateLine();
+        updateRoute();
       }
     }
   });
