@@ -61,11 +61,26 @@ export async function GET(req: NextRequest) {
     )
   }
 
-  // Fetch current open jobs to send as initial snapshot
+  // Fetch current open jobs to send as initial snapshot.
+  // Explicit safe column list — customer_phone and driver_phone NEVER in stream
+  // (encrypted ciphertext leaks structural info and is recoverable if key leaks).
+  const SAFE_COLS = `
+    id, ref, mode, status, rider_id,
+    customer_name,
+    pickup_label, pickup_lat, pickup_lon,
+    dropoff_label, dropoff_lat, dropoff_lon,
+    vehicle_id, distance_km,
+    fare_estimate, fare_client_paise, fare_server_paise, fare_accepted_paise,
+    driver_id, driver_name, driver_vehicle,
+    notes, scheduled_at,
+    accepted_at, picked_up_at, completed_at, cancelled_at,
+    cancel_by, cancel_reason,
+    created_at, updated_at`
+
   let initialJobs: SafeJob[] = []
   try {
     const rows = await query<Job>(
-      `SELECT * FROM jobs
+      `SELECT ${SAFE_COLS} FROM jobs
        WHERE status = 'open'
        ORDER BY created_at DESC
        LIMIT 50`

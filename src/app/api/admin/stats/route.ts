@@ -18,7 +18,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-import { requireAuth }               from '@/lib/firebase-admin'
+import { requireAdmin }              from '@/lib/admin-auth'
 import { readLimiter, checkLimit }   from '@/lib/rate-limit'
 import { query }                     from '@/lib/db'
 
@@ -56,22 +56,9 @@ export async function GET(req: NextRequest) {
   const limited = checkLimit(readLimiter, req)
   if (limited) return limited
 
-  // ── Auth ──────────────────────────────────────────────────────────────────
-  let auth: { uid: string; phone: string }
-  try {
-    auth = await requireAuth(req)
-  } catch {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  }
-
-  // ── Role check — only admins see this ────────────────────────────────────
-  const userRows = await query<{ role: string }>(
-    'SELECT role FROM users WHERE firebase_uid = $1 LIMIT 1',
-    [auth.uid]
-  )
-  if (!userRows.length || userRows[0].role !== 'admin') {
-    return NextResponse.json({ error: 'Forbidden — admin only' }, { status: 403 })
-  }
+  // ── Auth — requireAdmin handles both token verification and role check ──────
+  const admin = await requireAdmin(req)
+  if (admin instanceof NextResponse) return admin
 
   // ── Fetch all stats in parallel ───────────────────────────────────────────
   try {

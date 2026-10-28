@@ -3,13 +3,31 @@
  *
  * Server-side proxy for HERE reverse geocoding (coords → address).
  * API key NEVER leaves this file.
+ *
+ * Security:
+ *   - Firebase Auth required
+ *   - Rate limited (mapsLimiter: 60/min)
+ *   - Coordinate range validated
  */
 import { NextRequest, NextResponse } from 'next/server'
-import { reverseGeocode } from '@/lib/here'
+import { reverseGeocode }            from '@/lib/here'
+import { requireAuth }               from '@/lib/firebase-admin'
+import { mapsLimiter, checkLimit }   from '@/lib/rate-limit'
 
 export const runtime = 'nodejs'
 
 export async function GET(req: NextRequest) {
+  // ── Rate limit ──────────────────────────────────────────────────────────────
+  const limited = checkLimit(mapsLimiter, req)
+  if (limited) return limited
+
+  // ── Auth ────────────────────────────────────────────────────────────────────
+  try {
+    await requireAuth(req)
+  } catch {
+    return NextResponse.json({ result: null }, { status: 401 })
+  }
+
   const latStr = req.nextUrl.searchParams.get('lat')
   const lngStr = req.nextUrl.searchParams.get('lng')
 

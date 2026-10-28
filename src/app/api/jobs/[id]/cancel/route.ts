@@ -63,11 +63,7 @@ export async function POST(
     return NextResponse.json({ error: 'Invalid JSON body' }, { status: 400 })
   }
 
-  const { role, reason } = body
-  if (role !== 'rider' && role !== 'driver') {
-    return NextResponse.json({ error: 'role must be "rider" or "driver"' }, { status: 400 })
-  }
-
+  const { reason } = body
   const reasonStr = reason ? String(reason).trim().slice(0, 500) : null
 
   // ── Fetch job ─────────────────────────────────────────────────────────────────
@@ -77,6 +73,25 @@ export async function POST(
   }
 
   const job = rows[0]
+
+  // ── Derive role server-side from DB — NEVER trust client-supplied role ────────
+  // V13 fix: client previously supplied role = 'rider' | 'driver' in body.
+  // A malicious driver could claim role 'rider' to cancel any open job.
+  // Now role is determined solely from auth.uid vs job's rider_id / driver_id.
+  let role: 'rider' | 'driver' | null = null
+  if (auth.uid === job.rider_id) {
+    role = 'rider'
+  } else if (auth.uid === job.driver_id) {
+    role = 'driver'
+  }
+
+  if (role === null) {
+    // Authenticated user is neither the rider nor the assigned driver
+    return NextResponse.json(
+      { error: 'Forbidden — you are not associated with this job' },
+      { status: 403 }
+    )
+  }
 
   // ── Terminal check ────────────────────────────────────────────────────────────
   if (TERMINAL.includes(job.status)) {
@@ -88,10 +103,7 @@ export async function POST(
 
   // ── Role-specific authorisation & transition ──────────────────────────────────
   if (role === 'driver') {
-    // Driver must be the one assigned to the job
-    if (job.driver_id !== auth.uid) {
-      return NextResponse.json({ error: 'Forbidden — not your job' }, { status: 403 })
-    }
+    // Ownership already verified above (driver_id === auth.uid)
     if (!DRIVER_CANCELLABLE.includes(job.status)) {
       return NextResponse.json(
         { error: `Driver cannot cancel from status "${job.status}"` },

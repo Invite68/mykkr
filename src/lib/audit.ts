@@ -2,7 +2,8 @@
  * Audit log helper — appends to audit_log table.
  * Always fire-and-forget on errors (never block the main response).
  */
-import { query } from '@/lib/db'
+import { query }        from '@/lib/db'
+import { getClientIp } from '@/lib/rate-limit'
 import { NextRequest } from 'next/server'
 
 interface AuditParams {
@@ -18,7 +19,7 @@ interface AuditParams {
 
 export async function logAudit(p: AuditParams): Promise<void> {
   try {
-    const ip        = p.req?.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ?? null
+    const ip        = p.req ? getClientIp(p.req) : null
     const userAgent = p.req?.headers.get('user-agent') ?? null
     await query(
       `INSERT INTO audit_log

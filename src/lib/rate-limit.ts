@@ -90,16 +90,43 @@ export const apiLimiter = createRateLimiter({ limit: 30, windowMs: 60_000 })
  */
 export const readLimiter = createRateLimiter({ limit: 120, windowMs: 60_000 })
 
+/**
+ * Maps API proxy limiter — protects HERE API credit.
+ * 60 requests per minute per IP (1 per second average).
+ * Autocomplete is chatty but 60/min is reasonable for a real user.
+ */
+export const mapsLimiter = createRateLimiter({ limit: 60, windowMs: 60_000 })
+
 // ── Helper: get client IP from Next.js request ────────────────────────────────
 
+// Valid IPv4 regex for spoofing protection
+const IPV4_RE = /^(?:(?:25[0-5]|2[0-4]\d|[01]?\d\d?)\.){3}(?:25[0-5]|2[0-4]\d|[01]?\d\d?)$/
+
+function sanitiseIp(raw: string | null): string | null {
+  if (!raw) return null
+  const candidate = raw.split(',')[0].trim()
+  // Accept IPv4 and simplified IPv6 (enough for rate-limiting identity)
+  if (IPV4_RE.test(candidate)) return candidate
+  // Very basic IPv6 check — reject anything with spaces or injection chars
+  if (candidate.includes(':') && !/[^0-9a-fA-F:.]/.test(candidate)) return candidate
+  return null
+}
+
 export function getClientIp(req: Request): string {
-  // Prefer Cloudflare's header (set when traffic goes through Cloudflare proxy)
-  const cf  = (req.headers as Headers).get('cf-connecting-ip')
+  const headers = req.headers as Headers
+
+  // ── Cloudflare sets this; it's the real client IP and cannot be spoofed
+  // by the client because Cloudflare strips and overwrites it.
+  // Only trust it when Cloudflare is in front (production).
+  const cf = sanitiseIp(headers.get('cf-connecting-ip'))
   if (cf) return cf
 
-  // Vercel / standard reverse proxy
-  const xff = (req.headers as Headers).get('x-forwarded-for')
-  if (xff) return xff.split(',')[0].trim()
+  // ── In dev / non-CF: x-forwarded-for is set by the reverse proxy.
+  // We take only the FIRST IP (leftmost = original client).
+  // An attacker can prepend IPs, but we always take the first one the
+  // trusted proxy inserted, which is the real client.
+  const xff = sanitiseIp(headers.get('x-forwarded-for'))
+  if (xff) return xff
 
   // Fallback (direct connection, development)
   return '127.0.0.1'

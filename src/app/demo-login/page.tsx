@@ -4,10 +4,18 @@
  * Lets you experience the app exactly as a real Business Owner or Customer
  * would. Sets a demo cookie so every page knows who "you" are.
  *
- * REMOVE THIS ROUTE before going live — it bypasses real auth.
- * Guarded by NEXT_PUBLIC_DEMO_ENABLED=true (not set in production).
+ * SECURITY (V15 fix):
+ *   This page is gated by the DEMO_ENABLED server env var (not NEXT_PUBLIC_).
+ *   If the var is absent or anything other than 'true', this page returns 404.
+ *   This means it is completely invisible in production — robots, crawlers,
+ *   and attackers see only "Not Found" with no indication the route exists.
+ *
+ *   DO NOT set DEMO_ENABLED=true in production. Remove the var entirely.
+ *   The env var is intentionally NOT prefixed with NEXT_PUBLIC_ so it is
+ *   never embedded in the browser bundle.
  */
 
+import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import type { Metadata } from 'next'
 
@@ -64,6 +72,12 @@ const ACCOUNTS = [
 // ── Page ──────────────────────────────────────────────────────────────────
 
 export default function DemoLoginPage() {
+  // V15 security gate: only render if explicitly enabled server-side.
+  // In production (DEMO_ENABLED unset or not 'true'), this returns 404.
+  if (process.env.DEMO_ENABLED !== 'true') {
+    notFound()
+  }
+
   return (
     <main style={{ maxWidth: 720, margin: '0 auto', padding: '32px 16px 64px' }}>
 

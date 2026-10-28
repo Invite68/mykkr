@@ -1,18 +1,21 @@
 import { NextResponse, type NextRequest } from 'next/server'
+import { randomBytes } from 'crypto'
 
 /**
  * Edge middleware — runs before every matched request.
  *
  * Security responsibilities:
- * 1. Block direct access to /dashboard/admin from non-localhost origins
- *    (real auth guard goes here once Firebase JWT is wired)
- * 2. Add Cache-Control: no-store to all /dashboard/* routes so browsers
- *    never cache private dashboard pages
- * 3. Block /api/* routes from cross-origin simple requests (CSRF defence)
- *    by checking Origin header against the allowed host
+ * 1. Block /admin/* UI pages from unauthenticated requests.
+ *    (Redirect to /admin-login. Full token verification is done in
+ *    the server component AdminAuthGuard — edge can't run Firebase Admin SDK.)
+ * 2. Generate a per-request CSP nonce and inject it into the CSP header.
+ *    The nonce replaces NONCE_PLACEHOLDER in the header set by next.config.js.
+ *    Server components read it via x-nonce response header.
+ * 3. Add Cache-Control: no-store to all /dashboard/* and /admin/* routes.
+ * 4. Block /api/* routes from cross-origin requests (CSRF defence).
  *
- * NOTE: This is a lightweight guard. Full server-side auth (Firebase JWT
- * verification in API route handlers) is required before going live.
+ * NOTE: Full server-side admin auth is in src/app/admin/auth-guard.tsx.
+ * The middleware only handles the quick redirect; the guard does DB role check.
  */
 
 const ALLOWED_HOSTS = [
@@ -22,24 +25,70 @@ const ALLOWED_HOSTS = [
   '127.0.0.1',
 ]
 
+// Paths that are part of the admin area but are public (login page)
+const ADMIN_PUBLIC_PATHS = ['/admin-login']
+
 export function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl
-  const res = NextResponse.next()
 
-  // ── 1. No-cache for dashboard pages ─────────────────────────────
-  if (pathname.startsWith('/dashboard')) {
+  // ── 1. Generate per-request CSP nonce ─────────────────────────────────────
+  // Only generate in production (dev uses unsafe-inline for HMR).
+  const isProd = process.env.NODE_ENV === 'production'
+  const nonce  = isProd ? randomBytes(16).toString('base64') : ''
+
+  const res = NextResponse.next({
+    request: {
+      headers: new Headers(req.headers),
+    },
+  })
+
+  // Pass nonce to server components via a response header
+  if (isProd && nonce) {
+    res.headers.set('x-nonce', nonce)
+
+    // Replace NONCE_PLACEHOLDER in the static CSP header from next.config.js
+    const existingCsp = res.headers.get('Content-Security-Policy') ?? ''
+    if (existingCsp.includes('NONCE_PLACEHOLDER')) {
+      res.headers.set(
+        'Content-Security-Policy',
+        existingCsp.replace(/NONCE_PLACEHOLDER/g, nonce)
+      )
+    }
+  }
+
+  // ── 2. Admin UI protection — redirect to login ─────────────────────────────
+  // This is a fast redirect guard. The actual Firebase token + role check
+  // happens inside the admin layout's AdminAuthGuard server component.
+  // The edge runtime cannot run Firebase Admin SDK (no Node.js crypto).
+  if (
+    pathname.startsWith('/admin') &&
+    !ADMIN_PUBLIC_PATHS.some(p => pathname === p || pathname.startsWith(p + '/'))
+  ) {
+    // Check for session cookie. If absent, redirect immediately.
+    const sessionCookie = req.cookies.get('__session')?.value
+    if (!sessionCookie) {
+      const loginUrl = new URL('/admin-login', req.url)
+      loginUrl.searchParams.set('next', pathname)
+      return NextResponse.redirect(loginUrl)
+    }
+    // Cookie present — let AdminAuthGuard do the full verification
+  }
+
+  // ── 3. No-cache for private pages ─────────────────────────────────────────
+  if (pathname.startsWith('/dashboard') || pathname.startsWith('/admin')) {
     res.headers.set('Cache-Control', 'no-store, max-age=0')
     res.headers.set('Pragma', 'no-cache')
   }
 
-  // ── 2. CSRF: reject cross-origin POST/PUT/PATCH/DELETE to /api ──
+  // ── 4. CSRF: reject cross-origin POST/PUT/PATCH/DELETE to /api ────────────
   if (
     pathname.startsWith('/api/') &&
     ['POST', 'PUT', 'PATCH', 'DELETE'].includes(req.method)
   ) {
     const origin = req.headers.get('origin')
-    const host = req.headers.get('host') ?? ''
-    // Allow same-origin (no Origin header) or matching host
+    const host   = req.headers.get('host') ?? ''
+    void host // checked indirectly via ALLOWED_HOSTS
+
     if (origin) {
       try {
         const originHost = new URL(origin).hostname
@@ -51,15 +100,13 @@ export function middleware(req: NextRequest) {
         return new NextResponse('Forbidden', { status: 403 })
       }
     }
+
     // Require Origin or Referer on state-mutating API calls
     // (defends against CSRF from browsers that don't send Origin)
     const referer = req.headers.get('referer')
     if (!origin && !referer) {
-      // Allow health check and CI crawlers (no Referer is fine for GET)
-      // Block POST/PUT/PATCH/DELETE with no origin or referer
       return new NextResponse('Forbidden', { status: 403 })
     }
-    void host // unused — future use for host allowlist checks
   }
 
   return res

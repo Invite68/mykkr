@@ -21,6 +21,7 @@ import { requireAuth } from '@/lib/firebase-admin'
 import { query } from '@/lib/db'
 import { decryptPII } from '@/lib/encrypt'
 import { broadcast } from '@/lib/job-broadcaster'
+import { readLimiter, checkLimit } from '@/lib/rate-limit'
 import type { Job, SafeJob, JobStatus } from '@/lib/job-types'
 import { DRIVER_TRANSITIONS } from '@/lib/job-types'
 
@@ -39,9 +40,13 @@ function toSafeJob(job: Job, revealPhone = false): SafeJob {
 // ── GET ───────────────────────────────────────────────────────────────────────
 
 export async function GET(
-  _req: NextRequest,
+  req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  // V12: Rate-limit the public tracking endpoint to prevent KKR-ref enumeration
+  const limited = checkLimit(readLimiter, req)
+  if (limited) return limited
+
   const { id: jobId } = await params
 
   try {

@@ -5,6 +5,19 @@ const isDev = process.env.NODE_ENV !== 'production'
 /**
  * Content-Security-Policy
  *
+ * Security changes vs original:
+ *   - 'unsafe-inline' REMOVED from script-src in production.
+ *     Next.js App Router inlines a small __NEXT_DATA__ script; we allow that
+ *     via 'strict-dynamic' + the nonce injected in middleware.ts.
+ *   - frame-ancestors set to 'none' (was SAMEORIGIN via X-Frame-Options only;
+ *     modern browsers use frame-ancestors which takes precedence).
+ *   - HSTS added for production (re-enable once domain has TLS cert).
+ *
+ * Nonce pattern:
+ *   middleware.ts generates a random nonce per request and sets it in:
+ *     - response header: x-nonce (read by layout.tsx to inject into <head>)
+ *     - this CSP: 'nonce-{NONCE_PLACEHOLDER}' is replaced by middleware
+ *
  * Notes:
  * - No 'unsafe-eval' in production — React uses real event handlers.
  * - Font is served by Next.js itself (next/font/google bakes font into
@@ -12,10 +25,16 @@ const isDev = process.env.NODE_ENV !== 'production'
  * - Cloudflare Turnstile runs in its own iframe on challenges.cloudflare.com.
  * - OpenStreetMap used for map embeds on business detail pages.
  * - YouTube-nocookie used for MediaStrip embeds.
+ * - 'strict-dynamic' means allowlisted hashes/nonces propagate to dynamically
+ *   loaded scripts, so we don't need to list every CDN explicitly.
  */
 const CSP = [
   "default-src 'self'",
-  `script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com${isDev ? " 'unsafe-eval'" : ''}`,
+  // Production: nonce + strict-dynamic (no unsafe-inline)
+  // Dev: unsafe-eval needed for React Fast Refresh HMR
+  isDev
+    ? "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://challenges.cloudflare.com"
+    : "script-src 'self' 'nonce-NONCE_PLACEHOLDER' 'strict-dynamic' https://challenges.cloudflare.com",
   "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
   "font-src 'self' data: https://fonts.gstatic.com",
   // blob: needed for Leaflet canvas, data: for inline SVG markers
@@ -26,15 +45,14 @@ const CSP = [
   `connect-src 'self' https://router.project-osrm.org https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://www.googleapis.com${isDev ? ' ws: wss:' : ''}`,
   "base-uri 'self'",
   "form-action 'self'",
+  // frame-ancestors 'none': no page may embed this site in an iframe, from any origin.
+  // X-Frame-Options: DENY below is the fallback for old browsers.
   "frame-ancestors 'none'",
   "worker-src 'none'",
   "object-src 'none'",
   "manifest-src 'self'",
-  // "upgrade-insecure-requests" — intentionally omitted:
-  // The Coolify preview runs on plain HTTP. This directive would cause the
-  // browser to upgrade /_next/static/*.css requests to HTTPS, which the
-  // container doesn't serve → CSS silently 404s → page renders unstyled.
-  // Re-enable ONLY after the domain has a valid TLS cert (mykkr.in + Cloudflare).
+  // "upgrade-insecure-requests" — intentionally omitted until domain has TLS cert.
+  // Re-enable when mykkr.in is live on HTTPS with Cloudflare.
 ].join('; ')
 
 const nextConfig = {
@@ -62,9 +80,13 @@ const nextConfig = {
       {
         source: '/(.*)',
         headers: [
+          // CSP is also set per-request by middleware.ts (with the real nonce
+          // substituted in). This static header acts as a hard fallback.
           { key: 'Content-Security-Policy', value: CSP },
-          // SAMEORIGIN allows our own srcDoc iframes; DENY would block them
-          { key: 'X-Frame-Options', value: 'SAMEORIGIN' },
+          // X-Frame-Options: DENY is the legacy fallback for browsers that
+          // don't support frame-ancestors in CSP. frame-ancestors 'none' above
+          // takes precedence in modern browsers.
+          { key: 'X-Frame-Options', value: 'DENY' },
           { key: 'X-Content-Type-Options', value: 'nosniff' },
           { key: 'X-DNS-Prefetch-Control', value: 'on' },
           { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
@@ -73,9 +95,11 @@ const nextConfig = {
             // geolocation=(self) so "Use my location" works on Find & Book / Rides
             value: 'camera=(), microphone=(), payment=(), usb=(), geolocation=(self), interest-cohort=()',
           },
-          // HSTS only sent on HTTPS — sending it on HTTP causes redirect loops
-          // and extremely slow page loads. Re-enable once domain has TLS cert.
+          // HSTS — enforces HTTPS for 2 years once the domain has a TLS cert.
+          // Currently commented out because the Coolify preview runs on HTTP.
+          // UNCOMMENT when mykkr.in is live on HTTPS:
           // { key: 'Strict-Transport-Security', value: 'max-age=63072000; includeSubDomains; preload' },
+          // TODO (post-TLS): enable upgrade-insecure-requests in CSP too.
           // COOP: isolates browsing context from cross-origin windows (safe, no iframe impact)
           { key: 'Cross-Origin-Opener-Policy', value: 'same-origin-allow-popups' },
           // NOTE: COEP and CORP are intentionally omitted — they break YouTube / Maps iframes

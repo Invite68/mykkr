@@ -119,15 +119,31 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'mode must be "ride" or "deliver"' }, { status: 400 })
   }
 
+  // Explicit safe column list — customer_phone and driver_phone NEVER returned
+  // even as encrypted ciphertext (ciphertext leaks structural information and
+  // is recoverable if the encryption key is ever compromised).
+  const SAFE_COLS = `
+    id, ref, mode, status, rider_id,
+    customer_name,
+    pickup_label, pickup_lat, pickup_lon,
+    dropoff_label, dropoff_lat, dropoff_lon,
+    vehicle_id, distance_km,
+    fare_estimate, fare_client_paise, fare_server_paise, fare_accepted_paise,
+    driver_id, driver_name, driver_vehicle,
+    notes, scheduled_at,
+    accepted_at, picked_up_at, completed_at, cancelled_at,
+    cancel_by, cancel_reason,
+    created_at, updated_at`
+
   try {
     const rows = mode
       ? await query<Job>(
-          `SELECT * FROM jobs WHERE status = 'open' AND mode = $1
+          `SELECT ${SAFE_COLS} FROM jobs WHERE status = 'open' AND mode = $1
            ORDER BY created_at DESC LIMIT $2`,
           [mode, limit]
         )
       : await query<Job>(
-          `SELECT * FROM jobs WHERE status = 'open'
+          `SELECT ${SAFE_COLS} FROM jobs WHERE status = 'open'
            ORDER BY created_at DESC LIMIT $1`,
           [limit]
         )
@@ -147,8 +163,9 @@ export async function POST(req: NextRequest) {
   if (limited) return limited
 
   // ── Auth ─────────────────────────────────────────────────────────────────────
+  let auth: { uid: string; phone: string }
   try {
-    await requireAuth(req)
+    auth = await requireAuth(req)
   } catch {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
@@ -244,6 +261,7 @@ export async function POST(req: NextRequest) {
     const rows = await query<Job>(
       `INSERT INTO jobs (
          ref, mode,
+         rider_id,
          customer_name, customer_phone,
          pickup_label, pickup_lat, pickup_lon,
          dropoff_label, dropoff_lat, dropoff_lon,
@@ -251,11 +269,12 @@ export async function POST(req: NextRequest) {
          fare_client_paise, fare_server_paise, fare_accepted_paise,
          notes, scheduled_at
        ) VALUES (
-         $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18
+         $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19
        )
        RETURNING *`,
       [
         ref, mode,
+        auth.uid,          // rider_id — the firebase UID of the customer who created the job
         nameStr, encPhone,
         pickStr, pickLatN, pickLonN,
         dropStr, dropLatN, dropLonN,

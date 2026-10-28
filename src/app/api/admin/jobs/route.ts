@@ -30,7 +30,20 @@ export async function GET(req: NextRequest) {
 
   const [rows, countRows] = await Promise.all([
     query<Record<string, unknown>>(
-      `SELECT j.*,
+      // Explicit safe columns — customer_phone and driver_phone NEVER returned,
+      // even in encrypted form (ciphertext leaks structural information).
+      `SELECT
+              j.id, j.ref, j.mode, j.status,
+              j.customer_name,
+              j.pickup_label, j.pickup_lat, j.pickup_lon,
+              j.dropoff_label, j.dropoff_lat, j.dropoff_lon,
+              j.vehicle_id, j.distance_km,
+              j.fare_estimate, j.fare_accepted_paise, j.fare_server_paise,
+              j.driver_id, j.driver_name, j.driver_vehicle,
+              j.notes, j.cancel_by, j.cancel_reason,
+              j.scheduled_at, j.accepted_at, j.picked_up_at,
+              j.completed_at, j.cancelled_at,
+              j.created_at, j.updated_at,
               u.display_name AS rider_name,
               dp.name        AS driver_name
        FROM jobs j

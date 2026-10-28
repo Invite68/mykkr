@@ -21,6 +21,10 @@ export interface Job {
   mode:          JobMode
   status:        JobStatus
 
+  // rider_id stores the Firebase UID of the customer who created the job.
+  // Used server-side to authorise rider cancellations without trusting client role claims.
+  rider_id:       string  | null
+
   customer_name:  string
   customer_phone: string   // AES-256-GCM encrypted
 
@@ -32,8 +36,11 @@ export interface Job {
   dropoff_lon:    number
 
   vehicle_id:     string
-  distance_km:    number  | null
-  fare_estimate:  number  | null   // paise
+  distance_km:        number  | null
+  fare_estimate:      number  | null   // accepted fare in rupees (legacy col)
+  fare_client_paise:  number  | null   // fare the client submitted
+  fare_server_paise:  number  | null   // fare the server calculated
+  fare_accepted_paise: number | null   // final fare used (within ±30% of server)
   notes:          string  | null
   scheduled_at:   string  | null   // ISO timestamp
 
