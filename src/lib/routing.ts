@@ -38,19 +38,22 @@ export function haversineKm(a: LatLon, b: LatLon): number {
 }
 
 export async function geocode(query: string, signal?: AbortSignal): Promise<LatLon | null> {
-  // Use our server-side proxy — avoids mixed-content block on HTTP deployments
-  const url = '/api/maps/nominatim?q=' + encodeURIComponent(`${query} Kurukshetra Haryana India`)
+  // Use HERE geocoding proxy — significantly better for Indian addresses than Nominatim
+  const url = '/api/maps/geocode?q=' + encodeURIComponent(`${query} Kurukshetra Haryana India`)
   const res = await fetch(url, { signal })
   if (!res.ok) return null
-  const data = (await res.json()) as { lat: string; lon: string }[]
-  if (!data.length) return null
-  return { lat: parseFloat(data[0].lat), lon: parseFloat(data[0].lon) }
+  const data = (await res.json()) as { results?: Array<{ lat: number; lng: number }> }
+  const first = data.results?.[0]
+  if (!first) return null
+  return { lat: first.lat, lon: first.lng }
 }
 
 export function mapsLinks(a: LatLon, b: LatLon) {
   return {
     google: `https://www.google.com/maps/dir/?api=1&origin=${a.lat},${a.lon}&destination=${b.lat},${b.lon}&travelmode=driving`,
     apple: `https://maps.apple.com/?saddr=${a.lat},${a.lon}&daddr=${b.lat},${b.lon}&dirflg=d`,
+    // OLA Maps — India's top ride-hailing app deep link (opens OLA app or website)
+    ola: `https://book.olacabs.com/?serviceType=p2p&utm_source=widget&lat=${a.lat}&lng=${a.lon}&drop_lat=${b.lat}&drop_lng=${b.lon}`,
     waze: `https://waze.com/ul?ll=${b.lat},${b.lon}&navigate=yes`,
     osm: `https://www.openstreetmap.org/directions?from=${a.lat},${a.lon}&to=${b.lat},${b.lon}&engine=fossgis_osrm_car`,
   }
