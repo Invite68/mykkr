@@ -16,14 +16,14 @@ const isDev = process.env.NODE_ENV !== 'production'
 const CSP = [
   "default-src 'self'",
   `script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com${isDev ? " 'unsafe-eval'" : ''}`,
-  // unpkg.com needed for Leaflet CSS loaded dynamically in FindBookForm LocationMap
-  "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://unpkg.com",
+  "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
   "font-src 'self' data: https://fonts.gstatic.com",
-  // unpkg.com needed for Leaflet default marker icon images
-  "img-src 'self' data: blob: https://*.tile.openstreetmap.org https://nominatim.openstreetmap.org https://unpkg.com",
-  "frame-src https://www.openstreetmap.org https://www.youtube-nocookie.com https://challenges.cloudflare.com",
+  // blob: needed for Leaflet canvas, data: for inline SVG markers
+  "img-src 'self' data: blob:",
+  // 'self' allows our srcDoc iframes; youtube/cloudflare for embeds
+  "frame-src 'self' https://www.youtube-nocookie.com https://challenges.cloudflare.com",
   // Firebase Auth (Phone OTP): identitytoolkit for token exchange, securetoken for refresh
-  `connect-src 'self' https://nominatim.openstreetmap.org https://router.project-osrm.org https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://www.googleapis.com${isDev ? ' ws: wss:' : ''}`,
+  `connect-src 'self' https://router.project-osrm.org https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://www.googleapis.com${isDev ? ' ws: wss:' : ''}`,
   "base-uri 'self'",
   "form-action 'self'",
   "frame-ancestors 'none'",
@@ -63,7 +63,8 @@ const nextConfig = {
         source: '/(.*)',
         headers: [
           { key: 'Content-Security-Policy', value: CSP },
-          { key: 'X-Frame-Options', value: 'DENY' },
+          // SAMEORIGIN allows our own srcDoc iframes; DENY would block them
+          { key: 'X-Frame-Options', value: 'SAMEORIGIN' },
           { key: 'X-Content-Type-Options', value: 'nosniff' },
           { key: 'X-DNS-Prefetch-Control', value: 'on' },
           { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
@@ -72,10 +73,9 @@ const nextConfig = {
             // geolocation=(self) so "Use my location" works on Find & Book / Rides
             value: 'camera=(), microphone=(), payment=(), usb=(), geolocation=(self), interest-cohort=()',
           },
-          {
-            key: 'Strict-Transport-Security',
-            value: 'max-age=63072000; includeSubDomains; preload',
-          },
+          // HSTS only sent on HTTPS — sending it on HTTP causes redirect loops
+          // and extremely slow page loads. Re-enable once domain has TLS cert.
+          // { key: 'Strict-Transport-Security', value: 'max-age=63072000; includeSubDomains; preload' },
           // COOP: isolates browsing context from cross-origin windows (safe, no iframe impact)
           { key: 'Cross-Origin-Opener-Policy', value: 'same-origin-allow-popups' },
           // NOTE: COEP and CORP are intentionally omitted — they break YouTube / Maps iframes
@@ -89,9 +89,9 @@ const nextConfig = {
       // warning ("can break development behavior") and caused stale CSS caching
       // on the Coolify preview. Let Next.js manage its own static asset cache.
 
-      // No-cache for API routes
+      // No-cache for API routes (except tile + nominatim proxies which set their own cache headers)
       {
-        source: '/api/(.*)',
+        source: '/api/((?!maps/tiles|maps/nominatim).*)',
         headers: [
           { key: 'Cache-Control', value: 'no-store, max-age=0' },
         ],
