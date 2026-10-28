@@ -79,14 +79,17 @@ var TILE_BASE=${JSON.stringify(origin)};
 </body></html>`
 
   return (
-    <iframe
-      ref={frameRef}
-      srcDoc={html}
-      className="findbk-map"
-      aria-label="Pin your location on the map"
-      style={{ border: 'none', display: 'block', width: '100%' }}
-      title="Location map"
-    />
+    <div style={{ position: 'relative', isolation: 'isolate', zIndex: 1 }}>
+      <iframe
+        ref={frameRef}
+        srcDoc={html}
+        className="findbk-map"
+        aria-label="Pin your location on the map"
+        style={{ border: 'none', display: 'block', width: '100%' }}
+        title="Location map"
+        sandbox="allow-scripts allow-same-origin"
+      />
+    </div>
   )
 }
 

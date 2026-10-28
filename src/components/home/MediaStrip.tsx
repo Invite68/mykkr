@@ -79,6 +79,8 @@ export default function MediaStrip() {
                   loading="lazy"
                   allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                   allowFullScreen
+                  sandbox="allow-scripts allow-same-origin allow-presentation allow-popups"
+                  style={{ contain: 'strict' }}
                 />
               ) : (
                 <div
