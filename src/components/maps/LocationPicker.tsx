@@ -235,7 +235,6 @@ export default function LocationPicker({
           srcDoc={mapSrc}
           style={{ marginTop: 10, width: '100%', height: mapHeight, border: `1.5px solid ${C.border}`, borderRadius: 10, display: 'block' }}
           title="Location map"
-          sandbox="allow-scripts allow-same-origin"
         />
       )}
 

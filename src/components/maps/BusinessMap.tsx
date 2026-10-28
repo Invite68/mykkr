@@ -55,7 +55,6 @@ export default function BusinessMap({ lat, lng, name, address, height = 240, zoo
         display: 'block',
       }}
       title={`Map — ${name}`}
-      sandbox="allow-scripts allow-same-origin"
     />
   )
 }

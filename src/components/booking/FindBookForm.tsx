@@ -82,7 +82,6 @@ function LocationMap({ lat, lon, onPin }: { lat: number; lon: number; onPin: (la
       srcDoc={html}
       className="findbk-map"
       aria-label="Pin your location on the map"
-      sandbox="allow-scripts allow-same-origin"
       style={{ border: 'none', display: 'block', width: '100%' }}
       title="Location map"
     />
