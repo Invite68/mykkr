@@ -1,5 +1,11 @@
 import { NextResponse, type NextRequest } from 'next/server'
-import { randomBytes } from 'crypto'
+
+/** Web Crypto API — available in Edge runtime (no Node.js 'crypto' import needed) */
+function randomBase64(bytes = 16): string {
+  const buf = new Uint8Array(bytes)
+  crypto.getRandomValues(buf)
+  return btoa(String.fromCharCode(...buf))
+}
 
 /**
  * Edge middleware — runs before every matched request.
@@ -34,7 +40,7 @@ export function middleware(req: NextRequest) {
   // ── 1. Generate per-request CSP nonce ─────────────────────────────────────
   // Only generate in production (dev uses unsafe-inline for HMR).
   const isProd = process.env.NODE_ENV === 'production'
-  const nonce  = isProd ? randomBytes(16).toString('base64') : ''
+  const nonce  = isProd ? randomBase64(16) : ''
 
   const res = NextResponse.next({
     request: {
