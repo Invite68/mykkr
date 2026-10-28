@@ -16,6 +16,7 @@ interface Props {
 export default function BusinessMap({ lat, lng, name, address, height = 240, zoom = 15 }: Props) {
   const escapedName = name.replace(/'/g, "\\'").replace(/</g, '&lt;')
   const escapedAddr = (address ?? '').replace(/'/g, "\\'").replace(/</g, '&lt;')
+  const origin = typeof window !== 'undefined' ? window.location.origin : ''
 
   const html = `<!DOCTYPE html>
 <html>
@@ -31,10 +32,11 @@ export default function BusinessMap({ lat, lng, name, address, height = 240, zoo
 <div id="map"></div>
 <script src="/leaflet/leaflet.js"></script>
 <script>
+var TILE_BASE=${JSON.stringify(origin)};
 (function(){
   var map = L.map('map',{zoomControl:true,scrollWheelZoom:false,attributionControl:true})
     .setView([${lat},${lng}],${zoom});
-  L.tileLayer(window.location.origin+'/api/maps/tiles/{z}/{x}/{y}.png',{
+  L.tileLayer(TILE_BASE+'/api/maps/tiles/{z}/{x}/{y}.png',{
     attribution:'© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',maxZoom:19
   }).addTo(map);
   var marker = L.marker([${lat},${lng}]).addTo(map);

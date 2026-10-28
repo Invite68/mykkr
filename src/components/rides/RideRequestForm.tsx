@@ -294,9 +294,10 @@ export default function RideRequestForm() {
   }
 
   const links = pickup && dropoff ? mapsLinks(pickup, dropoff) : null
+  const origin = typeof window !== 'undefined' ? window.location.origin : ''
 
   // Build self-contained Leaflet HTML for the route/location preview map
-  const mapHtml = buildRouteMapHtml(pickup, dropoff)
+  const mapHtml = buildRouteMapHtml(pickup, dropoff, origin)
 
   return (
     <form className="panel" onSubmit={onSubmit} noValidate>
@@ -439,7 +440,8 @@ export default function RideRequestForm() {
 /** Build self-contained Leaflet HTML for ride route/location preview map */
 function buildRouteMapHtml(
   pickup: { lat: number; lon: number; label: string } | null,
-  dropoff: { lat: number; lon: number; label: string } | null
+  dropoff: { lat: number; lon: number; label: string } | null,
+  origin: string
 ): string {
   const lat = pickup?.lat ?? KKR_CENTER.lat
   const lon = pickup?.lon ?? KKR_CENTER.lon
@@ -469,9 +471,10 @@ function buildRouteMapHtml(
 <div id="map"></div>
 <script src="/leaflet/leaflet.js"></script>
 <script>
+var TILE_BASE=${JSON.stringify(origin)};
 (function(){
   var map=L.map('map',{zoomControl:true,scrollWheelZoom:false}).setView([${lat},${lon}],${zoom});
-  L.tileLayer(window.location.origin+'/api/maps/tiles/{z}/{x}/{y}.png',{
+  L.tileLayer(TILE_BASE+'/api/maps/tiles/{z}/{x}/{y}.png',{
     attribution:'© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',maxZoom:19
   }).addTo(map);
   ${markersJs}

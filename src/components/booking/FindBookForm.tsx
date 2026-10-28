@@ -50,6 +50,7 @@ function LocationMap({ lat, lon, onPin }: { lat: number; lon: number; onPin: (la
     frameRef.current?.contentWindow?.postMessage({ type: 'SET_LOCATION', lat, lng: lon }, '*')
   }, [lat, lon])
 
+  const origin = typeof window !== 'undefined' ? window.location.origin : ''
   const html = `<!DOCTYPE html>
 <html><head>
 <meta charset="utf-8"/>
@@ -60,9 +61,10 @@ function LocationMap({ lat, lon, onPin }: { lat: number; lon: number; onPin: (la
 <div id="map"></div>
 <script src="/leaflet/leaflet.js"></script>
 <script>
+var TILE_BASE=${JSON.stringify(origin)};
 (function(){
   var map=L.map('map',{zoomControl:true,scrollWheelZoom:false}).setView([${lat},${lon}],13);
-  L.tileLayer(window.location.origin+'/api/maps/tiles/{z}/{x}/{y}.png',{
+  L.tileLayer(TILE_BASE+'/api/maps/tiles/{z}/{x}/{y}.png',{
     attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',maxZoom:19
   }).addTo(map);
   var mk=L.marker([${lat},${lon}],{draggable:true}).addTo(map);

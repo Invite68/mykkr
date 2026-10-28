@@ -173,7 +173,8 @@ export default function LocationPicker({
   // Build the iframe src as a data URI with self-contained Leaflet HTML
   const startLat = value?.lat ?? 29.9695
   const startLng = value?.lng ?? 76.8783
-  const mapSrc = buildMapHtml(startLat, startLng, frameId)
+  const origin = typeof window !== 'undefined' ? window.location.origin : ''
+  const mapSrc = buildMapHtml(startLat, startLng, frameId, origin)
 
   return (
     <div style={{ position: 'relative' }}>
@@ -249,7 +250,7 @@ export default function LocationPicker({
   )
 }
 
-function buildMapHtml(lat: number, lng: number, id: string): string {
+function buildMapHtml(lat: number, lng: number, id: string, origin: string): string {
   return `<!DOCTYPE html>
 <html>
 <head>
@@ -265,10 +266,11 @@ function buildMapHtml(lat: number, lng: number, id: string): string {
 <div id="map"></div>
 <script src="/leaflet/leaflet.js"></script>
 <script>
+var TILE_BASE=${JSON.stringify(origin)};
 (function(){
   var lat=${lat}, lng=${lng};
   var map = L.map('map',{zoomControl:true,attributionControl:true}).setView([lat,lng],14);
-  L.tileLayer(window.location.origin+'/api/maps/tiles/{z}/{x}/{y}.png',{
+  L.tileLayer(TILE_BASE+'/api/maps/tiles/{z}/{x}/{y}.png',{
     attribution:'© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',maxZoom:19
   }).addTo(map);
   var marker = L.marker([lat,lng],{draggable:true}).addTo(map);
