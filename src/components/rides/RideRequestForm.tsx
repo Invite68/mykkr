@@ -718,7 +718,6 @@ function DualPinMap({
         title="Pickup and drop-off map — drag green pin for pickup, red for drop-off"
         aria-label="Interactive map: drag green pin to set pickup location, red pin to set drop-off location"
         style={{ display: 'block', width: '100%', border: 'none' }}
-        sandbox="allow-scripts allow-same-origin"
       />
     </div>
   )
