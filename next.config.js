@@ -120,6 +120,28 @@ const nextConfig = {
           { key: 'Cache-Control', value: 'no-store, max-age=0' },
         ],
       },
+
+      // Map frame routes — override DENY with SAMEORIGIN so they can be embedded
+      // by our own pages. These routes serve their own permissive CSP for Leaflet.
+      {
+        source: '/map-frame/:path*',
+        headers: [
+          { key: 'X-Frame-Options', value: 'SAMEORIGIN' },
+          // Override the global frame-ancestors 'none' — allow embedding by same origin only
+          {
+            key: 'Content-Security-Policy',
+            value: [
+              "default-src 'self'",
+              "script-src 'self' 'unsafe-inline'",
+              "style-src 'self' 'unsafe-inline'",
+              "img-src 'self' data: blob:",
+              "connect-src 'self' https://router.project-osrm.org",
+              "frame-ancestors 'self'",
+            ].join('; '),
+          },
+          { key: 'Cache-Control', value: 'no-store' },
+        ],
+      },
     ]
   },
 

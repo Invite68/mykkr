@@ -121,6 +121,7 @@ export function middleware(req: NextRequest) {
 export const config = {
   // Match all routes except Next.js internals and static files
   matcher: [
-    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|css|js|woff2?)$).*)',
+    // Exclude static assets AND map-frame routes (they manage their own CSP)
+    '/((?!_next/static|_next/image|favicon.ico|map-frame|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|css|js|woff2?)$).*)',
   ],
 }
