@@ -19,9 +19,9 @@ const OSM_HOSTS = ['a', 'b', 'c']
 
 export async function GET(
   _req: NextRequest,
-  { params }: { params: { tilepath: string[] } }
+  { params }: { params: Promise<{ tilepath: string[] }> }
 ) {
-  const tilepath = params.tilepath // e.g. ["14","12345","6789.png"]
+  const { tilepath } = await params // e.g. ["14","12345","6789.png"]
 
   // Validate: must be exactly z/x/y.png
   if (tilepath.length !== 3) {
