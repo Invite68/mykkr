@@ -62,7 +62,7 @@ function LocationMap({ lat, lon, onPin }: { lat: number; lon: number; onPin: (la
 <script>
 (function(){
   var map=L.map('map',{zoomControl:true,scrollWheelZoom:false}).setView([${lat},${lon}],13);
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
+  L.tileLayer(window.location.origin+'/api/maps/tiles/{z}/{x}/{y}.png',{
     attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',maxZoom:19
   }).addTo(map);
   var mk=L.marker([${lat},${lon}],{draggable:true}).addTo(map);

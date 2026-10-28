@@ -34,8 +34,8 @@ export default function BusinessMap({ lat, lng, name, address, height = 240, zoo
 (function(){
   var map = L.map('map',{zoomControl:true,scrollWheelZoom:false,attributionControl:true})
     .setView([${lat},${lng}],${zoom});
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
-    attribution:'© OpenStreetMap contributors',maxZoom:19
+  L.tileLayer(window.location.origin+'/api/maps/tiles/{z}/{x}/{y}.png',{
+    attribution:'© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',maxZoom:19
   }).addTo(map);
   var marker = L.marker([${lat},${lng}]).addTo(map);
   marker.bindPopup('<b>${escapedName}</b>${escapedAddr ? `<br>${escapedAddr}` : ''}').openPopup();

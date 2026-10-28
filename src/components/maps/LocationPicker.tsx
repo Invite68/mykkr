@@ -268,8 +268,8 @@ function buildMapHtml(lat: number, lng: number, id: string): string {
 (function(){
   var lat=${lat}, lng=${lng};
   var map = L.map('map',{zoomControl:true,attributionControl:true}).setView([lat,lng],14);
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
-    attribution:'© OpenStreetMap contributors',maxZoom:19
+  L.tileLayer(window.location.origin+'/api/maps/tiles/{z}/{x}/{y}.png',{
+    attribution:'© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',maxZoom:19
   }).addTo(map);
   var marker = L.marker([lat,lng],{draggable:true}).addTo(map);
 
