@@ -38,10 +38,9 @@ export function haversineKm(a: LatLon, b: LatLon): number {
 }
 
 export async function geocode(query: string, signal?: AbortSignal): Promise<LatLon | null> {
-  const url =
-    'https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&q=' +
-    encodeURIComponent(`${query} Kurukshetra Haryana India`)
-  const res = await fetch(url, { headers: { Accept: 'application/json' }, signal })
+  // Use our server-side proxy — avoids mixed-content block on HTTP deployments
+  const url = '/api/maps/nominatim?q=' + encodeURIComponent(`${query} Kurukshetra Haryana India`)
+  const res = await fetch(url, { signal })
   if (!res.ok) return null
   const data = (await res.json()) as { lat: string; lon: string }[]
   if (!data.length) return null

@@ -4,7 +4,7 @@ import { useEffect, useState, type FormEvent } from 'react'
 import AreaSelect from '@/components/ui/AreaSelect'
 import { IconRides, IconPackage, IconLock, IconZap, IconDriver, IconPin, IconMap, IconCheck } from '@/components/layout/NavIcons'
 import { DELIVERY_VEHICLES, RIDE_VEHICLES } from '@/data/vehicles'
-import { KKR_CENTER, findArea, osmBboxUrl, osmEmbedUrl } from '@/data/areas'
+import { KKR_CENTER, findArea } from '@/data/areas'
 import { estimateRoute, fareFor, geocode, mapsLinks, type LatLon, type RouteEstimate } from '@/lib/routing'
 import { isValidIndianMobile, jobRef } from '@/lib/sanitize'
 
@@ -79,10 +79,8 @@ function LocationField({
       async (pos) => {
         const { latitude: lat, longitude: lon } = pos.coords
         try {
-          const res = await fetch(
-            `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json`,
-            { headers: { 'Accept-Language': 'en' } }
-          )
+          // Use our server-side proxy — avoids mixed-content block on HTTP deployments
+          const res = await fetch(`/api/maps/nominatim?lat=${lat}&lon=${lon}`)
           const data = await res.json()
           const addr = data.address
           const short = [
@@ -296,8 +294,9 @@ export default function RideRequestForm() {
   }
 
   const links = pickup && dropoff ? mapsLinks(pickup, dropoff) : null
-  const mapSrc =
-    pickup && dropoff ? osmBboxUrl(pickup, dropoff) : pickup ? osmEmbedUrl(pickup.lat, pickup.lon) : osmEmbedUrl(KKR_CENTER.lat, KKR_CENTER.lon, 0.08)
+
+  // Build self-contained Leaflet HTML for the route/location preview map
+  const mapHtml = buildRouteMapHtml(pickup, dropoff)
 
   return (
     <form className="panel" onSubmit={onSubmit} noValidate>
@@ -344,7 +343,7 @@ export default function RideRequestForm() {
           <LocationField which="pickup" point={pickup} onChange={setPickup} />
           <LocationField which="dropoff" point={dropoff} onChange={setDropoff} />
         </div>
-        <iframe className="map-frame" style={{ marginTop: 12 }} src={mapSrc} title="Route map" loading="lazy" />
+        <iframe className="map-frame" style={{ marginTop: 12 }} srcDoc={mapHtml} title="Route map" />
         {estimate && (
           <div className="estimate" style={{ marginTop: 12 }}>
             <div className="estimate-row"><span>Distance</span><span>{estimate.approximate ? '~' : ''}{estimate.km.toFixed(1)} km</span></div>
@@ -435,4 +434,49 @@ export default function RideRequestForm() {
       </button>
     </form>
   )
+}
+
+/** Build self-contained Leaflet HTML for ride route/location preview map */
+function buildRouteMapHtml(
+  pickup: { lat: number; lon: number; label: string } | null,
+  dropoff: { lat: number; lon: number; label: string } | null
+): string {
+  const lat = pickup?.lat ?? KKR_CENTER.lat
+  const lon = pickup?.lon ?? KKR_CENTER.lon
+  const zoom = pickup ? 14 : 12
+
+  const markersJs = [
+    pickup
+      ? `L.marker([${pickup.lat},${pickup.lon}],{title:${JSON.stringify(pickup.label)}}).addTo(map).bindPopup(${JSON.stringify('<b>Pickup:</b> ' + pickup.label)}).openPopup();`
+      : '',
+    dropoff
+      ? `var di=L.icon({iconUrl:'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',iconRetinaUrl:'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',shadowUrl:'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',iconSize:[25,41],iconAnchor:[12,41],popupAnchor:[1,-34],shadowSize:[41,41]});L.marker([${dropoff.lat},${dropoff.lon}],{title:${JSON.stringify(dropoff.label)},icon:di}).addTo(map).bindPopup(${JSON.stringify('<b>Drop-off:</b> ' + dropoff.label)});`
+      : '',
+    pickup && dropoff
+      ? `map.fitBounds([[${pickup.lat},${pickup.lon}],[${dropoff.lat},${dropoff.lon}]],{padding:[30,30]});`
+      : '',
+  ].join('\n')
+
+  return `<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<style>html,body,#map{margin:0;padding:0;width:100%;height:100%;overflow:hidden;}</style>
+</head>
+<body>
+<div id="map"></div>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+(function(){
+  var map=L.map('map',{zoomControl:true,scrollWheelZoom:false}).setView([${lat},${lon}],${zoom});
+  L.tileLayer(window.location.origin+'/api/maps/tiles/{z}/{x}/{y}.png',{
+    attribution:'© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',maxZoom:19
+  }).addTo(map);
+  ${markersJs}
+})();
+</script>
+</body>
+</html>`
 }
