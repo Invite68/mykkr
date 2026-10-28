@@ -1,10 +1,65 @@
 'use client'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 
 const C = { teal: '#12343b', gold: '#e1b382', border: '#e2e8f0', muted: '#64748b', green: '#0f766e', red: '#dc2626', amber: '#b45309', bg: '#f1f5f9', surface: '#fff' }
 
 export default function AdminSettings() {
   const [toast, setToast] = useState('')
+
+  // ── Driver subscription (persisted in DB via platform-settings API) ───────
+  const [driverSubEnabled, setDriverSubEnabled] = useState(false)
+  const [driverPlanAmount, setDriverPlanAmount] = useState(49)
+  const [driverAmountInput, setDriverAmountInput] = useState('49')
+  const [subLoading, setSubLoading] = useState(true)
+  const [subSaving, setSubSaving] = useState(false)
+
+  const loadDriverSub = useCallback(async () => {
+    try {
+      const res = await fetch('/api/admin/platform-settings')
+      if (!res.ok) return
+      const data = await res.json() as { settings: { key: string; value: string }[] }
+      for (const s of data.settings) {
+        if (s.key === 'driver_subscription_enabled') setDriverSubEnabled(s.value === 'true')
+        if (s.key === 'driver_plan_amount') { setDriverPlanAmount(parseInt(s.value, 10)); setDriverAmountInput(s.value) }
+      }
+    } finally {
+      setSubLoading(false)
+    }
+  }, [])
+
+  useEffect(() => { void loadDriverSub() }, [loadDriverSub])
+
+  async function saveDriverSetting(key: string, value: boolean | number) {
+    setSubSaving(true)
+    try {
+      const res = await fetch('/api/admin/platform-settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ key, value }),
+      })
+      if (!res.ok) throw new Error('Save failed')
+      showToast(key === 'driver_subscription_enabled'
+        ? (value ? 'Driver subscription activated — drivers will be billed' : 'Driver subscription deactivated — drivers access for free')
+        : `Driver plan updated to ₹${value}/month`)
+      await loadDriverSub()
+    } catch {
+      showToast('Failed to save — try again')
+    } finally {
+      setSubSaving(false)
+    }
+  }
+
+  async function toggleDriverSub() {
+    const next = !driverSubEnabled
+    setDriverSubEnabled(next)
+    await saveDriverSetting('driver_subscription_enabled', next)
+  }
+
+  async function saveDriverAmount() {
+    const n = parseInt(driverAmountInput, 10)
+    if (!Number.isInteger(n) || n < 1 || n > 100_000) { showToast('Enter a valid amount (1–100000)'); return }
+    await saveDriverSetting('driver_plan_amount', n)
+  }
 
   // Maintenance mode
   const [maintenanceOn, setMaintenanceOn] = useState(false)
@@ -208,6 +263,71 @@ export default function AdminSettings() {
           <input value={ipWhitelist} onChange={e => setIpWhitelist(e.target.value)} placeholder="e.g. 192.168.1.0/24, 10.0.0.1" style={{ width: '100%', maxWidth: 400, border: `1px solid ${C.border}`, borderRadius: 7, padding: '8px 12px', fontSize: 13, outline: 'none' }} />
         </div>
       </Section>
+
+      {/* ── Subscription Controls (persisted in DB) ─────────────────────── */}
+      <div style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 12, overflow: 'hidden', marginBottom: 16 }}>
+        <div style={{ padding: '13px 18px', borderBottom: `1px solid ${C.border}`, fontSize: 14, fontWeight: 800, color: C.teal, background: C.bg, display: 'flex', alignItems: 'center', gap: 8 }}>
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+          Subscription Controls
+        </div>
+        <div style={{ padding: 18 }}>
+          <div style={{ fontSize: 12, color: C.muted, marginBottom: 16, lineHeight: 1.6 }}>
+            These settings are stored in the database and take effect immediately — no deployment needed.
+            Driver subscription is <strong>off by default</strong>. Activate when drivers are earning consistently on the platform.
+          </div>
+
+          {subLoading ? (
+            <div style={{ fontSize: 13, color: C.muted }}>Loading settings…</div>
+          ) : (
+            <>
+              {/* Driver subscription toggle */}
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', padding: '12px 0', borderBottom: `1px solid ${C.border}` }}>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontSize: 13.5, fontWeight: 600, color: '#334155' }}>Driver subscription billing</div>
+                  <div style={{ fontSize: 12, color: C.muted, marginTop: 2 }}>When on, drivers must pay ₹{driverPlanAmount}/month via Razorpay to accept jobs. When off, drivers get free access.</div>
+                  <div style={{ marginTop: 8 }}>
+                    <span style={{ display: 'inline-block', padding: '2px 10px', borderRadius: 20, fontSize: 11, fontWeight: 700, background: driverSubEnabled ? 'rgba(15,118,110,.12)' : 'rgba(100,116,139,.10)', color: driverSubEnabled ? C.green : C.muted }}>
+                      {driverSubEnabled ? 'ACTIVE — drivers will be billed' : 'INACTIVE — drivers access for free'}
+                    </span>
+                  </div>
+                </div>
+                <button
+                  onClick={toggleDriverSub}
+                  disabled={subSaving}
+                  style={{ width: 42, height: 24, borderRadius: 12, border: 'none', cursor: subSaving ? 'wait' : 'pointer', background: driverSubEnabled ? C.green : '#d1d5db', position: 'relative', flexShrink: 0, marginLeft: 16, opacity: subSaving ? 0.6 : 1 }}
+                >
+                  <span style={{ position: 'absolute', top: 4, left: driverSubEnabled ? 20 : 4, width: 16, height: 16, borderRadius: '50%', background: '#fff', transition: 'left .15s' }} />
+                </button>
+              </div>
+
+              {/* Driver plan amount */}
+              <div style={{ padding: '12px 0' }}>
+                <div style={{ fontSize: 13.5, fontWeight: 600, color: '#334155', marginBottom: 4 }}>Driver monthly fee (₹)</div>
+                <div style={{ fontSize: 12, color: C.muted, marginBottom: 10 }}>Set the monthly subscription amount for drivers (in rupees). Current: ₹{driverPlanAmount}/month.</div>
+                <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+                  <span style={{ fontSize: 16, fontWeight: 700, color: C.muted }}>₹</span>
+                  <input
+                    type="number"
+                    min={1}
+                    max={100000}
+                    value={driverAmountInput}
+                    onChange={e => setDriverAmountInput(e.target.value)}
+                    style={{ width: 100, border: `1px solid ${C.border}`, borderRadius: 7, padding: '7px 12px', fontSize: 14, fontWeight: 700, outline: 'none', textAlign: 'center' }}
+                  />
+                  <span style={{ fontSize: 13, color: C.muted }}>/month</span>
+                  <button
+                    onClick={saveDriverAmount}
+                    disabled={subSaving || driverAmountInput === String(driverPlanAmount)}
+                    style={{ background: C.teal, color: '#fff', border: 'none', borderRadius: 7, padding: '8px 16px', fontWeight: 700, fontSize: 12, cursor: 'pointer', opacity: (subSaving || driverAmountInput === String(driverPlanAmount)) ? 0.45 : 1 }}
+                  >
+                    Update price
+                  </button>
+                </div>
+              </div>
+            </>
+          )}
+        </div>
+      </div>
 
       <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
         <button onClick={() => showToast('Settings saved')} style={{ background: C.green, color: '#fff', border: 'none', borderRadius: 8, padding: '10px 22px', fontWeight: 700, fontSize: 13, cursor: 'pointer' }}>Save Settings</button>

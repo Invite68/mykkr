@@ -26,6 +26,7 @@ import { requireAuth } from '@/lib/firebase-admin'
 import { query } from '@/lib/db'
 import { encryptPII, decryptPII } from '@/lib/encrypt'
 import { broadcast } from '@/lib/job-broadcaster'
+import { checkDriverAccess } from '@/lib/driver-access'
 import type { Job, SafeJob } from '@/lib/job-types'
 
 function toSafeJob(job: Job): SafeJob {
@@ -62,6 +63,17 @@ export async function POST(
   // driverId is always the authenticated Firebase UID — cannot be spoofed by body
   const { driverName, driverPhone, driverVehicle } = body
   const driverId = auth.uid
+
+  // ── Driver subscription gate ─────────────────────────────────────────────────
+  // Checks platform_settings.driver_subscription_enabled.
+  // If off (default), all drivers pass. If on, driver must have an active subscription.
+  const access = await checkDriverAccess(driverId)
+  if (!access.allowed) {
+    return NextResponse.json(
+      { error: access.reason ?? 'Subscription required', code: 'DRIVER_SUBSCRIPTION_REQUIRED' },
+      { status: 402 }
+    )
+  }
 
   if (!driverName || !driverPhone || !driverVehicle) {
     return NextResponse.json({ error: 'Missing driver fields' }, { status: 400 })
