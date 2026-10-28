@@ -13,14 +13,18 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server'
+import { readLimiter, checkLimit }   from '@/lib/rate-limit'
 
 // OSM subdomains for load-balancing
 const OSM_HOSTS = ['a', 'b', 'c']
 
 export async function GET(
-  _req: NextRequest,
+  req: NextRequest,
   { params }: { params: Promise<{ tilepath: string[] }> }
 ) {
+  // ── Rate limit — prevents abusive tile scraping that violates OSM policy ────
+  const limited = checkLimit(readLimiter, req)
+  if (limited) return limited
   const { tilepath } = await params // e.g. ["14","12345","6789.png"]
 
   // Validate: must be exactly z/x/y.png
