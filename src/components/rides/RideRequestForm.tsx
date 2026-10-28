@@ -1,12 +1,26 @@
 'use client'
 
 import { useEffect, useRef, useState, type FormEvent } from 'react'
-import AreaSelect from '@/components/ui/AreaSelect'
 import { IconRides, IconPackage } from '@/components/layout/NavIcons'
 import { DELIVERY_VEHICLES, RIDE_VEHICLES } from '@/data/vehicles'
-import { KKR_CENTER, findArea } from '@/data/areas'
+import { KKR_CENTER, ALL_AREAS, findArea } from '@/data/areas'
 import { estimateRoute, fareFor, mapsLinks, type LatLon, type RouteEstimate } from '@/lib/routing'
-import { isValidIndianMobile, jobRef } from '@/lib/sanitize'
+import { isValidIndianMobile } from '@/lib/sanitize'
+
+// Popular Kurukshetra quick-pick locations shown before the user types anything
+const QUICK_LOCATIONS = [
+  { label: 'Brahmasarovar', lat: 29.9737, lon: 76.8168 },
+  { label: 'KU / NIT Campus', lat: 29.952, lon: 76.886 },
+  { label: 'Sector 13 Market', lat: 29.955, lon: 76.89 },
+  { label: 'Thanesar Bus Stand', lat: 29.971, lon: 76.879 },
+  { label: 'Pipli', lat: 29.955, lon: 76.84 },
+  { label: 'Model Town', lat: 29.966, lon: 76.858 },
+  { label: 'Sector 3', lat: 29.965, lon: 76.874 },
+  { label: 'Sector 7', lat: 29.97, lon: 76.88 },
+  { label: 'Shahabad', lat: 30.1667, lon: 76.8167 },
+  { label: 'Ladwa', lat: 29.9997, lon: 77.0425 },
+  { label: 'Pehowa', lat: 29.9833, lon: 76.5833 },
+]
 
 type Mode = 'ride' | 'deliver'
 
@@ -15,16 +29,13 @@ interface Point extends LatLon {
 }
 
 /**
- * LocationField — text entry + HERE autocomplete + GPS + area picker.
+ * LocationField — quick-picks + text search + GPS for a single ride location pin.
  *
- * GPS flow:
- * 1. User clicks GPS button → browser asks permission
- * 2. On success → reverse-geocode via /api/maps/reverse (HERE) → fill input
- * 3. On denial → friendly fallback message
- *
- * Autocomplete flow:
- * 1. User types ≥3 chars → debounced call to /api/maps/geocode?mode=autocomplete
- * 2. Suggestions shown in dropdown — click to confirm location
+ * UX flow:
+ * 1. Tap a popular location chip → instant pin set, no typing needed
+ * 2. Type any address → HERE autocomplete dropdown appears
+ * 3. Press Search button (or Enter) → full geocode of whatever is typed
+ * 4. GPS button → one-time browser location permission → HERE reverse geocode
  */
 function LocationField({
   which,
@@ -38,91 +49,116 @@ function LocationField({
   pinColor: string
 }) {
   const [text, setText] = useState('')
-  const [area, setArea] = useState('')
-  const [status, setStatus] = useState('')
+  const [status, setStatus] = useState<{ msg: string; ok?: boolean } | null>(null)
   const [gpsLoading, setGpsLoading] = useState(false)
+  const [searching, setSearching] = useState(false)
   const [suggestions, setSuggestions] = useState<Array<{ id: string; title: string; address: string; lat?: number; lng?: number }>>([])
   const [showSuggestions, setShowSuggestions] = useState(false)
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const label = which === 'pickup' ? 'Pickup' : 'Drop-off'
+  const isSet = !!point
 
-  // Keep input text in sync when parent clears point
+  // Sync text when parent resets
   useEffect(() => {
-    if (!point && !text) return
-    if (!point) { setText(''); setArea(''); setSuggestions([]); setShowSuggestions(false) }
+    if (!point) { setText(''); setSuggestions([]); setShowSuggestions(false); setStatus(null) }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [point])
 
-  function pickArea(name: string) {
-    setArea(name)
+  /** Quick-pick a known location */
+  function pickQuick(loc: { label: string; lat: number; lon: number }) {
+    setText(loc.label)
     setSuggestions([])
     setShowSuggestions(false)
-    const a = findArea(name)
-    if (a) {
-      onChange({ lat: a.lat, lon: a.lon, label: a.name })
-      setText(a.name)
-    } else {
-      onChange(null)
-    }
-    setStatus('')
+    onChange({ lat: loc.lat, lon: loc.lon, label: loc.label })
+    setStatus({ msg: 'Location set', ok: true })
   }
 
+  /** Autocomplete as user types */
   async function fetchSuggestions(q: string) {
     if (q.length < 3) { setSuggestions([]); setShowSuggestions(false); return }
     try {
-      const res = await fetch(`/api/maps/geocode?q=${encodeURIComponent(q + ' Kurukshetra Haryana')}&mode=autocomplete&lat=${KKR_CENTER.lat}&lng=${KKR_CENTER.lon}`)
+      const res = await fetch(
+        `/api/maps/geocode?q=${encodeURIComponent(q + ' Kurukshetra Haryana')}&mode=autocomplete&lat=${KKR_CENTER.lat}&lng=${KKR_CENTER.lon}`
+      )
       const data = await res.json() as { results?: Array<{ id: string; title: string; address: string; lat?: number; lng?: number }> }
       const hits = data.results ?? []
       setSuggestions(hits)
       setShowSuggestions(hits.length > 0)
-    } catch { /* network error — silent */ }
+    } catch { /* silent */ }
   }
 
   function handleInput(e: React.ChangeEvent<HTMLInputElement>) {
     const v = e.target.value
     setText(v)
-    setStatus('')
+    setStatus(null)
     if (debounceRef.current) clearTimeout(debounceRef.current)
     debounceRef.current = setTimeout(() => fetchSuggestions(v), 280)
   }
 
+  /** Full geocode search — triggered by Search button or Enter key */
+  async function doSearch() {
+    const q = text.trim()
+    if (!q) { setStatus({ msg: 'Type an address first.' }); return }
+    setSuggestions([])
+    setShowSuggestions(false)
+    setSearching(true)
+    setStatus({ msg: 'Searching…' })
+    try {
+      const res = await fetch(
+        `/api/maps/geocode?q=${encodeURIComponent(q + ' Kurukshetra Haryana India')}&lat=${KKR_CENTER.lat}&lng=${KKR_CENTER.lon}`
+      )
+      const data = await res.json() as { results?: Array<{ lat: number; lng: number; address: string }> }
+      const first = data.results?.[0]
+      if (first) {
+        onChange({ lat: first.lat, lon: first.lng, label: first.address })
+        setText(first.address)
+        setStatus({ msg: 'Location found', ok: true })
+      } else {
+        setStatus({ msg: 'Address not found — try dragging the pin on the map, or use GPS.' })
+      }
+    } catch {
+      setStatus({ msg: 'Search failed — check your connection.' })
+    }
+    setSearching(false)
+  }
+
+  /** Select from autocomplete dropdown */
   async function selectSuggestion(s: { id: string; title: string; address: string; lat?: number; lng?: number }) {
     setSuggestions([])
     setShowSuggestions(false)
-    setText(s.address || s.title)
-    setArea('')
+    const lbl = s.address || s.title
+    setText(lbl)
 
     if (s.lat && s.lng) {
-      onChange({ lat: s.lat, lon: s.lng, label: s.address || s.title })
-      setStatus('Location set')
+      onChange({ lat: s.lat, lon: s.lng, label: lbl })
+      setStatus({ msg: 'Location set', ok: true })
       return
     }
 
-    // Need full lookup by HERE place ID
-    setStatus('Getting exact location…')
+    setStatus({ msg: 'Getting exact location…' })
     try {
       const res = await fetch(`/api/maps/lookup?id=${encodeURIComponent(s.id)}`)
       const data = await res.json() as { result?: { lat: number; lng: number; address: string } }
       if (data.result) {
         onChange({ lat: data.result.lat, lon: data.result.lng, label: data.result.address })
         setText(data.result.address)
-        setStatus('Location set')
+        setStatus({ msg: 'Location set', ok: true })
       } else {
-        setStatus('Could not resolve location — try a different search.')
+        setStatus({ msg: 'Could not resolve — try Search button.' })
       }
     } catch {
-      setStatus('Network error — try again.')
+      setStatus({ msg: 'Network error — try again.' })
     }
   }
 
-  /** GPS: browser permission → HERE reverse geocode */
+  /** GPS → HERE reverse geocode */
   function useMyLocation() {
     if (!navigator.geolocation) {
-      setStatus('GPS not supported — type the address or pick area below.')
+      setStatus({ msg: 'GPS not available on this device.' })
       return
     }
     setGpsLoading(true)
-    setStatus('Getting your location…')
+    setStatus({ msg: 'Getting your location…' })
     navigator.geolocation.getCurrentPosition(
       async (pos) => {
         const { latitude: lat, longitude: lng } = pos.coords
@@ -130,47 +166,43 @@ function LocationField({
           const res = await fetch(`/api/maps/reverse?lat=${lat}&lng=${lng}`)
           const data = await res.json() as { result?: { address: string; lat: number; lng: number } }
           if (data.result) {
-            const loc = { lat: data.result.lat, lon: data.result.lng, label: data.result.address }
-            onChange(loc)
+            onChange({ lat: data.result.lat, lon: data.result.lng, label: data.result.address })
             setText(data.result.address)
-            setArea('')
-            setStatus('Live location set')
+            setStatus({ msg: 'Live location set', ok: true })
           } else {
             const lbl = `${lat.toFixed(5)}, ${lng.toFixed(5)}`
             onChange({ lat, lon: lng, label: lbl })
             setText(lbl)
-            setStatus('GPS coordinates set — address not found nearby')
+            setStatus({ msg: 'GPS set — address not found nearby', ok: true })
           }
         } catch {
           const lbl = `${lat.toFixed(5)}, ${lng.toFixed(5)}`
           onChange({ lat, lon: lng, label: lbl })
           setText(lbl)
-          setStatus('GPS coordinates set')
+          setStatus({ msg: 'GPS coordinates set', ok: true })
         }
         setGpsLoading(false)
       },
       (err) => {
         setGpsLoading(false)
         const msgs: Record<number, string> = {
-          1: 'Location access denied — type the address or pick an area below.',
-          2: 'Location unavailable — try typing the address.',
-          3: 'Location request timed out — try again.',
+          1: 'Location access denied — type address or drag the pin.',
+          2: 'Location unavailable — try again.',
+          3: 'Location timed out — try again.',
         }
-        setStatus(msgs[err.code] ?? 'Could not get your location.')
+        setStatus({ msg: msgs[err.code] ?? 'Could not get location.' })
       },
       { enableHighAccuracy: true, timeout: 12_000, maximumAge: 60_000 }
     )
   }
 
-  const isSet = !!point
-
   return (
     <div className="field" style={{ position: 'relative' }}>
+      {/* Label with colour dot + tick when set */}
       <span className="label" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-        {/* Color dot for this pin */}
         <span style={{
           display: 'inline-block', width: 10, height: 10, borderRadius: '50%',
-          background: pinColor, border: '1.5px solid rgba(0,0,0,.25)', flexShrink: 0
+          background: pinColor, border: '1.5px solid rgba(0,0,0,.25)', flexShrink: 0,
         }} aria-hidden="true" />
         {label} location
         {isSet && (
@@ -178,46 +210,92 @@ function LocationField({
         )}
       </span>
 
-      {/* Address search input with autocomplete */}
-      <div style={{ position: 'relative' }}>
-        <input
-          className="input"
-          aria-label={`${label} address`}
-          placeholder={which === 'pickup' ? 'Type pickup — e.g. Sector 13 Market' : 'Type drop-off — e.g. Brahmasarovar'}
-          maxLength={200}
-          value={text}
-          onChange={handleInput}
-          onFocus={() => suggestions.length > 0 && setShowSuggestions(true)}
-          onBlur={() => setTimeout(() => setShowSuggestions(false), 180)}
-          autoComplete="off"
-          autoCorrect="off"
-          spellCheck={false}
-        />
-        {showSuggestions && suggestions.length > 0 && (
-          <div style={{
-            position: 'absolute', top: '100%', left: 0, right: 0, zIndex: 1000,
-            background: '#fff', border: '1.5px solid #e2e8f0', borderRadius: 8,
-            boxShadow: '0 6px 20px rgba(0,0,0,.12)', marginTop: 2, overflow: 'hidden',
-          }}>
-            {suggestions.map(s => (
-              <button
-                key={s.id}
-                type="button"
-                onMouseDown={() => selectSuggestion(s)}
-                style={{
-                  width: '100%', textAlign: 'left', padding: '9px 13px',
-                  border: 'none', borderBottom: '1px solid #f1f5f9',
-                  background: 'none', cursor: 'pointer', fontSize: 13,
-                }}
-                onMouseEnter={e => (e.currentTarget.style.background = '#f8fafc')}
-                onMouseLeave={e => (e.currentTarget.style.background = 'none')}
-              >
-                <div style={{ fontWeight: 600, color: '#1e293b', marginBottom: 2 }}>{s.title}</div>
-                <div style={{ fontSize: 11, color: '#64748b' }}>{s.address}</div>
-              </button>
-            ))}
-          </div>
-        )}
+      {/* Quick-pick popular spots */}
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5, marginBottom: 8 }}>
+        {QUICK_LOCATIONS.map(loc => (
+          <button
+            key={loc.label}
+            type="button"
+            onMouseDown={() => pickQuick(loc)}
+            style={{
+              fontSize: 11, padding: '4px 10px', borderRadius: 99,
+              border: `1.5px solid ${point?.label === loc.label ? pinColor : '#e2e8f0'}`,
+              background: point?.label === loc.label ? pinColor : '#f8fafc',
+              color: point?.label === loc.label ? '#fff' : '#334155',
+              cursor: 'pointer', fontWeight: 600, transition: 'all .15s',
+            }}
+          >
+            {loc.label}
+          </button>
+        ))}
+      </div>
+
+      {/* Text input + Search button */}
+      <div style={{ display: 'flex', gap: 6 }}>
+        <div style={{ position: 'relative', flex: 1 }}>
+          <input
+            className="input"
+            aria-label={`${label} address`}
+            placeholder={which === 'pickup' ? 'e.g. House 572, Sector 3, UE' : 'e.g. Village Tatka, Pehowa road'}
+            maxLength={200}
+            value={text}
+            onChange={handleInput}
+            onFocus={() => suggestions.length > 0 && setShowSuggestions(true)}
+            onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
+            onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), doSearch())}
+            autoComplete="off"
+            autoCorrect="off"
+            spellCheck={false}
+          />
+          {/* Autocomplete dropdown */}
+          {showSuggestions && suggestions.length > 0 && (
+            <div style={{
+              position: 'absolute', top: '100%', left: 0, right: 0, zIndex: 1000,
+              background: '#fff', border: '1.5px solid #e2e8f0', borderRadius: 8,
+              boxShadow: '0 6px 20px rgba(0,0,0,.12)', marginTop: 2, overflow: 'hidden',
+            }}>
+              {suggestions.map(s => (
+                <button
+                  key={s.id}
+                  type="button"
+                  onMouseDown={() => selectSuggestion(s)}
+                  style={{
+                    width: '100%', textAlign: 'left', padding: '9px 13px',
+                    border: 'none', borderBottom: '1px solid #f1f5f9',
+                    background: 'none', cursor: 'pointer', fontSize: 13,
+                  }}
+                  onMouseEnter={e => (e.currentTarget.style.background = '#f8fafc')}
+                  onMouseLeave={e => (e.currentTarget.style.background = 'none')}
+                >
+                  <div style={{ fontWeight: 600, color: '#1e293b', marginBottom: 2 }}>{s.title}</div>
+                  <div style={{ fontSize: 11, color: '#64748b' }}>{s.address}</div>
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Search button */}
+        <button
+          type="button"
+          onClick={doSearch}
+          disabled={searching}
+          aria-label={`Search ${label.toLowerCase()} address`}
+          title="Search this address"
+          style={{
+            flexShrink: 0, padding: '0 14px', borderRadius: 8,
+            border: `1.5px solid ${pinColor}`, background: pinColor,
+            color: '#fff', cursor: searching ? 'wait' : 'pointer',
+            display: 'flex', alignItems: 'center', gap: 5,
+            fontSize: 12, fontWeight: 700,
+          }}
+        >
+          {searching
+            ? <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" style={{ animation: 'spin 1s linear infinite' }}><line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"/><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"/><line x1="2" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="22" y2="12"/><line x1="4.93" y1="19.07" x2="7.76" y2="16.24"/><line x1="16.24" y1="7.76" x2="19.07" y2="4.93"/></svg>
+            : <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          }
+          Search
+        </button>
       </div>
 
       {/* GPS button */}
@@ -226,24 +304,26 @@ function LocationField({
         className="btn btn-ghost btn-sm"
         onClick={useMyLocation}
         disabled={gpsLoading}
-        aria-label={`Use current GPS location as ${label.toLowerCase()}`}
-        style={{ marginTop: 6, width: '100%', justifyContent: 'center', gap: 7, fontSize: 12 }}
+        aria-label={`Use live GPS location as ${label.toLowerCase()}`}
+        style={{ marginTop: 6, width: '100%', justifyContent: 'center', gap: 6, fontSize: 12 }}
       >
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 1v4M12 19v4M1 12h4M19 12h4"/></svg>
-        {gpsLoading ? 'Getting location…' : `Use live location as ${label.toLowerCase()}`}
+        {gpsLoading ? 'Getting live location…' : `Use live location as ${label.toLowerCase()}`}
       </button>
-      <p className="muted" style={{ fontSize: 11, marginTop: 3 }}>
-        One-time GPS only. My KKR never stores your live location.
-      </p>
+      <p className="muted" style={{ fontSize: 11, marginTop: 3 }}>One-time GPS access only. My KKR never stores your location.</p>
 
-      {/* Area fallback picker */}
-      <AreaSelect id={`${which}-area`} value={area} onChange={pickArea} placeholder={`…or choose ${label.toLowerCase()} area from list`} />
-
+      {/* Status message */}
       {status && (
-        <span className="muted" role="status" aria-live="polite"
-          style={{ fontSize: 11, display: 'block', marginTop: 3, color: status.includes('set') || status.includes('Set') ? '#10b981' : undefined }}
+        <span
+          role="status"
+          aria-live="polite"
+          style={{
+            fontSize: 11, display: 'block', marginTop: 4,
+            color: status.ok ? '#10b981' : '#64748b',
+            fontWeight: status.ok ? 600 : 400,
+          }}
         >
-          {status}
+          {status.msg}
         </span>
       )}
     </div>
