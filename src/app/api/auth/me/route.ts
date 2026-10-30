@@ -23,8 +23,17 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { requireAuth }               from '@/lib/firebase-admin'
-import { findUserByUid, toPublicUser, hasActiveSubscription } from '@/lib/user-db'
+import { findUserByUid, toPublicUser } from '@/lib/user-db'
 import { query }                     from '@/lib/db'
+
+// Subscription fields safe to return to the owner
+const SAFE_SUB_COLS = `
+  status, plan,
+  trial_ends_at,
+  current_period_start, current_period_end,
+  cancelled_at,
+  razorpay_sub_id
+`
 
 export const dynamic = 'force-dynamic'
 
@@ -115,12 +124,32 @@ export async function GET(req: NextRequest) {
     profile = null
   }
 
-  const hasSub = await hasActiveSubscription(user.id)
+  // ── Load subscription details ──────────────────────────────────────────────────
+  let subscription: Record<string, unknown> | null = null
+  try {
+    const subRows = await query<Record<string, unknown>>(
+      `SELECT ${SAFE_SUB_COLS}
+       FROM subscriptions
+       WHERE user_id = $1
+       ORDER BY created_at DESC
+       LIMIT 1`,
+      [user.id]
+    )
+    subscription = subRows[0] ?? null
+  } catch (err) {
+    console.error('[GET /api/auth/me] Subscription fetch error:', err)
+    subscription = null
+  }
+
+  const hasSub = subscription?.status === 'active' || subscription?.status === 'trialing'
 
   return NextResponse.json({
     exists:          true,
     user:            pub,
     profile,
+    subscription,
     hasSubscription: hasSub,
+    // Convenience alias — keeps SubscribeReturn polling simple
+    role:            user.role,
   })
 }

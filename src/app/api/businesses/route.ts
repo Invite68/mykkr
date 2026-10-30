@@ -29,6 +29,7 @@ import { upsertUserOnLogin, toPublicUser } from '@/lib/user-db'
 import { encryptPII }   from '@/lib/encrypt'
 import { query }        from '@/lib/db'
 import { stripContactDetails } from '@/lib/sanitize'
+import { validatePublicUrl } from '@/lib/url-validate'
 
 // Valid top-level categories (must match platform.ts / category seed)
 const VALID_CATEGORIES = [
@@ -103,14 +104,32 @@ export async function POST(req: NextRequest) {
   const addrStr    = addressLine ? String(addressLine).trim().slice(0, 300) : null
   const pinStr     = pinCode ? String(pinCode).trim().slice(0, 10) : null
   const gstinStr   = gstin ? String(gstin).trim().toUpperCase().slice(0, 20) : null
-  const logoStr    = logoUrl ? String(logoUrl).slice(0, 500) : null
-  const photos     = Array.isArray(photoUrls) ? (photoUrls as string[]).slice(0, 10).map(u => String(u).slice(0, 500)) : []
+  // ── URL validation (SSRF prevention) ─────────────────────────────────────────
+  const rawLogoUrl = logoUrl ? String(logoUrl).slice(0, 500) : null
+  const rawPhotoUrls = Array.isArray(photoUrls) ? (photoUrls as string[]).slice(0, 10).map(u => String(u).slice(0, 500)) : []
+  const rawWebsiteUrl = websiteUrl ? String(websiteUrl).trim().slice(0, 300) : null
+
+  if (rawLogoUrl) {
+    const v = validatePublicUrl(rawLogoUrl)
+    if (!v.ok) return NextResponse.json({ error: `logoUrl: ${v.reason}` }, { status: 400 })
+  }
+  for (const u of rawPhotoUrls) {
+    const v = validatePublicUrl(u)
+    if (!v.ok) return NextResponse.json({ error: `photoUrls: ${v.reason}` }, { status: 400 })
+  }
+  if (rawWebsiteUrl) {
+    const v = validatePublicUrl(rawWebsiteUrl)
+    if (!v.ok) return NextResponse.json({ error: `websiteUrl: ${v.reason}` }, { status: 400 })
+  }
+
+  const logoStr    = rawLogoUrl
+  const photos     = rawPhotoUrls
   const openDaysArr = Array.isArray(openDays) ? (openDays as string[]).slice(0, 7) : []
   const delivArr   = Array.isArray(deliveryModes) ? (deliveryModes as string[]).slice(0, 3) : []
   const openTime   = openingTime ? String(openingTime).trim().slice(0, 10) : null
   const closeTime  = closingTime ? String(closingTime).trim().slice(0, 10) : null
   const emailStr   = contactEmail ? String(contactEmail).trim().slice(0, 200) : null
-  const webStr     = websiteUrl ? String(websiteUrl).trim().slice(0, 300) : null
+  const webStr     = rawWebsiteUrl
 
   // Encrypt contact phone before storage
   const encContactPhone = contactPhone ? encryptPII(String(contactPhone).trim().slice(0, 20)) : null

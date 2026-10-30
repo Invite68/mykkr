@@ -57,13 +57,14 @@ export default function SubscribeReturn() {
           const data = await res.json() as {
             exists?: boolean
             role?: string
-            profile?: { subscription_status?: string }
+            hasSubscription?: boolean
+            subscription?: { status?: string }
           }
-          const status = data.profile?.subscription_status
+          const subStatus = data.subscription?.status
           const userRole = data.role ?? ''
           setRole(userRole)
 
-          if (status === 'active' || status === 'trialing') {
+          if (data.hasSubscription || subStatus === 'active' || subStatus === 'trialing') {
             setState('active')
             // Redirect to the right dashboard after a short pause
             setTimeout(() => {
