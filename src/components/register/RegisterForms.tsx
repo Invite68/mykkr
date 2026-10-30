@@ -178,6 +178,19 @@ function OtpLoginStep({
     setErrors([])
     setSending(true)
     try {
+      // ── Server-side rate limit gate (3/10min per IP + 3/10min + 9/day per phone) ──
+      const gate = await fetch('/api/auth/send-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phone: `+91${phone}` }),
+      })
+      if (!gate.ok) {
+        const json = await gate.json() as { error?: string }
+        setErrors([json.error ?? 'Too many requests. Please wait and try again.'])
+        setSending(false)
+        return
+      }
+
       const auth = getAuth(firebaseApp)
 
       // Create invisible reCAPTCHA verifier (required by Firebase)
@@ -283,7 +296,7 @@ function OtpLoginStep({
               onClick={sendOtp}
               disabled={cooldown > 0 || sending}
             >
-              {sending ? '⏳ Sending…' : cooldown > 0 ? `Resend in ${cooldown}s` : sent ? 'Resend OTP' : 'Send OTP'}
+              {sending ? 'Sending…' : cooldown > 0 ? `Resend in ${cooldown}s` : sent ? 'Resend OTP' : 'Send OTP'}
             </button>
           </div>
           {msg && <span className="muted" role="status">{msg}</span>}
@@ -311,7 +324,7 @@ function OtpLoginStep({
         <div id="recaptcha-container" />
 
         <button type="submit" className="btn btn-primary btn-block" disabled={!sent || verifying}>
-          {verifying ? '⏳ Verifying…' : 'Verify & Continue →'}
+          {verifying ? 'Verifying…' : 'Verify & Continue →'}
         </button>
 
         <p className="muted" style={{ textAlign: 'center', fontSize: 12 }}>
