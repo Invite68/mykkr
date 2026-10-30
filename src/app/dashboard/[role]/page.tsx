@@ -8,7 +8,7 @@ import { CATEGORY_GROUPS } from '@/data/categories'
 import { BUSINESSES } from '@/data/businesses'
 import { query } from '@/lib/db'
 
-import JobBoardWrapper from '@/components/driver/JobBoardWrapper'
+import DriverDashboard from '@/components/driver/DriverDashboard'
 import TabbedDashboard from '@/components/dashboard/TabbedDashboard'
 import type { DashTab } from '@/components/dashboard/TabbedDashboard'
 
@@ -544,16 +544,7 @@ function CustomerDash() {
 
 // ── DRIVER DASHBOARD ──────────────────────────────────────────────────────────
 
-function DriverJobBoard() {
-  return (
-    <div>
-      <p className="muted" style={{ marginBottom: 14, fontSize: 13 }}>
-        New delivery and ride requests appear here in real time. Only one driver can accept each job.
-      </p>
-      <JobBoardWrapper />
-    </div>
-  )
-}
+// DriverJobBoard is replaced by DriverDashboard (handles its own auth/state)
 
 function DriverEarnings() {
   return (
@@ -627,7 +618,7 @@ function DriverDash() {
     {
       id: 'jobs', label: 'Job Board',
       icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><rect x="1" y="9" width="22" height="10" rx="2" ry="2"/><path d="M16 9V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v4"/></svg>,
-      panel: <DriverJobBoard />,
+      panel: <DriverDashboard />,
     },
     {
       id: 'earnings', label: 'Earnings',

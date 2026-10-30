@@ -57,27 +57,12 @@ async function fetchStreamToken(): Promise<{ token: string; expiresInMs: number 
   }
 }
 
-// ── Driver identity from Firebase ─────────────────────────────────────────────
-// These are filled from the driver's saved profile (set during registration).
-// Falls back to generic placeholders — the real values come from Firebase.
+// ── Driver identity ────────────────────────────────────────────────────────────
+// Passed as props from DriverDashboard (loaded from DB via /api/auth/me).
 interface DriverInfo {
   name:    string
   phone:   string
   vehicle: string
-}
-
-async function getDriverInfo(): Promise<DriverInfo> {
-  try {
-    const { getAuth } = await import('firebase/auth')
-    const user = getAuth().currentUser
-    return {
-      name:    user?.displayName ?? 'Driver',
-      phone:   user?.phoneNumber ?? '',
-      vehicle: 'Vehicle',   // pulled from driver profile on first accept
-    }
-  } catch {
-    return { name: 'Driver', phone: '', vehicle: 'Vehicle' }
-  }
 }
 
 // ── Relative time helper ──────────────────────────────────────────────────────
@@ -265,7 +250,15 @@ function JobCard({
 }
 
 // ── Main board ────────────────────────────────────────────────────────────────
-export default function JobBoard() {
+interface JobBoardProps {
+  driverName:    string
+  driverPhone:   string
+  driverVehicle: string
+  onAccepted?:   (job: SafeJob) => void
+  disabled?:     boolean
+}
+
+export default function JobBoard({ driverName, driverPhone, driverVehicle, onAccepted, disabled }: JobBoardProps) {
   const [jobs, setJobs]           = useState<SafeJob[]>([])
   const [connected, setConnected] = useState(false)
   const [authed, setAuthed]       = useState(true)   // false = no Firebase user
@@ -365,15 +358,14 @@ export default function JobBoard() {
 
   // ── Accept ────────────────────────────────────────────────────────────────
   const handleAccept = useCallback(async (jobId: string) => {
-    const driver = await getDriverInfo()
     const res = await fetch(`/api/jobs/${jobId}/accept`, {
       method: 'POST',
       headers: await authHeaders(),
       body: JSON.stringify({
         // driverId comes from auth.uid server-side — NOT from body
-        driverName:    driver.name,
-        driverPhone:   driver.phone,
-        driverVehicle: driver.vehicle,
+        driverName:    driverName    || 'Driver',
+        driverPhone:   driverPhone   || '',
+        driverVehicle: driverVehicle || 'Vehicle',
       }),
     })
     const json = await res.json() as { job?: SafeJob; error?: string; code?: string }
@@ -382,9 +374,10 @@ export default function JobBoard() {
     setMyJobId(jobId)
     if (json.job) {
       setJobs((prev) => prev.map((j) => j.id === jobId ? { ...j, ...json.job } : j))
+      onAccepted?.(json.job)
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  }, [driverName, driverPhone, driverVehicle, onAccepted])
 
   // ── Cancel ────────────────────────────────────────────────────────────────
   const handleCancel = useCallback(async (jobId: string) => {
