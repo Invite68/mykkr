@@ -8,6 +8,8 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react'
 import type { SafeJob, JobStatus } from '@/lib/job-types'
 import { directionsUrl, fetchRoute } from '@/lib/maps'
+import { firebaseAuth } from '@/lib/firebase-client'
+import JobChat from '@/components/chat/JobChat'
 
 // ── Status display config ─────────────────────────────────────────────────────
 /* Status icons — stroke SVGs, 20×20 */
@@ -163,6 +165,9 @@ function Stepper({ status }: { status: JobStatus }) {
   )
 }
 
+// Active statuses where chat should be shown
+const CHAT_ACTIVE_STATUSES = new Set<JobStatus>(['accepted', 'driver_en_route', 'picked_up'])
+
 // ── Main component ────────────────────────────────────────────────────────────
 export default function TrackingClient({ initialJob }: { initialJob: SafeJob }) {
   const [job, setJob] = useState<SafeJob>(initialJob)
@@ -172,6 +177,15 @@ export default function TrackingClient({ initialJob }: { initialJob: SafeJob }) 
   const [cancelling, setCancelling]     = useState(false)
   const [cancelError, setCancelError]   = useState('')
   const [confirmCancel, setConfirmCancel] = useState(false)
+
+  // Firebase ID token for chat auth
+  const [idToken, setIdToken] = useState<string | null>(null)
+  useEffect(() => {
+    const user = firebaseAuth.currentUser
+    if (user) {
+      user.getIdToken().then(setIdToken).catch(() => { /* not logged in */ })
+    }
+  }, [])
 
   const handleCancelConfirmed = useCallback(async () => {
     setConfirmCancel(false)
@@ -308,6 +322,22 @@ export default function TrackingClient({ initialJob }: { initialJob: SafeJob }) 
         </div>
         {job.notes && <div style={{ marginTop: 10, padding: '8px 10px', background: 'var(--bg)', borderRadius: 8, fontSize: 13 }}><span style={{ color: 'var(--text-3)' }}>Notes: </span>{job.notes}</div>}
       </div>
+
+      {/* Live chat — customer ↔ driver, only while job is active */}
+      {CHAT_ACTIVE_STATUSES.has(job.status) && idToken && (
+        <JobChat
+          jobId={job.id}
+          myUid={firebaseAuth.currentUser?.uid ?? ''}
+          myRole="customer"
+          idToken={idToken}
+        />
+      )}
+      {CHAT_ACTIVE_STATUSES.has(job.status) && !idToken && (
+        <div className="banner banner-info" role="status" style={{ marginTop: 12 }}>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          <span>Sign in to chat with your driver</span>
+        </div>
+      )}
 
       {/* Final banners */}
       {job.status === 'completed'          && <div className="banner banner-ok"   role="status">Job completed! Pay your driver directly — cash or UPI. My KKR takes ₹0 commission.</div>}
