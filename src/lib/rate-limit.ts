@@ -72,11 +72,27 @@ function createRateLimiter(opts: RateLimiterOptions) {
 // ── Named limiters — one per sensitivity level ────────────────────────────────
 
 /**
- * Strict limiter for OTP-adjacent endpoints:
- * 5 requests per 10 minutes per IP.
- * Prevents SMS credit drain from brute-force OTP requests.
+ * OTP send limiter — per IP:
+ * 3 SMS requests per 10 minutes.
+ * Protects Firebase's 10/day quota from being burned by one bad actor.
  */
-export const otpLimiter = createRateLimiter({ limit: 5, windowMs: 10 * 60_000 })
+export const otpLimiter = createRateLimiter({ limit: 3, windowMs: 10 * 60_000 })
+
+/**
+ * OTP send limiter — per phone number (short window):
+ * 3 SMS requests per 10 minutes per phone number.
+ * Prevents targeting a single victim's phone with floods of OTP messages.
+ * Key: 'otp:phone:<e164_phone>'
+ */
+export const otpPhoneLimiter = createRateLimiter({ limit: 3, windowMs: 10 * 60_000 })
+
+/**
+ * OTP send limiter — per phone number (daily cap):
+ * 9 SMS requests per 24 hours per phone number.
+ * Hard ceiling so no single number can burn the Firebase daily quota.
+ * Key: 'otp:day:<e164_phone>'
+ */
+export const otpDailyLimiter = createRateLimiter({ limit: 9, windowMs: 24 * 60 * 60_000 })
 
 /**
  * Standard API limiter for job creation and profile writes:

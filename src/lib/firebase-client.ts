@@ -1,28 +1,29 @@
 /**
- * Firebase client SDK — safe to import in Client Components.
+ * firebase-client.ts
  *
- * Required env vars (add NEXT_PUBLIC_ prefix — these are safe to expose):
- *   NEXT_PUBLIC_FIREBASE_API_KEY
- *   NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN
- *   NEXT_PUBLIC_FIREBASE_PROJECT_ID
- *   NEXT_PUBLIC_FIREBASE_APP_ID
+ * Client-side Firebase initialiser — safe to import from client components.
+ * Uses NEXT_PUBLIC_ env vars (public config values, rate-limited by Firebase to
+ * authorised domains only).
  *
- * These are public keys used by Firebase SDK to identify your app.
- * They are NOT secret — they are safe to ship in the browser bundle.
- * The actual security is enforced by Firebase Auth rules.
+ * NEVER import firebase-admin here. NEVER put secrets in NEXT_PUBLIC_ vars.
  *
- * Set them in Coolify → Environment Variables.
+ * Usage:
+ *   import { firebaseApp, firebaseAuth } from '@/lib/firebase-client'
+ *   import { RecaptchaVerifier, signInWithPhoneNumber } from 'firebase/auth'
  */
 
-import { initializeApp, getApps, type FirebaseApp } from 'firebase/app'
+import { initializeApp, getApps, getApp, type FirebaseApp } from 'firebase/app'
+import { getAuth, type Auth } from 'firebase/auth'
 
 const firebaseConfig = {
-  apiKey:    process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
-  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
-  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
-  appId:     process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
+  apiKey:            process.env.NEXT_PUBLIC_FIREBASE_API_KEY!,
+  authDomain:        process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN!,
+  projectId:         process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID!,
+  appId:             process.env.NEXT_PUBLIC_FIREBASE_APP_ID!,
 }
 
-// Initialise once — safe to call multiple times
+// Singleton — safe to call multiple times (Next.js hot-reload safe)
 export const firebaseApp: FirebaseApp =
-  getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0]
+  getApps().length > 0 ? getApp() : initializeApp(firebaseConfig)
+
+export const firebaseAuth: Auth = getAuth(firebaseApp)
