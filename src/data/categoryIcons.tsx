@@ -7,20 +7,17 @@
 import type { LucideIcon } from 'lucide-react'
 import {
   // Services
-  Wrench, Scissors, Sparkles, Flower2, Zap, Droplets,
-  PaintBucket, Hammer, Layers, BrickWall, Lock, Wind, Sun,
+  Wrench, Flower2, Zap, Droplets, PaintBucket, Hammer, Wind,
   // Venues
-  Building2, Crown, TentTree, Hotel, Home, UtensilsCrossed, CalendarDays,
+  Building2, Crown, TentTree, Hotel, UtensilsCrossed,
   // Shopping
-  ShoppingBag, Shirt, Footprints, Gem, ShoppingCart, BookOpen,
-  Smartphone, Plug, ChefHat, Sofa, Frame, Puzzle,
+  ShoppingBag, Shirt, ShoppingCart, BookOpen, Smartphone,
   // Food
-  Apple, Milk, Leaf, Beef, Cake, Candy, CupSoda, Soup, ConciergeBell,
+  Apple, Milk, Cake, Candy, ConciergeBell,
   // Transport
-  Car, Bus, Bike, Truck, Package, Van, Tractor, PackageSearch,
+  Car, Package,
   // Events
-  Music, Drum, Camera, Video, Flower, Lightbulb,
-  ClipboardList, PersonStanding, Umbrella,
+  Music, Camera,
   // Fallback
   LayoutGrid,
 } from 'lucide-react'
@@ -37,83 +34,47 @@ export const GROUP_ICONS: Record<string, LucideIcon> = {
 
 /** Icons for subcategory labels (matched by the clean text after stripping emoji) */
 export const SUB_ICONS: Record<string, LucideIcon> = {
-  // Services
-  'All Services':        Wrench,
-  'Grooming':            Scissors,
-  'Wellness':            Sparkles,
-  'Artistry · Mehendi':  Flower2,
-  'Electrical':          Zap,
-  'Plumbing':            Droplets,
-  'Painting':            PaintBucket,
-  'Carpentry':           Hammer,
-  'Flooring & Tiling':   Layers,
-  'Masonry':             BrickWall,
-  'Security':            Lock,
-  'Cleaning':            Wind,
-  'AC Repair':           Wind,
-  'Solar':               Sun,
+  // Services — must match categories.ts subcategories exactly
+  'All Services':          Wrench,
+  'Artistry · Mehendi':    Flower2,
+  'Electrical':            Zap,
+  'Plumbing':              Droplets,
+  'Painting':              PaintBucket,
+  'Carpentry':             Hammer,
+  'Domestic & Cleaning':   Wind,
+  'AC & Appliance Repair': Wind,
+  'Other Handyman':        Wrench,
 
   // Venues
-  'All Venues':          Building2,
-  'Marriage Halls':      Crown,
-  'Grounds':             TentTree,
-  'Hotels':              Hotel,
-  'Guest Houses':        Home,
-  'Dining Spaces':       UtensilsCrossed,
-  'Event Spaces':        CalendarDays,
-  'Farmhouses':          TentTree,
+  'All Venues':            Building2,
+  'Hotels & Resorts':      Hotel,
+  'Marriage Hall & Lawn':  Crown,
+  'Farmhouse':             TentTree,
 
   // Shopping
-  'All Shopping':        ShoppingBag,
-  'Fashion':             Shirt,
-  'Footwear':            Footprints,
-  'Jewellery':           Gem,
-  'Groceries':           ShoppingCart,
-  'Stationery':          BookOpen,
-  'Electronics':         Smartphone,
-  'Appliances':          Plug,
-  'Kitchen':             ChefHat,
-  'Furniture':           Sofa,
-  'Decor':               Frame,
-  'Hardware':            Wrench,
-  'Toys':                Puzzle,
+  'All Shopping':          ShoppingBag,
+  'Fashion & Clothing':    Shirt,
+  'Electronics':           Smartphone,
+  'Grocery & Supplies':    ShoppingCart,
+  'Stationery':            BookOpen,
 
   // Food
-  'All Food':            UtensilsCrossed,
-  'Grocery':             Apple,
-  'Dairy':               Milk,
-  'Organics':            Leaf,
-  'Meats':               Beef,
-  'Bakery':              Cake,
-  'Sweets':              Candy,
-  'Beverages':           CupSoda,
-  'Meals':               Soup,
-  'Catering':            ConciergeBell,
+  'All Food':              UtensilsCrossed,
+  'Grocery':               Apple,
+  'Dairy':                 Milk,
+  'Bakery & Cakes':        Cake,
+  'Sweets & Mithai':       Candy,
+  'Restaurant':            ConciergeBell,
 
   // Transport
-  'All Transport':       Car,
-  'Autos':               Bike,
-  'Cabs':                Car,
-  'Buses':               Bus,
-  'Vans':                Van,
-  'Trucks':              Truck,
-  'Couriers':            Package,
-  'Tractors':            Tractor,
-  'Packers & Movers':    PackageSearch,
+  'All Transport':         Car,
+  'Taxi & Cab':            Car,
+  'Courier & Parcel':      Package,
 
   // Events
-  'All Events':          Music,
-  'DJs & Music':         Music,
-  'Bands & Dhol':        Drum,
-  'Photography':         Camera,
-  'Videography':         Video,
-  'Decoration':          Flower,
-  'Lighting':            Lightbulb,
-  'Fireworks':           Sparkles,
-  'Event Planning':      ClipboardList,
-  'Choreography':        PersonStanding,
-  'Horse & Barat':       Umbrella,
-  'Tent & Shamiana':     Umbrella,
+  'All Events':            Music,
+  'DJs & Sound':           Music,
+  'Photography':           Camera,
 }
 
 /** Get icon for a group slug, fallback to grid */
