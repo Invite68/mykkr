@@ -55,6 +55,7 @@ html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
   --tnav:    56px;
   --bnav:    60px;
   --sidebar: 236px;
+  --tl1:     41px;   /* height of the L1 category tab row */
 
   /* Focus */
   --focus-ring: 0 0 0 3px rgba(45,84,94,.25);
@@ -590,12 +591,15 @@ img, svg { max-width: 100%; display: block; }
   color: var(--night-d);
 }
 
-/* L2 row */
+/* L2 row — sticky directly below the L1 row */
 .cat-l2-row {
   background: var(--bg);
   border-bottom: 1px solid var(--border);
   padding-top: 8px; padding-bottom: 8px;
   gap: 7px;
+  position: sticky;
+  top: calc(var(--tnav) + var(--tl1));
+  z-index: 199;
 }
 .cat-l2-row::after {
   background: linear-gradient(to right, transparent, var(--bg));

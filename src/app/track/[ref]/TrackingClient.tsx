@@ -8,7 +8,7 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react'
 import type { SafeJob, JobStatus } from '@/lib/job-types'
 import { directionsUrl, fetchRoute } from '@/lib/maps'
-import { firebaseAuth } from '@/lib/firebase-client'
+import { getFirebaseAuth } from '@/lib/firebase-client'
 import JobChat from '@/components/chat/JobChat'
 
 // ── Status display config ─────────────────────────────────────────────────────
@@ -181,7 +181,7 @@ export default function TrackingClient({ initialJob }: { initialJob: SafeJob }) 
   // Firebase ID token for chat auth
   const [idToken, setIdToken] = useState<string | null>(null)
   useEffect(() => {
-    const user = firebaseAuth.currentUser
+    const user = getFirebaseAuth().currentUser
     if (user) {
       user.getIdToken().then(setIdToken).catch(() => { /* not logged in */ })
     }
@@ -327,7 +327,7 @@ export default function TrackingClient({ initialJob }: { initialJob: SafeJob }) 
       {CHAT_ACTIVE_STATUSES.has(job.status) && idToken && (
         <JobChat
           jobId={job.id}
-          myUid={firebaseAuth.currentUser?.uid ?? ''}
+          myUid={getFirebaseAuth().currentUser?.uid ?? ''}
           myRole="customer"
           idToken={idToken}
         />

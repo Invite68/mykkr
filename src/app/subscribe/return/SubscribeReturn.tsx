@@ -13,7 +13,7 @@
 
 import { useEffect, useState, useRef } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
-import { firebaseAuth } from '@/lib/firebase-client'
+import { getFirebaseAuth } from '@/lib/firebase-client'
 
 type State = 'checking' | 'activating' | 'active' | 'cancelled' | 'error'
 
@@ -42,7 +42,7 @@ export default function SubscribeReturn() {
 
     async function poll(attempt: number) {
       try {
-        const user = firebaseAuth.currentUser
+        const user = getFirebaseAuth().currentUser
         if (!user) {
           // Not signed in — redirect to register
           router.replace('/register')

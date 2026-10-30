@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from 'react'
 import { PLANS, formatInr } from '@/config/platform'
-import { firebaseAuth } from '@/lib/firebase-client'
+import { getFirebaseAuth } from '@/lib/firebase-client'
 
 interface SubscriptionCtx {
   /** Opens the "subscribe to contact" modal for a business */
@@ -49,7 +49,7 @@ export default function SubscriptionProvider({ children }: { children: ReactNode
     setStarting(true)
     setSubError('')
     try {
-      const user = firebaseAuth.currentUser
+      const user = getFirebaseAuth().currentUser
       if (!user) {
         // Not signed in — send to register instead
         window.location.href = '/register?role=customer'
@@ -118,7 +118,7 @@ export default function SubscriptionProvider({ children }: { children: ReactNode
             {subError && (
               <div className="banner banner-err" role="alert" style={{ marginBottom: 10 }}>{subError}</div>
             )}
-            {firebaseAuth.currentUser ? (
+            {getFirebaseAuth().currentUser ? (
               <button
                 className="btn btn-primary btn-block"
                 onClick={startCheckout}
@@ -134,7 +134,7 @@ export default function SubscriptionProvider({ children }: { children: ReactNode
               </button>
             ) : (
               <Link href="/register?role=customer" className="btn btn-primary btn-block" onClick={close}>
-                Start {plan.trialDays}-day free trial →
+                Sign in to start {plan.trialDays}-day free trial →
               </Link>
             )}
             <p className="muted" style={{ marginTop: 10 }}>No payment needed during the trial.</p>

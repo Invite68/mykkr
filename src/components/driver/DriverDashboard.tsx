@@ -14,7 +14,7 @@
  */
 
 import { useEffect, useState, useCallback } from 'react'
-import { firebaseAuth } from '@/lib/firebase-client'
+import { getFirebaseAuth } from '@/lib/firebase-client'
 import type { SafeJob } from '@/lib/job-types'
 import JobBoard from '@/components/driver/JobBoard'
 import ActiveJob from '@/components/driver/ActiveJob'
@@ -38,7 +38,7 @@ export default function DriverDashboard() {
 
   // ── Initialise Firebase auth + load driver profile ────────────────────────
   useEffect(() => {
-    const unsub = firebaseAuth.onAuthStateChanged(async (user) => {
+    const unsub = getFirebaseAuth().onAuthStateChanged(async (user) => {
       if (!user) {
         setAuth({ status: 'unauthenticated' })
         return

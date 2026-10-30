@@ -12,7 +12,7 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { firebaseAuth } from '@/lib/firebase-client'
+import { getFirebaseAuth } from '@/lib/firebase-client'
 
 // ── Colour tokens (match page.tsx) ────────────────────────────────────────────
 const C = {
@@ -110,7 +110,7 @@ export default function BusinessDashboardClient({ today }: { today: string }) {
   const [subWarn, setSubWarn] = useState('')
 
   useEffect(() => {
-    const unsub = firebaseAuth.onAuthStateChanged(async (user) => {
+    const unsub = getFirebaseAuth().onAuthStateChanged(async (user) => {
       if (!user) { setState('unauthenticated'); return }
 
       try {
