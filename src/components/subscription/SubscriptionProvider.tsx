@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from 'react'
 import { PLANS, formatInr } from '@/config/platform'
+import { firebaseAuth } from '@/lib/firebase-client'
 
 interface SubscriptionCtx {
   /** Opens the "subscribe to contact" modal for a business */
@@ -23,9 +24,48 @@ export function useSubscription(): SubscriptionCtx {
  * request shows the subscribe modal.
  */
 export default function SubscriptionProvider({ children }: { children: ReactNode }) {
-  const [target, setTarget] = useState<string | null>(null)
-  const close = useCallback(() => setTarget(null), [])
-  const requestContact = useCallback((name: string) => setTarget(name), [])
+  const [target, setTarget]     = useState<string | null>(null)
+  const [starting, setStarting] = useState(false)
+  const [subError, setSubError] = useState('')
+  const close = useCallback(() => { setTarget(null); setSubError('') }, [])
+  const requestContact = useCallback((name: string) => { setStarting(false); setSubError(''); setTarget(name) }, [])
+
+  async function startCheckout() {
+    setStarting(true)
+    setSubError('')
+    try {
+      const user = firebaseAuth.currentUser
+      if (!user) {
+        // Not signed in — send to register instead
+        window.location.href = '/register?role=customer'
+        return
+      }
+      const idToken = await user.getIdToken()
+      const res = await fetch('/api/subscriptions/create', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${idToken}`,
+        },
+        body: JSON.stringify({ plan: 'customer' }),
+      })
+      const json = await res.json() as { shortUrl?: string; error?: string }
+      if (res.status === 409) {
+        // Already subscribed — just close the modal and let them browse
+        close()
+        return
+      }
+      if (!res.ok || !json.shortUrl) {
+        setSubError(json.error ?? 'Could not start checkout. Please try again.')
+        setStarting(false)
+        return
+      }
+      window.location.href = json.shortUrl
+    } catch {
+      setSubError('Network error. Check your connection.')
+      setStarting(false)
+    }
+  }
 
   useEffect(() => {
     if (!target) return
@@ -59,9 +99,28 @@ export default function SubscriptionProvider({ children }: { children: ReactNode
               </div>
               <div className="muted">{plan.trialDays}-day free trial · Unlimited contacts · Cancel anytime</div>
             </div>
-            <Link href="/register?role=customer" className="btn btn-primary btn-block" onClick={close}>
-              Start {plan.trialDays}-day free trial →
-            </Link>
+            {subError && (
+              <div className="banner banner-err" role="alert" style={{ marginBottom: 10 }}>{subError}</div>
+            )}
+            {firebaseAuth.currentUser ? (
+              <button
+                className="btn btn-primary btn-block"
+                onClick={startCheckout}
+                disabled={starting}
+              >
+                {starting
+                  ? <>
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" style={{ animation: 'spin 1s linear infinite' }}><circle cx="12" cy="12" r="10" strokeOpacity="0.2"/><path d="M12 2a10 10 0 0 1 10 10"/></svg>
+                      Opening checkout…
+                    </>
+                  : `Start ${plan.trialDays}-day free trial →`
+                }
+              </button>
+            ) : (
+              <Link href="/register?role=customer" className="btn btn-primary btn-block" onClick={close}>
+                Start {plan.trialDays}-day free trial →
+              </Link>
+            )}
             <p className="muted" style={{ marginTop: 10 }}>No payment needed during the trial.</p>
           </div>
         </div>

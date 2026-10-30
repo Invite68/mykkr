@@ -433,6 +433,7 @@ function BusinessWizard({ phone, idToken, onDone }: { phone: string; idToken: st
   async function submitBusiness() {
     setErrors(['Submitting…'])
     try {
+      // 1 — Save business profile
       const res = await fetch('/api/businesses', {
         method: 'POST',
         headers: {
@@ -460,6 +461,26 @@ function BusinessWizard({ phone, idToken, onDone }: { phone: string; idToken: st
         setErrors([json.error ?? 'Submission failed. Please try again.'])
         return
       }
+
+      // 2 — Create Razorpay subscription and redirect to hosted checkout
+      setErrors(['Setting up your subscription…'])
+      const subRes = await fetch('/api/subscriptions/create', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${idToken}`,
+        },
+        body: JSON.stringify({ plan: 'business' }),
+      })
+      if (subRes.ok) {
+        const subJson = await subRes.json() as { shortUrl?: string }
+        if (subJson.shortUrl) {
+          window.location.href = subJson.shortUrl
+          return
+        }
+      }
+      // Subscription creation failed — still mark profile done, user can pay later from dashboard
+      console.warn('[subscribe] Could not create subscription:', await subRes.text().catch(() => ''))
       onDone()
     } catch {
       setErrors(['Network error — please check your connection and try again.'])
@@ -691,6 +712,7 @@ function CustomerWizard({ phone, idToken, onDone }: { phone: string; idToken: st
   async function submitCustomer() {
     setErrors(['Submitting…'])
     try {
+      // 1 — Save customer profile
       const res = await fetch('/api/customers', {
         method: 'POST',
         headers: {
@@ -710,6 +732,26 @@ function CustomerWizard({ phone, idToken, onDone }: { phone: string; idToken: st
         setErrors([json.error ?? 'Submission failed. Please try again.'])
         return
       }
+
+      // 2 — Create Razorpay subscription (7-day trial, then ₹9.99/month)
+      setErrors(['Starting your free trial…'])
+      const subRes = await fetch('/api/subscriptions/create', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${idToken}`,
+        },
+        body: JSON.stringify({ plan: 'customer' }),
+      })
+      if (subRes.ok) {
+        const subJson = await subRes.json() as { shortUrl?: string }
+        if (subJson.shortUrl) {
+          window.location.href = subJson.shortUrl
+          return
+        }
+      }
+      // Subscription creation failed — still complete registration, user can subscribe from dashboard
+      console.warn('[subscribe] Could not create subscription:', await subRes.text().catch(() => ''))
       onDone()
     } catch {
       setErrors(['Network error — please check your connection and try again.'])

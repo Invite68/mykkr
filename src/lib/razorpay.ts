@@ -102,6 +102,10 @@ export async function createRazorpaySubscription(params: {
   const planId = getRazorpayPlanId(params.plan)
   const totalCount = params.totalCount ?? 12
 
+  // Razorpay redirects the user here after checkout (success or cancel)
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://mykkr.in'
+  const returnUrl = `${siteUrl}/subscribe/return`
+
   return razorpayRequest<RazorpaySubscription>('POST', '/subscriptions', {
     plan_id:     planId,
     total_count: totalCount,
@@ -111,6 +115,9 @@ export async function createRazorpaySubscription(params: {
       notify_phone: 1,
       notify_email: 1,
     },
+    // Hosted checkout return URL — user lands here after payment
+    callback_url: returnUrl,
+    cancel_url:   returnUrl,
   })
 }
 
