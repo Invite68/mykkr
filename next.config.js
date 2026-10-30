@@ -80,12 +80,18 @@ const nextConfig = {
       {
         source: '/(.*)',
         headers: [
-          // CSP is also set per-request by middleware.ts (with the real nonce
-          // substituted in). This static header acts as a hard fallback.
-          { key: 'Content-Security-Policy', value: CSP },
+          // NOTE: CSP is NOT set here. It is set entirely in middleware.ts where
+          // the per-request nonce is available. A static CSP here with the
+          // NONCE_PLACEHOLDER literal would block all JS in production because
+          // Next.js static headers are sent AFTER middleware, so middleware
+          // cannot replace the placeholder.
+          //
+          // The CSP variable above is kept for reference / dev-only fallback
+          // but is not used as a response header.
+          //
           // X-Frame-Options: DENY is the legacy fallback for browsers that
-          // don't support frame-ancestors in CSP. frame-ancestors 'none' above
-          // takes precedence in modern browsers.
+          // don't support frame-ancestors in CSP. frame-ancestors 'none' in
+          // the middleware CSP takes precedence in modern browsers.
           { key: 'X-Frame-Options', value: 'DENY' },
           { key: 'X-Content-Type-Options', value: 'nosniff' },
           { key: 'X-DNS-Prefetch-Control', value: 'on' },

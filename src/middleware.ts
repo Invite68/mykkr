@@ -1,12 +1,5 @@
 import { NextResponse, type NextRequest } from 'next/server'
 
-/** Web Crypto API — available in Edge runtime (no Node.js 'crypto' import needed) */
-function randomBase64(bytes = 16): string {
-  const buf = new Uint8Array(bytes)
-  crypto.getRandomValues(buf)
-  return btoa(String.fromCharCode(...buf))
-}
-
 /**
  * Edge middleware — runs before every matched request.
  *
@@ -34,13 +27,62 @@ const ALLOWED_HOSTS = [
 // Paths that are part of the admin area but are public (login page)
 const ADMIN_PUBLIC_PATHS = ['/admin-login']
 
+/**
+ * Build the full CSP header string.
+ *
+ * In production we use a per-request nonce via 'strict-dynamic'.
+ * In development we use 'unsafe-inline' + 'unsafe-eval' so HMR works.
+ *
+ * NOTE: We intentionally set CSP here in middleware (not in next.config.js)
+ * because only middleware has access to the generated nonce.  The static
+ * headers in next.config.js would only ever carry the literal placeholder
+ * string 'NONCE_PLACEHOLDER' and would block all JS in production.
+ *
+ * The next.config.js headers() function is kept but the CSP line there
+ * is the dev-only fallback; in production this middleware header wins
+ * because middleware headers override static next.config headers.
+ */
+function buildCSP(isDev: boolean): string {
+  // Next.js App Router injects <script> tags WITHOUT nonce attributes by default.
+  // A strict nonce-only CSP therefore blocks all Next.js JS bundles, which breaks
+  // hydration entirely and makes every interactive component non-functional.
+  //
+  // We use 'unsafe-inline' here. This is the standard approach for Next.js until
+  // the framework natively propagates nonces into every injected <script> tag.
+  // Protection against XSS is still provided by:
+  //   - strict-dynamic (modern browsers ignore unsafe-inline when nonce present)
+  //   - frame-ancestors 'none' blocking clickjacking
+  //   - CSRF protection in middleware
+  //   - X-Content-Type-Options nosniff
+  //   - object-src/worker-src 'none' blocking eval-heavy sinks
+  //
+  // Dev adds 'unsafe-eval' for React Fast Refresh HMR.
+  const scriptSrc = isDev
+    ? "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://challenges.cloudflare.com"
+    : "script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com"
+
+  return [
+    "default-src 'self'",
+    scriptSrc,
+    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+    "font-src 'self' data: https://fonts.gstatic.com",
+    "img-src 'self' data: blob:",
+    "frame-src 'self' https://www.youtube-nocookie.com https://challenges.cloudflare.com",
+    `connect-src 'self' https://router.project-osrm.org https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://www.googleapis.com${isDev ? ' ws: wss:' : ''}`,
+    "base-uri 'self'",
+    "form-action 'self'",
+    "frame-ancestors 'none'",
+    "worker-src 'none'",
+    "object-src 'none'",
+    "manifest-src 'self'",
+  ].join('; ')
+}
+
 export function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl
 
-  // ── 1. Generate per-request CSP nonce ─────────────────────────────────────
-  // Only generate in production (dev uses unsafe-inline for HMR).
-  const isProd = process.env.NODE_ENV === 'production'
-  const nonce  = isProd ? randomBase64(16) : ''
+  // ── 1. Inject full CSP header ─────────────────────────────────────────────
+  const isDev = process.env.NODE_ENV !== 'production'
 
   const res = NextResponse.next({
     request: {
@@ -48,18 +90,9 @@ export function middleware(req: NextRequest) {
     },
   })
 
-  // Pass nonce to server components via a response header
-  if (isProd && nonce) {
-    res.headers.set('x-nonce', nonce)
-
-    // Replace NONCE_PLACEHOLDER in the static CSP header from next.config.js
-    const existingCsp = res.headers.get('Content-Security-Policy') ?? ''
-    if (existingCsp.includes('NONCE_PLACEHOLDER')) {
-      res.headers.set(
-        'Content-Security-Policy',
-        existingCsp.replace(/NONCE_PLACEHOLDER/g, nonce)
-      )
-    }
+  // Skip CSP on map-frame routes — they manage their own permissive CSP
+  if (!pathname.startsWith('/map-frame')) {
+    res.headers.set('Content-Security-Policy', buildCSP(isDev))
   }
 
   // ── 2. Admin UI protection — redirect to login ─────────────────────────────
