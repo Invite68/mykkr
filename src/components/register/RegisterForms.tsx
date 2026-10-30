@@ -235,6 +235,20 @@ function OtpLoginStep({
     try {
       const result = await confirmRef.current.confirm(otp)
       const idToken = await result.user.getIdToken()
+
+      // Exchange Firebase ID token for a server-side session cookie (__session).
+      // This lets the middleware protect /dashboard/* and /admin/* routes.
+      const sessionRes = await fetch('/api/auth/session', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ idToken }),
+      })
+      if (!sessionRes.ok) {
+        const json = await sessionRes.json() as { error?: string }
+        setErrors([json.error ?? 'Could not create session. Please try again.'])
+        return
+      }
+
       onVerified(`+91${phone}`, idToken)
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Verification failed'
