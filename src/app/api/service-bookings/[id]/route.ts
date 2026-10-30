@@ -110,9 +110,9 @@ export async function PATCH(
     return NextResponse.json({ error: 'action is required' }, { status: 400 })
   }
 
-  // Fetch booking
+  // Fetch booking — use SAFE_COLS to never pull customer_phone into memory
   const rows = await query<Booking>(
-    `SELECT * FROM service_bookings WHERE id = $1 LIMIT 1`,
+    `SELECT ${SAFE_COLS} FROM service_bookings WHERE id = $1 LIMIT 1`,
     [id]
   )
   if (!rows.length) return NextResponse.json({ error: 'Not found' }, { status: 404 })

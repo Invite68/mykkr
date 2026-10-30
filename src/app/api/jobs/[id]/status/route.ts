@@ -25,6 +25,21 @@ import { readLimiter, checkLimit } from '@/lib/rate-limit'
 import type { Job, SafeJob, JobStatus } from '@/lib/job-types'
 import { DRIVER_TRANSITIONS } from '@/lib/job-types'
 
+// Safe cols — driver_phone deliberately included so toSafeJob can decrypt when appropriate
+// customer_phone is excluded — it is NEVER needed by this endpoint
+const SAFE_FETCH_COLS = `
+  id, ref, mode, status, rider_id,
+  customer_name,
+  pickup_label, pickup_lat, pickup_lon,
+  dropoff_label, dropoff_lat, dropoff_lon,
+  vehicle_id, distance_km,
+  fare_estimate, fare_client_paise, fare_server_paise, fare_accepted_paise,
+  driver_id, driver_name, driver_phone, driver_vehicle,
+  notes, scheduled_at,
+  accepted_at, picked_up_at, completed_at, cancelled_at,
+  cancel_by, cancel_reason,
+  created_at, updated_at`
+
 const SHOW_PHONE_STATUSES: JobStatus[] = ['accepted', 'driver_en_route', 'picked_up']
 
 function toSafeJob(job: Job, revealPhone = false): SafeJob {
@@ -50,7 +65,7 @@ export async function GET(
   const { id: jobId } = await params
 
   try {
-    const rows = await query<Job>('SELECT * FROM jobs WHERE id = $1', [jobId])
+    const rows = await query<Job>(`SELECT ${SAFE_FETCH_COLS} FROM jobs WHERE id = $1`, [jobId])
     if (rows.length === 0) {
       return NextResponse.json({ error: 'Job not found' }, { status: 404 })
     }

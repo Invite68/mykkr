@@ -11,6 +11,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { onAuthStateChanged, getAuth } from 'firebase/auth'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import SignOutButton from '@/components/SignOutButton'
 
 interface Job {
   id: string
@@ -119,14 +120,22 @@ export default function DriverDashboard() {
     setAcceptingId(job.id)
     setAcceptError(prev => ({ ...prev, [job.id]: '' }))
 
-    // Get driver details from Firebase profile (simplified: use displayName or ask)
-    const auth = getAuth()
-    const user = auth.currentUser
-    const driverName    = user?.displayName ?? 'Driver'
-    const driverPhone   = user?.phoneNumber ?? '0000000000'
-    const driverVehicle = 'Auto'   // TODO: pull from driver profile
-
     try {
+      // Pull driver profile from DB — never trust Firebase displayName for name/vehicle
+      const profileRes = await fetch('/api/auth/me', {
+        headers: { Authorization: `Bearer ${idToken}` },
+        cache: 'no-store',
+      })
+      const profileData = profileRes.ok
+        ? (await profileRes.json() as { profile?: { full_name?: string; vehicle_type?: string; vehicle_number?: string } })
+        : {}
+      const profile = profileData.profile ?? {}
+      const auth = getAuth()
+      const user = auth.currentUser
+      const driverName    = profile.full_name ?? user?.displayName ?? 'Driver'
+      const driverPhone   = user?.phoneNumber ?? '0000000000'
+      const driverVehicle = [profile.vehicle_type, profile.vehicle_number].filter(Boolean).join(' ') || 'Vehicle'
+
       const res = await fetch(`/api/jobs/${job.id}/accept`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${idToken}`, 'Content-Type': 'application/json' },
@@ -180,9 +189,12 @@ export default function DriverDashboard() {
     <div className="container" style={{ maxWidth: 720, paddingTop: 32, paddingBottom: 80 }}>
 
       {/* Header */}
-      <div style={{ marginBottom: 24 }}>
-        <h1 style={{ fontSize: 22, fontWeight: 700, color: 'var(--night-d)' }}>Driver Dashboard</h1>
-        <p className="muted" style={{ fontSize: 13, marginTop: 4 }}>Accept jobs and earn. All payments are between you and the customer.</p>
+      <div style={{ marginBottom: 24, display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
+        <div>
+          <h1 style={{ fontSize: 22, fontWeight: 700, color: 'var(--night-d)' }}>Driver Dashboard</h1>
+          <p className="muted" style={{ fontSize: 13, marginTop: 4 }}>Accept jobs and earn. All payments are between you and the customer.</p>
+        </div>
+        <SignOutButton />
       </div>
 
       {/* Active jobs banner */}

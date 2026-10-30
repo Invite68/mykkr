@@ -29,6 +29,20 @@ import { query }                     from '@/lib/db'
 import { broadcast }                 from '@/lib/job-broadcaster'
 import type { Job, SafeJob, JobStatus } from '@/lib/job-types'
 
+// Explicit safe cols — customer_phone and driver_phone NEVER fetched
+const SAFE_FETCH_COLS = `
+  id, ref, mode, status, rider_id,
+  customer_name,
+  pickup_label, pickup_lat, pickup_lon,
+  dropoff_label, dropoff_lat, dropoff_lon,
+  vehicle_id, distance_km,
+  fare_estimate, fare_client_paise, fare_server_paise, fare_accepted_paise,
+  driver_id, driver_name, driver_vehicle,
+  notes, scheduled_at,
+  accepted_at, picked_up_at, completed_at, cancelled_at,
+  cancel_by, cancel_reason,
+  created_at, updated_at`
+
 // Statuses that can no longer be cancelled
 const TERMINAL: JobStatus[] = ['completed', 'cancelled_by_rider', 'cancelled_by_driver']
 
@@ -66,8 +80,8 @@ export async function POST(
   const { reason } = body
   const reasonStr = reason ? String(reason).trim().slice(0, 500) : null
 
-  // ── Fetch job ─────────────────────────────────────────────────────────────────
-  const rows = await query<Job>('SELECT * FROM jobs WHERE id = $1', [jobId])
+  // ── Fetch job — explicit safe cols only ──────────────────────────────────────
+  const rows = await query<Job>(`SELECT ${SAFE_FETCH_COLS} FROM jobs WHERE id = $1`, [jobId])
   if (rows.length === 0) {
     return NextResponse.json({ error: 'Job not found' }, { status: 404 })
   }

@@ -11,6 +11,7 @@ import { useState, useEffect } from 'react'
 import { onAuthStateChanged } from 'firebase/auth'
 import { getAuth } from 'firebase/auth'
 import Link from 'next/link'
+import SignOutButton from '@/components/SignOutButton'
 
 interface Job {
   id: string
@@ -121,12 +122,15 @@ export default function CustomerDashboard() {
     <div className="container" style={{ maxWidth: 720, paddingTop: 32, paddingBottom: 80 }}>
 
       {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24, gap: 12, flexWrap: 'wrap' }}>
         <h1 style={{ fontSize: 22, fontWeight: 700, color: 'var(--night-d)' }}>My Bookings</h1>
-        <Link href="/find-book" className="btn btn-primary" style={{ fontSize: 14, padding: '8px 16px' }}>
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: 6 }} aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-          New Booking
-        </Link>
+        <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+          <Link href="/find-book" className="btn btn-primary" style={{ fontSize: 14, padding: '8px 16px' }}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: 6 }} aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            New Booking
+          </Link>
+          <SignOutButton />
+        </div>
       </div>
 
       {jobs.length === 0 && (

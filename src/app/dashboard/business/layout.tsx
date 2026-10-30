@@ -8,6 +8,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import SignOutButton from '@/components/SignOutButton'
 
 // ── Colour tokens (consistent with globals.css brand) ─────────────────────────
 const C = {
@@ -163,14 +164,13 @@ function Sidebar({ current }: { current: string }) {
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
           View public page
         </Link>
-        <Link href="/demo-login" style={{
-          display: 'flex', alignItems: 'center', gap: 8,
-          padding: '8px 12px', borderRadius: 8,
-          textDecoration: 'none', color: C.text3, fontSize: 12, fontWeight: 500,
-        }}>
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-          Switch account
-        </Link>
+        <SignOutButton
+          style={{
+            color: C.text3, borderColor: C.panelBorder, width: '100%',
+            justifyContent: 'flex-start', padding: '8px 12px', borderRadius: 8,
+            fontSize: 12, fontWeight: 500,
+          }}
+        />
       </div>
     </aside>
   )
