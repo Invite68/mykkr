@@ -13,6 +13,7 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { getFirebaseAuth } from '@/lib/firebase-client'
+import SubscriptionBanner from '@/components/SubscriptionBanner'
 
 // ── Colour tokens (match page.tsx) ────────────────────────────────────────────
 const C = {
@@ -105,18 +106,19 @@ function jobTypeLabel(t: string): string {
 
 // ── Component ─────────────────────────────────────────────────────────────────
 export default function BusinessDashboardClient({ today }: { today: string }) {
-  const [state, setState] = useState<'loading' | 'unauthenticated' | 'ready' | 'error'>('loading')
-  const [data, setData]   = useState<DashData | null>(null)
-  const [subWarn, setSubWarn] = useState('')
+  const [state, setState]     = useState<'loading' | 'unauthenticated' | 'ready' | 'error'>('loading')
+  const [data, setData]       = useState<DashData | null>(null)
+  const [idToken, setIdToken] = useState<string | null>(null)
 
   useEffect(() => {
     const unsub = getFirebaseAuth().onAuthStateChanged(async (user) => {
       if (!user) { setState('unauthenticated'); return }
 
       try {
-        const idToken = await user.getIdToken()
+        const token = await user.getIdToken()
+        setIdToken(token)
         const res = await fetch('/api/business/dashboard', {
-          headers: { Authorization: `Bearer ${idToken}` },
+          headers: { Authorization: `Bearer ${token}` },
           cache: 'no-store',
         })
         if (!res.ok) {
@@ -125,16 +127,6 @@ export default function BusinessDashboardClient({ today }: { today: string }) {
         }
         const json = await res.json() as DashData & { subscription?: Subscription | null }
         setData(json)
-
-        // Warn if subscription is not active
-        const sub = json.subscription
-        if (!sub || (sub.status !== 'active' && sub.status !== 'trialing')) {
-          setSubWarn('Your subscription is inactive. Renew to keep your listing live.')
-        } else if (sub.status === 'trialing' && sub.trial_ends_at) {
-          const daysLeft = Math.ceil((new Date(sub.trial_ends_at).getTime() - Date.now()) / 86400000)
-          if (daysLeft <= 3) setSubWarn(`Trial ends in ${daysLeft} day${daysLeft === 1 ? '' : 's'}.`)
-        }
-
         setState('ready')
       } catch {
         setState('error')
@@ -177,12 +169,10 @@ export default function BusinessDashboardClient({ today }: { today: string }) {
 
   return (
     <>
-      {/* ── Subscription warning ──────────────────────────────────────────────── */}
-      {subWarn && (
-        <div style={{ marginBottom: 20, background: '#fffbeb', border: '1.5px solid #fbbf24', borderRadius: 10, padding: '12px 16px', display: 'flex', alignItems: 'center', gap: 10 }}>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#d97706" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-          <span style={{ fontSize: 13, color: '#92400e', flex: 1 }}>{subWarn}</span>
-          <Link href="/dashboard/business/subscription" style={{ fontSize: 12, fontWeight: 700, color: C.teal, textDecoration: 'none' }}>Manage &rarr;</Link>
+      {/* ── Subscription banner ───────────────────────────────────────────────── */}
+      {idToken && (
+        <div style={{ marginBottom: 20 }}>
+          <SubscriptionBanner idToken={idToken} plan="business" />
         </div>
       )}
 

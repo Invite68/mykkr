@@ -1,15 +1,22 @@
+'use client'
+
 /**
- * Business Portal — Subscription & Help
- * Brand: teal (#12343b) × gold (#e1b382) × white
+ * Business Portal — Subscription & Billing
+ *
+ * Fetches live subscription status from /api/subscriptions/status
+ * and payment history from /api/subscriptions/payments.
+ *
+ * Security: auth required via Firebase ID token; no PII exposed.
  */
 
 import type { Metadata } from 'next'
+import { useEffect, useState } from 'react'
+import { getFirebaseAuth } from '@/lib/firebase-client'
 import { PLANS, formatInr, withGst } from '@/config/platform'
+import Link from 'next/link'
 
-export const metadata: Metadata = {
-  title: 'Subscription — My KKR Business Portal',
-  robots: 'noindex,nofollow',
-}
+// metadata export not supported in 'use client' — handled by parent layout
+// export const metadata: Metadata = { ... }
 
 const C = {
   panel:   '#132b32',
@@ -48,7 +55,7 @@ const FAQ = [
   },
   {
     q: 'How do I get a GST invoice for my subscription payment?',
-    a: 'GST invoices are generated automatically and emailed to you after each monthly payment. You can also download them from the Billing section below. My KKR\'s GSTIN is available on all invoices.',
+    a: "GST invoices are generated automatically and emailed to you after each monthly payment. My KKR's GSTIN is available on all invoices.",
   },
 ]
 
@@ -65,8 +72,90 @@ const INCLUDES = [
   'Zero commission on any customer transaction — ever',
 ]
 
+interface SubStatus {
+  hasSubscription: boolean
+  status:          string | null
+  plan:            string | null
+  trialEndsAt:     string | null
+  trialDaysLeft:   number | null
+  periodEnd:       string | null
+  razorpaySubId:   string | null
+}
+
+interface Payment {
+  id:                  number
+  razorpay_payment_id: string
+  amount_paise:        number
+  status:              string
+  created_at:          string
+}
+
+function fmtDate(iso: string) {
+  return new Date(iso).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })
+}
+
 export default function SubscriptionPage() {
   const bizPrice = withGst(PLANS.business.priceInr)
+
+  const [idToken,   setIdToken]   = useState<string | null>(null)
+  const [sub,       setSub]       = useState<SubStatus | null>(null)
+  const [payments,  setPayments]  = useState<Payment[]>([])
+  const [loading,   setLoading]   = useState(true)
+  const [cancelling, setCancelling] = useState(false)
+  const [cancelDone, setCancelDone] = useState(false)
+  const [cancelErr,  setCancelErr]  = useState('')
+
+  useEffect(() => {
+    const unsub = getFirebaseAuth().onAuthStateChanged(async (user) => {
+      if (!user) return
+      try {
+        const token = await user.getIdToken()
+        setIdToken(token)
+
+        const [subRes, payRes] = await Promise.all([
+          fetch('/api/subscriptions/status',   { headers: { Authorization: `Bearer ${token}` }, cache: 'no-store' }),
+          fetch('/api/subscriptions/payments', { headers: { Authorization: `Bearer ${token}` }, cache: 'no-store' }),
+        ])
+
+        if (subRes.ok)  setSub(await subRes.json() as SubStatus)
+        if (payRes.ok)  setPayments((await payRes.json() as { payments: Payment[] }).payments ?? [])
+      } finally {
+        setLoading(false)
+      }
+    })
+    return () => unsub()
+  }, [])
+
+  async function handleCancel() {
+    if (!idToken) return
+    setCancelling(true); setCancelErr('')
+    try {
+      const res = await fetch('/api/subscriptions/cancel', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${idToken}` },
+      })
+      if (!res.ok) {
+        const d = await res.json() as { error?: string }
+        throw new Error(d.error ?? 'Could not cancel')
+      }
+      setCancelDone(true)
+    } catch (e) {
+      setCancelErr(e instanceof Error ? e.message : 'Error cancelling subscription')
+    } finally {
+      setCancelling(false)
+    }
+  }
+
+  const isActive   = sub?.status === 'active' || sub?.status === 'trialing'
+  const statusBadge = (() => {
+    switch (sub?.status) {
+      case 'active':   return { label: 'Active',    bg: 'rgba(34,197,94,0.18)',   color: '#4ade80', border: 'rgba(34,197,94,0.35)' }
+      case 'trialing': return { label: 'Trial',     bg: 'rgba(59,130,246,0.18)',  color: '#60a5fa', border: 'rgba(59,130,246,0.35)' }
+      case 'past_due': return { label: 'Past due',  bg: 'rgba(251,191,36,0.18)', color: '#fbbf24', border: 'rgba(251,191,36,0.35)' }
+      case 'cancelled':return { label: 'Cancelled', bg: 'rgba(239,68,68,0.18)',  color: '#f87171', border: 'rgba(239,68,68,0.35)' }
+      default:         return { label: 'Inactive',  bg: 'rgba(100,116,139,0.18)',color: '#94a3b8', border: 'rgba(100,116,139,0.35)' }
+    }
+  })()
 
   return (
     <>
@@ -76,43 +165,65 @@ export default function SubscriptionPage() {
         <h1 style={{ fontWeight: 900, fontSize: 22, color: C.text1, margin: 0, letterSpacing: -0.4 }}>Your Plan</h1>
       </div>
 
-      {/* Active plan hero */}
+      {/* Plan hero */}
       <div style={{
         background: `linear-gradient(135deg, ${C.teal} 0%, ${C.tealMid} 100%)`,
         borderRadius: 14, padding: '22px 24px', marginBottom: 20,
         border: `1.5px solid ${C.goldB}`,
         position: 'relative', overflow: 'hidden',
       }}>
-        {/* decorative ring */}
         <div style={{ position: 'absolute', top: -40, right: -40, width: 140, height: 140, borderRadius: '50%', background: C.goldBg, pointerEvents: 'none' }} />
 
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 10, position: 'relative' }}>
           <div>
-            <div style={{ fontSize: 10, fontWeight: 800, color: '#4ade80', marginBottom: 6, letterSpacing: 0.8, textTransform: 'uppercase' }}>Currently active</div>
-            <div style={{ fontWeight: 900, fontSize: 22, color: C.text1, letterSpacing: -0.4 }}>{PLANS.business.name}</div>
-            <div style={{ fontWeight: 800, fontSize: 16, color: C.gold, marginTop: 4 }}>
-              {formatInr(bizPrice)}<span style={{ fontSize: 12, fontWeight: 500, color: C.text2, marginLeft: 4 }}>/month incl. GST</span>
-            </div>
+            {loading ? (
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: C.text3, fontSize: 13 }}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" style={{ animation: 'spin 1s linear infinite' }}><circle cx="12" cy="12" r="10" strokeOpacity=".2"/><path d="M12 2a10 10 0 0 1 10 10"/></svg>
+                Loading…
+              </div>
+            ) : (
+              <>
+                <div style={{ fontSize: 10, fontWeight: 800, color: statusBadge.color, marginBottom: 6, letterSpacing: 0.8, textTransform: 'uppercase' }}>
+                  {sub?.status === 'trialing' ? `Free trial — ${sub.trialDaysLeft ?? 0} day${sub.trialDaysLeft === 1 ? '' : 's'} left` : statusBadge.label}
+                </div>
+                <div style={{ fontWeight: 900, fontSize: 22, color: C.text1, letterSpacing: -0.4 }}>{PLANS.business.name}</div>
+                <div style={{ fontWeight: 800, fontSize: 16, color: C.gold, marginTop: 4 }}>
+                  {formatInr(bizPrice)}<span style={{ fontSize: 12, fontWeight: 500, color: C.text2, marginLeft: 4 }}>/month incl. GST</span>
+                </div>
+              </>
+            )}
           </div>
-          <span style={{
-            background: 'rgba(34,197,94,0.18)', color: '#4ade80',
-            border: '1px solid rgba(34,197,94,0.35)',
-            fontSize: 11, fontWeight: 800, padding: '5px 12px', borderRadius: 99,
-          }}>Active</span>
+          {!loading && (
+            <span style={{
+              background: statusBadge.bg, color: statusBadge.color,
+              border: `1px solid ${statusBadge.border}`,
+              fontSize: 11, fontWeight: 800, padding: '5px 12px', borderRadius: 99,
+            }}>{statusBadge.label}</span>
+          )}
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12, marginTop: 20, position: 'relative' }}>
-          {[
-            { label: 'Next renewal',     value: '1 Nov 2026' },
-            { label: 'Payment method',   value: 'Razorpay auto' },
-            { label: 'Member since',     value: 'Apr 2026' },
-          ].map(({ label, value }) => (
-            <div key={label}>
-              <div style={{ fontSize: 10, color: C.text3, fontWeight: 600, marginBottom: 3 }}>{label}</div>
-              <div style={{ fontSize: 12, fontWeight: 800, color: C.text1 }}>{value}</div>
-            </div>
-          ))}
-        </div>
+        {!loading && sub && (
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12, marginTop: 20, position: 'relative' }}>
+            {[
+              { label: 'Next renewal', value: sub.periodEnd ? fmtDate(sub.periodEnd) : '—' },
+              { label: 'Payment',      value: 'Razorpay auto' },
+              { label: 'Trial ends',   value: sub.trialEndsAt ? fmtDate(sub.trialEndsAt) : '—' },
+            ].map(({ label, value }) => (
+              <div key={label}>
+                <div style={{ fontSize: 10, color: C.text3, fontWeight: 600, marginBottom: 3 }}>{label}</div>
+                <div style={{ fontSize: 12, fontWeight: 800, color: C.text1 }}>{value}</div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {!loading && !isActive && (
+          <div style={{ marginTop: 16, position: 'relative' }}>
+            <Link href="/subscribe?plan=business" className="btn btn-primary" style={{ fontSize: 13 }}>
+              Subscribe now
+            </Link>
+          </div>
+        )}
       </div>
 
       {/* What's included */}
@@ -135,39 +246,45 @@ export default function SubscriptionPage() {
         <div style={{ padding: '16px 20px', borderBottom: `1px solid ${C.panelB}` }}>
           <div style={{ fontWeight: 700, fontSize: 14, color: C.text1 }}>Billing history</div>
         </div>
-        <div style={{ overflowX: 'auto' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 340 }}>
-            <thead>
-              <tr style={{ background: C.card }}>
-                {['Date', 'Amount', 'Status', 'Invoice'].map(h => (
-                  <td key={h} style={{ fontSize: 10, fontWeight: 700, color: C.text3, padding: '10px 16px', textTransform: 'uppercase', letterSpacing: 0.4 }}>{h}</td>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {[
-                { date: '1 Oct 2026', amount: formatInr(bizPrice), inv: 'KKR-B-20261001' },
-                { date: '1 Sep 2026', amount: formatInr(bizPrice), inv: 'KKR-B-20260901' },
-                { date: '1 Aug 2026', amount: formatInr(bizPrice), inv: 'KKR-B-20260801' },
-                { date: '1 Jul 2026', amount: formatInr(bizPrice), inv: 'KKR-B-20260701' },
-              ].map(({ date, amount, inv }, i, arr) => (
-                <tr key={inv}>
-                  <td style={{ padding: '11px 16px', fontSize: 12, color: C.text2, borderBottom: i < arr.length - 1 ? `1px solid ${C.panelB}` : 'none' }}>{date}</td>
-                  <td style={{ padding: '11px 16px', fontSize: 12, color: C.text1, fontWeight: 800, borderBottom: i < arr.length - 1 ? `1px solid ${C.panelB}` : 'none' }}>{amount}</td>
-                  <td style={{ padding: '11px 16px', borderBottom: i < arr.length - 1 ? `1px solid ${C.panelB}` : 'none' }}>
-                    <span style={{ background: 'rgba(34,197,94,0.14)', color: '#4ade80', fontSize: 11, fontWeight: 700, padding: '2px 8px', borderRadius: 99, border: '1px solid rgba(34,197,94,0.28)' }}>Paid</span>
-                  </td>
-                  <td style={{ padding: '11px 16px', borderBottom: i < arr.length - 1 ? `1px solid ${C.panelB}` : 'none' }}>
-                    <button style={{ background: 'transparent', border: 'none', color: C.gold, fontSize: 11, fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4, padding: 0 }}>
-                      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                      {inv}
-                    </button>
-                  </td>
+
+        {loading ? (
+          <div style={{ padding: '24px 20px', color: C.text3, fontSize: 13, textAlign: 'center' }}>Loading payments…</div>
+        ) : payments.length === 0 ? (
+          <div style={{ padding: '24px 20px', color: C.text3, fontSize: 13, textAlign: 'center' }}>No payments recorded yet.</div>
+        ) : (
+          <div style={{ overflowX: 'auto' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 340 }}>
+              <thead>
+                <tr style={{ background: C.card }}>
+                  {['Date', 'Amount', 'Status', 'Ref'].map(h => (
+                    <td key={h} style={{ fontSize: 10, fontWeight: 700, color: C.text3, padding: '10px 16px', textTransform: 'uppercase', letterSpacing: 0.4 }}>{h}</td>
+                  ))}
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody>
+                {payments.map((p, i) => (
+                  <tr key={p.id}>
+                    <td style={{ padding: '11px 16px', fontSize: 12, color: C.text2, borderBottom: i < payments.length - 1 ? `1px solid ${C.panelB}` : 'none' }}>{fmtDate(p.created_at)}</td>
+                    <td style={{ padding: '11px 16px', fontSize: 12, color: C.text1, fontWeight: 800, borderBottom: i < payments.length - 1 ? `1px solid ${C.panelB}` : 'none' }}>{formatInr(p.amount_paise / 100)}</td>
+                    <td style={{ padding: '11px 16px', borderBottom: i < payments.length - 1 ? `1px solid ${C.panelB}` : 'none' }}>
+                      <span style={{
+                        background: p.status === 'captured' ? 'rgba(34,197,94,0.14)' : 'rgba(239,68,68,0.14)',
+                        color: p.status === 'captured' ? '#4ade80' : '#f87171',
+                        fontSize: 11, fontWeight: 700, padding: '2px 8px', borderRadius: 99,
+                        border: `1px solid ${p.status === 'captured' ? 'rgba(34,197,94,0.28)' : 'rgba(239,68,68,0.28)'}`,
+                      }}>
+                        {p.status === 'captured' ? 'Paid' : p.status}
+                      </span>
+                    </td>
+                    <td style={{ padding: '11px 16px', fontSize: 11, color: C.text3, fontFamily: 'monospace', borderBottom: i < payments.length - 1 ? `1px solid ${C.panelB}` : 'none' }}>
+                      {p.razorpay_payment_id}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
 
       {/* Contact support */}
@@ -227,10 +344,7 @@ export default function SubscriptionPage() {
           <div style={{ fontWeight: 700, fontSize: 14, color: C.text1 }}>Frequently asked questions</div>
         </div>
         {FAQ.map(({ q, a }, i) => (
-          <div key={q} style={{
-            padding: '16px 20px',
-            borderBottom: i < FAQ.length - 1 ? `1px solid ${C.panelB}` : 'none',
-          }}>
+          <div key={q} style={{ padding: '16px 20px', borderBottom: i < FAQ.length - 1 ? `1px solid ${C.panelB}` : 'none' }}>
             <div style={{ fontWeight: 700, fontSize: 13, color: C.gold, marginBottom: 6 }}>{q}</div>
             <div style={{ fontSize: 12, color: C.text2, lineHeight: 1.65 }}>{a}</div>
           </div>
@@ -238,21 +352,40 @@ export default function SubscriptionPage() {
       </div>
 
       {/* Cancel */}
-      <div style={{
-        background: 'rgba(127,29,29,0.18)', borderRadius: 12, padding: '16px 20px',
-        marginBottom: 20, border: '1px solid rgba(185,28,28,0.30)',
-      }}>
-        <div style={{ fontWeight: 700, fontSize: 14, color: '#fca5a5', marginBottom: 6 }}>Cancel subscription</div>
-        <div style={{ fontSize: 12, color: C.text2, marginBottom: 14, lineHeight: 1.6 }}>
-          If you cancel, your profile stays live until 1 Nov 2026 (end of current billing period). After that your listings are hidden from customers. You can reactivate at any time.
-        </div>
-        <button style={{
-          padding: '8px 16px', borderRadius: 8, border: '1px solid rgba(185,28,28,0.50)',
-          background: 'transparent', color: '#f87171', cursor: 'pointer', fontSize: 13, fontWeight: 700,
+      {isActive && !cancelDone && (
+        <div style={{
+          background: 'rgba(127,29,29,0.18)', borderRadius: 12, padding: '16px 20px',
+          marginBottom: 20, border: '1px solid rgba(185,28,28,0.30)',
         }}>
-          Cancel my plan
-        </button>
-      </div>
+          <div style={{ fontWeight: 700, fontSize: 14, color: '#fca5a5', marginBottom: 6 }}>Cancel subscription</div>
+          <div style={{ fontSize: 12, color: C.text2, marginBottom: 14, lineHeight: 1.6 }}>
+            If you cancel, your profile stays live until{' '}
+            {sub?.periodEnd ? fmtDate(sub.periodEnd) : 'end of billing period'}.{' '}
+            After that your listings are hidden from customers. You can reactivate at any time.
+          </div>
+          {cancelErr && (
+            <p style={{ fontSize: 12, color: '#f87171', marginBottom: 10 }}>{cancelErr}</p>
+          )}
+          <button
+            onClick={handleCancel}
+            disabled={cancelling}
+            style={{
+              padding: '8px 16px', borderRadius: 8, border: '1px solid rgba(185,28,28,0.50)',
+              background: 'transparent', color: '#f87171', cursor: cancelling ? 'wait' : 'pointer',
+              fontSize: 13, fontWeight: 700, opacity: cancelling ? 0.6 : 1,
+            }}
+          >
+            {cancelling ? 'Cancelling…' : 'Cancel my plan'}
+          </button>
+        </div>
+      )}
+
+      {cancelDone && (
+        <div style={{ background: 'rgba(34,197,94,0.12)', borderRadius: 12, padding: '16px 20px', marginBottom: 20, border: '1px solid rgba(34,197,94,0.28)' }}>
+          <div style={{ fontWeight: 700, fontSize: 14, color: '#4ade80', marginBottom: 4 }}>Subscription cancelled</div>
+          <div style={{ fontSize: 12, color: C.text2 }}>Your access continues until {sub?.periodEnd ? fmtDate(sub.periodEnd) : 'end of billing period'}.</div>
+        </div>
+      )}
 
       {/* Disclaimer */}
       <div style={{

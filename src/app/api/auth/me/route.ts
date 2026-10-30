@@ -39,7 +39,8 @@ export const dynamic = 'force-dynamic'
 
 // ── Safe column lists — NEVER SELECT * on profile tables ─────────────────────
 
-// Business profile fields safe to return to the owner (no contact_phone, no raw GSTIN in prod)
+// Business profile fields safe to return to the owner
+// NOTE: contact_phone excluded (encrypted at rest)
 const SAFE_BUSINESS_COLS = `
   id, user_id, slug, business_name, description,
   category, sub_category,
@@ -50,25 +51,25 @@ const SAFE_BUSINESS_COLS = `
   opening_time, closing_time, open_days,
   delivery_modes,
   gstin,
+  kyc_status, verified_at, is_active,
   created_at, updated_at
 `
 
-// Customer profile — never return contact_phone (encrypted at rest)
+// Customer profile — match actual customer_profiles schema
 const SAFE_CUSTOMER_COLS = `
   id, user_id,
-  display_name, avatar_url,
-  default_address, saved_addresses,
+  full_name, email,
+  area, city, state, pin_code,
   created_at, updated_at
 `
 
-// Driver profile — never return license_number, aadhaar, encrypted PII
+// Driver profile — never return license_number, aadhaar (encrypted PII)
 const SAFE_DRIVER_COLS = `
   id, user_id,
-  full_name, avatar_url,
-  vehicle_type, vehicle_number, vehicle_model,
-  service_areas,
-  rating, total_jobs,
-  is_available,
+  full_name,
+  vehicle_type, vehicle_number,
+  working_area, city, state,
+  kyc_status, is_active,
   created_at, updated_at
 `
 

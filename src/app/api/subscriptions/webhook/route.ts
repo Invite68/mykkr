@@ -119,17 +119,18 @@ export async function POST(req: NextRequest) {
         )
 
         // Record payment if we have the payment ID — skip on replay (ON CONFLICT DO NOTHING)
+        // subscription_payments references subscriptions.id (UUID), NOT razorpay_sub_id
         if (rzpPaymentId && amountPaise !== null) {
           await query(
             `INSERT INTO subscription_payments
-               (razorpay_payment_id, razorpay_sub_id, amount_paise, plan, status, created_at)
+               (user_id, subscription_id, razorpay_payment_id, amount_paise, status)
              SELECT
-               $1, $2, $3,
-               (SELECT plan FROM subscriptions WHERE razorpay_sub_id = $2 LIMIT 1),
-               'captured',
-               NOW()
+               s.user_id, s.id, $1, $2, 'captured'
+             FROM subscriptions s
+             WHERE s.razorpay_sub_id = $3
+             LIMIT 1
              ON CONFLICT (razorpay_payment_id) DO NOTHING`,
-            [rzpPaymentId, rzpSubId, amountPaise]
+            [rzpPaymentId, amountPaise, rzpSubId]
           )
           void plan // plan may be used in future for multi-tier pricing
         }

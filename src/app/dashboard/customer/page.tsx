@@ -12,6 +12,7 @@ import { onAuthStateChanged } from 'firebase/auth'
 import { getAuth } from 'firebase/auth'
 import Link from 'next/link'
 import SignOutButton from '@/components/SignOutButton'
+import SubscriptionBanner from '@/components/SubscriptionBanner'
 
 interface Job {
   id: string
@@ -69,9 +70,10 @@ function timeAgo(iso: string) {
 type State = 'loading' | 'unauth' | 'ready' | 'error'
 
 export default function CustomerDashboard() {
-  const [state, setState] = useState<State>('loading')
-  const [jobs, setJobs] = useState<Job[]>([])
-  const [error, setError] = useState('')
+  const [state, setState]   = useState<State>('loading')
+  const [jobs, setJobs]     = useState<Job[]>([])
+  const [error, setError]   = useState('')
+  const [idToken, setIdToken] = useState<string | null>(null)
 
   useEffect(() => {
     const auth = getAuth()
@@ -80,6 +82,7 @@ export default function CustomerDashboard() {
 
       try {
         const token = await user.getIdToken()
+        setIdToken(token)
         const res = await fetch('/api/customer/jobs', {
           headers: { Authorization: `Bearer ${token}` },
           cache: 'no-store',
@@ -120,6 +123,13 @@ export default function CustomerDashboard() {
 
   return (
     <div className="container" style={{ maxWidth: 720, paddingTop: 32, paddingBottom: 80 }}>
+
+      {/* Subscription banner */}
+      {idToken && (
+        <div style={{ marginBottom: 16 }}>
+          <SubscriptionBanner idToken={idToken} plan="customer" />
+        </div>
+      )}
 
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24, gap: 12, flexWrap: 'wrap' }}>
