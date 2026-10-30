@@ -8,6 +8,11 @@ import { firebaseAuth } from '@/lib/firebase-client'
 interface SubscriptionCtx {
   /** Opens the "subscribe to contact" modal for a business */
   requestContact: (businessName: string) => void
+  /**
+   * Gate-checks subscription, then opens WhatsApp if subscribed.
+   * If not subscribed, opens the subscribe modal instead.
+   */
+  gatedWhatsApp: (businessName: string, waHref: string) => void
 }
 
 const Ctx = createContext<SubscriptionCtx | null>(null)
@@ -25,10 +30,20 @@ export function useSubscription(): SubscriptionCtx {
  */
 export default function SubscriptionProvider({ children }: { children: ReactNode }) {
   const [target, setTarget]     = useState<string | null>(null)
+  const [pendingWa, setPendingWa] = useState<string | null>(null) // waHref to open after subscribe
   const [starting, setStarting] = useState(false)
   const [subError, setSubError] = useState('')
-  const close = useCallback(() => { setTarget(null); setSubError('') }, [])
-  const requestContact = useCallback((name: string) => { setStarting(false); setSubError(''); setTarget(name) }, [])
+  const close = useCallback(() => { setTarget(null); setPendingWa(null); setSubError('') }, [])
+  const requestContact = useCallback((name: string) => { setStarting(false); setSubError(''); setPendingWa(null); setTarget(name) }, [])
+
+  const gatedWhatsApp = useCallback((name: string, waHref: string) => {
+    // TODO: once subscription check API is wired, check here first.
+    // For now: always show the subscribe modal (waHref stored so we can open it after subscribe).
+    setStarting(false)
+    setSubError('')
+    setPendingWa(waHref)
+    setTarget(name)
+  }, [])
 
   async function startCheckout() {
     setStarting(true)
@@ -51,7 +66,8 @@ export default function SubscriptionProvider({ children }: { children: ReactNode
       })
       const json = await res.json() as { shortUrl?: string; error?: string }
       if (res.status === 409) {
-        // Already subscribed — just close the modal and let them browse
+        // Already subscribed — open WhatsApp directly if we had one pending
+        if (pendingWa) window.open(pendingWa, '_blank', 'noopener,noreferrer')
         close()
         return
       }
@@ -77,7 +93,7 @@ export default function SubscriptionProvider({ children }: { children: ReactNode
   const plan = PLANS.customer
 
   return (
-    <Ctx.Provider value={{ requestContact }}>
+    <Ctx.Provider value={{ requestContact, gatedWhatsApp }}>
       {children}
       {target && (
         <div className="modal-overlay" onClick={close}>
