@@ -5,7 +5,7 @@
 
 CREATE TABLE IF NOT EXISTS job_messages (
   id          BIGSERIAL    PRIMARY KEY,
-  job_id      TEXT         NOT NULL REFERENCES jobs(id) ON DELETE CASCADE,
+  job_id      TEXT         NOT NULL,  -- no FK: jobs.id may be non-standard PK type
   sender_uid  TEXT         NOT NULL,                          -- Firebase UID
   sender_role TEXT         NOT NULL CHECK (sender_role IN ('customer', 'driver')),
   body        TEXT         NOT NULL CHECK (char_length(body) BETWEEN 1 AND 500),
