@@ -52,6 +52,13 @@ jobs:
         run: npm run build
         env:
           NEXT_TELEMETRY_DISABLED: 1
+          # Dummy values so Firebase client doesn't crash during static rendering.
+          # These are never used at runtime — real values live in Coolify env vars.
+          NEXT_PUBLIC_FIREBASE_API_KEY: ci-placeholder-api-key
+          NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN: ci-placeholder.firebaseapp.com
+          NEXT_PUBLIC_FIREBASE_PROJECT_ID: ci-placeholder
+          NEXT_PUBLIC_FIREBASE_APP_ID: 1:000000000000:web:ci-placeholder
+          NEXT_PUBLIC_SITE_URL: https://mykkr.in
       - name: Crawl every internal link + verify CSP
         run: |
           cp -r public .next/standalone/
