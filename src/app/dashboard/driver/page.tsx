@@ -163,7 +163,7 @@ export default function DriverDashboard() {
   if (state === 'unauth') return (
     <div className="container" style={{ maxWidth: 480, paddingTop: 80, textAlign: 'center' }}>
       <p className="muted" style={{ marginBottom: 16 }}>Sign in as a driver to continue.</p>
-      <Link href="/auth/login" className="btn btn-primary">Sign In</Link>
+      <Link href="/register?role=driver" className="btn btn-primary">Sign In</Link>
     </div>
   )
 

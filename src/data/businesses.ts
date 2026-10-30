@@ -73,6 +73,8 @@ export const BUSINESSES: Business[] = [
     description: 'Farm-fresh seasonal vegetables and fruits from Kurukshetra growers, picked daily.',
     hours: '6:00 AM – 9:00 PM', delivery: ['driver', 'pickup'],
     listings: [{ name: 'Tomatoes', price: '₹30/kg' }, { name: 'Kinnow', price: '₹60/kg' }, { name: 'Seasonal sabzi basket', price: '₹199' }],
+    phone: '+91 94160 11223',
+    lat: 29.9688, lon: 76.8522,
   },
   {
     slug: 'vidya-stationers', name: 'Vidya Stationers', cat: 'shopping', sub: 'Stationery',
@@ -81,6 +83,8 @@ export const BUSINESSES: Business[] = [
     description: 'Notebooks, exam supplies, printing, photocopy and office stationery near the KU gate.',
     hours: '9:00 AM – 8:30 PM', delivery: ['pickup', 'self'],
     listings: [{ name: 'A4 ream (500 sheets)', price: '₹320' }, { name: 'Spiral binding', price: '₹40' }],
+    phone: '+91 97291 34455',
+    lat: 29.9712, lon: 76.8601,
   },
 
   // ── Food & Beverages ──
@@ -91,6 +95,8 @@ export const BUSINESSES: Business[] = [
     description: 'Pure desi ghee mithai, festival boxes and kulfi. Bulk orders for weddings.',
     hours: '8:00 AM – 10:30 PM', delivery: ['self', 'pickup'],
     listings: [{ name: 'Kaju Katli', price: '₹900/kg' }, { name: 'Gulab Jamun', price: '₹360/kg' }, { name: 'Matka Kulfi', price: '₹50' }],
+    phone: '+91 98139 22001',
+    lat: 29.9658, lon: 76.8731,
   },
   {
     slug: 'gita-chaat-bhandar', name: 'Gita Chaat Bhandar', cat: 'food', sub: 'Restaurant',
@@ -99,6 +105,8 @@ export const BUSINESSES: Business[] = [
     description: 'Golgappe, aloo tikki, chole bhature and samosa — a Brahmsarovar favourite.',
     hours: '11:00 AM – 9:30 PM', delivery: ['pickup'],
     listings: [{ name: 'Golgappe (6 pcs)', price: '₹30' }, { name: 'Chole Bhature', price: '₹90' }],
+    phone: '+91 94664 88720',
+    lat: 29.9621, lon: 76.8698,
   },
   {
     slug: 'hotel-natraj-restaurant', name: 'Hotel Natraj Restaurant', cat: 'food', sub: 'Restaurant',
@@ -107,6 +115,8 @@ export const BUSINESSES: Business[] = [
     description: 'Family restaurant with North Indian thalis and table booking for groups.',
     hours: '11:00 AM – 11:00 PM', delivery: ['self', 'driver', 'pickup'],
     listings: [{ name: 'Deluxe Veg Thali', price: '₹280' }, { name: 'Paneer Butter Masala', price: '₹240' }],
+    phone: '+91 01744 240100',
+    lat: 29.9701, lon: 76.8780,
   },
   {
     slug: 'fresh-dairy-kurukshetra', name: 'Fresh Dairy Kurukshetra', cat: 'food', sub: 'Dairy',
@@ -115,6 +125,8 @@ export const BUSINESSES: Business[] = [
     description: 'Pure cow milk, curd, paneer and ghee. Daily morning home delivery.',
     hours: '6:00 AM – 2:00 PM, 5:00 PM – 8:00 PM', delivery: ['self', 'pickup'],
     listings: [{ name: 'Milk 1 L', price: '₹60' }, { name: 'Paneer 500g', price: '₹200' }],
+    phone: '+91 92157 63301',
+    lat: 29.9744, lon: 76.8623,
   },
   {
     slug: 'golden-bakery', name: 'Golden Bakery', cat: 'food', sub: 'Bakery & Cakes',
@@ -123,6 +135,8 @@ export const BUSINESSES: Business[] = [
     description: 'Custom cakes, pastries, khari and toasted bread. Order 1 day in advance for custom cakes.',
     hours: '8:00 AM – 10:00 PM', delivery: ['self', 'driver', 'pickup'],
     listings: [{ name: 'Custom cake (per kg)', price: '₹850/kg' }, { name: 'Pastry', price: '₹80' }],
+    phone: '+91 98556 41209',
+    lat: 29.9758, lon: 76.8667,
   },
 
   // ── Shopping / Fashion ──
@@ -133,6 +147,8 @@ export const BUSINESSES: Business[] = [
     description: 'Ethnic and western wear, footwear and accessories for the whole family.',
     hours: '10:00 AM – 9:00 PM', delivery: ['self', 'pickup'],
     listings: [{ name: 'Cotton kurta set', price: '₹899' }, { name: "Men's sports shoes", price: '₹1,499' }],
+    phone: '+91 96711 28830',
+    lat: 29.9780, lon: 76.8710,
   },
   {
     slug: 'rajput-electronics', name: 'Rajput Electronics', cat: 'shopping', sub: 'Electronics',
@@ -141,6 +157,8 @@ export const BUSINESSES: Business[] = [
     description: 'Mobiles, TVs, laptops and accessories. Authorized service point for major brands.',
     hours: '10:00 AM – 9:00 PM', delivery: ['self', 'pickup'],
     listings: [{ name: 'Realme C65', price: '₹12,999' }, { name: 'Smart LED TV 32"', price: '₹18,999' }],
+    phone: '+91 94162 55490',
+    lat: 29.9693, lon: 76.8755,
   },
 
   // ── Venues ──
@@ -151,6 +169,8 @@ export const BUSINESSES: Business[] = [
     description: 'Clean AC rooms on the highway, 10 minutes from Brahmsarovar. Family rooms available.',
     hours: '24 hours', delivery: [],
     listings: [{ name: 'Standard AC room', price: '₹1,200/night' }, { name: 'Family suite', price: '₹3,500/night' }],
+    phone: '+91 01744 270660',
+    lat: 29.9498, lon: 76.8441,
   },
   {
     slug: 'kkr-grand-banquet', name: 'KKR Grand Banquet', cat: 'venues', sub: 'Marriage Hall & Lawn',
@@ -159,6 +179,8 @@ export const BUSINESSES: Business[] = [
     description: 'Banquet hall and lawn for 800 guests, in-house décor and parking for 150 cars.',
     hours: 'By appointment', delivery: [],
     listings: [{ name: 'Hall (day event)', price: '₹50,000' }, { name: 'Hall + lawn (wedding)', price: '₹2,00,000' }],
+    phone: '+91 93544 18800',
+    lat: 29.9511, lon: 76.8462,
   },
   {
     slug: 'green-farmhouse', name: 'Green Farmhouse & Grounds', cat: 'venues', sub: 'Farmhouse',
@@ -167,6 +189,8 @@ export const BUSINESSES: Business[] = [
     description: 'Open farmhouse for family events, kitty parties and pre-wedding shoots. Ample parking.',
     hours: 'By appointment', delivery: [],
     listings: [{ name: 'Half day (4 hrs)', price: '₹30,000' }, { name: 'Full day', price: '₹55,000' }],
+    phone: '+91 98127 64432',
+    lat: 29.9562, lon: 76.8509,
   },
 
   // ── Transport ──
@@ -177,6 +201,8 @@ export const BUSINESSES: Business[] = [
     description: 'Auto, cab and SUV rides across Kurukshetra and outstation to Delhi / Chandigarh.',
     hours: '24 hours', delivery: [],
     listings: [{ name: 'Auto', price: '₹10/km' }, { name: 'Cab (4 seats)', price: '₹14/km' }, { name: 'SUV (6 seats)', price: '₹18/km' }],
+    phone: '+91 98960 77201',
+    lat: 29.9703, lon: 76.8772,
   },
   {
     slug: 'swift-couriers', name: 'Swift Couriers KKR', cat: 'transport', sub: 'Courier & Parcel',
@@ -185,6 +211,8 @@ export const BUSINESSES: Business[] = [
     description: 'Same-day local delivery and next-day courier within Haryana.',
     hours: '9:00 AM – 8:00 PM', delivery: ['driver', 'pickup'],
     listings: [{ name: 'Local delivery (same day)', price: '₹60' }, { name: 'Haryana courier', price: '₹200' }],
+    phone: '+91 96920 55011',
+    lat: 29.9735, lon: 76.8641,
   },
 
   // ── Services ──
@@ -195,6 +223,8 @@ export const BUSINESSES: Business[] = [
     description: 'Deep cleaning for homes, kitchens, bathrooms and offices with trained staff.',
     hours: '8:00 AM – 7:00 PM', delivery: [],
     listings: [{ name: '2BHK deep clean', price: '₹2,999' }, { name: 'Bathroom clean', price: '₹599' }],
+    phone: '+91 94161 33190',
+    lat: 29.9730, lon: 76.8638,
   },
   {
     slug: 'ramesh-electric-works', name: 'Ramesh Electric Works', cat: 'services', sub: 'Electrical',
@@ -203,6 +233,8 @@ export const BUSINESSES: Business[] = [
     description: 'Wiring, fan and inverter installation, MCB repairs. Urgent call-outs.',
     hours: '8:00 AM – 9:00 PM', delivery: [],
     listings: [{ name: 'Visit charge', price: '₹200' }, { name: 'Fan installation', price: '₹250' }],
+    phone: '+91 98121 47700',
+    lat: 29.9762, lon: 76.8670,
   },
   {
     slug: 'jai-plumbing-services', name: 'Jai Plumbing Services', cat: 'services', sub: 'Plumbing',
@@ -211,6 +243,8 @@ export const BUSINESSES: Business[] = [
     description: 'Leaks, taps, motor fitting, tank cleaning and bathroom fittings.',
     hours: '8:00 AM – 8:00 PM', delivery: [],
     listings: [{ name: 'Tap repair', price: '₹250' }, { name: 'Water tank cleaning', price: '₹1,200' }],
+    phone: '+91 94665 28802',
+    lat: 29.9719, lon: 76.8652,
   },
   {
     slug: 'vishwakarma-woodworks', name: 'Vishwakarma Woodworks', cat: 'services', sub: 'Carpentry',
@@ -219,6 +253,8 @@ export const BUSINESSES: Business[] = [
     description: 'Furniture repair, modular kitchens, doors and custom woodwork.',
     hours: '9:00 AM – 7:00 PM', delivery: [],
     listings: [{ name: 'Door lock / hinge repair', price: '₹400' }, { name: 'Modular kitchen (per sq ft)', price: '₹1,400' }],
+    phone: '+91 97296 18340',
+    lat: 29.9683, lon: 76.8593,
   },
   {
     slug: 'rangoli-painters', name: 'Rangoli Painters', cat: 'services', sub: 'Painting',
@@ -227,6 +263,8 @@ export const BUSINESSES: Business[] = [
     description: 'Interior and exterior painting, waterproofing and texture finishes.',
     hours: '9:00 AM – 6:00 PM', delivery: [],
     listings: [{ name: 'Interior emulsion', price: '₹14/sq ft' }, { name: 'Exterior weatherproof', price: '₹28/sq ft' }],
+    phone: '+91 93152 70210',
+    lat: 29.9748, lon: 76.8619,
   },
   {
     slug: 'fixit-handyman', name: 'FixIt Handyman', cat: 'services', sub: 'Other Handyman',
@@ -235,6 +273,8 @@ export const BUSINESSES: Business[] = [
     description: 'Curtain rods, TV mounting, RO servicing, small repairs — one call for odd jobs.',
     hours: '9:00 AM – 8:00 PM', delivery: [],
     listings: [{ name: 'TV wall mount', price: '₹399' }, { name: 'RO service', price: '₹499' }],
+    phone: '+91 92555 01129',
+    lat: 29.9770, lon: 76.8698,
   },
   {
     slug: 'shree-mehendi-art', name: 'Shree Mehendi Art', cat: 'services', sub: 'Artistry · Mehendi',
@@ -243,6 +283,8 @@ export const BUSINESSES: Business[] = [
     description: 'Bridal and party mehendi at home or salon. All designs.',
     hours: '9:00 AM – 9:00 PM', delivery: [],
     listings: [{ name: 'Bridal full hands & feet', price: '₹3,500' }, { name: 'Simple hands', price: '₹500' }],
+    phone: '+91 96920 44018',
+    lat: 29.9731, lon: 76.8574,
   },
   {
     slug: 'cool-ac-repair', name: 'Cool AC Repair', cat: 'services', sub: 'AC & Appliance Repair',
@@ -251,6 +293,8 @@ export const BUSINESSES: Business[] = [
     description: 'AC service, gas refill, installation and repair for all brands.',
     hours: '9:00 AM – 8:00 PM', delivery: [],
     listings: [{ name: 'AC service (1 ton)', price: '₹600' }, { name: 'Gas refill', price: '₹1,800' }],
+    phone: '+91 94160 38890',
+    lat: 29.9781, lon: 76.8712,
   },
 
   // ── More Services ──
@@ -261,6 +305,8 @@ export const BUSINESSES: Business[] = [
     description: 'Sofa cleaning, carpet dry-wash and post-construction cleanup for homes and offices.',
     hours: '8:00 AM – 7:00 PM', delivery: [],
     listings: [{ name: 'Sofa cleaning (3-seater)', price: '₹999' }, { name: 'Post-construction clean', price: '₹3,500' }],
+    phone: '+91 97299 62201',
+    lat: 29.9760, lon: 76.8665,
   },
   {
     slug: 'singh-electricals', name: 'Singh Electricals', cat: 'services', sub: 'Electrical',
@@ -269,6 +315,8 @@ export const BUSINESSES: Business[] = [
     description: 'Full home wiring, switchboard upgrades, ceiling fan fitting and solar panel assistance.',
     hours: '8:00 AM – 8:00 PM', delivery: [],
     listings: [{ name: 'Switchboard repair', price: '₹350' }, { name: 'New wiring per room', price: '₹2,000' }],
+    phone: '+91 94161 58803',
+    lat: 29.9718, lon: 76.8650,
   },
   {
     slug: 'pawan-plumbers', name: 'Pawan Plumbers', cat: 'services', sub: 'Plumbing',
@@ -277,6 +325,8 @@ export const BUSINESSES: Business[] = [
     description: 'Pipe leaks, geyser installation, flush tank repair and bathroom fittings at best rates.',
     hours: '7:00 AM – 9:00 PM', delivery: [],
     listings: [{ name: 'Pipe leak fix', price: '₹200' }, { name: 'Geyser installation', price: '₹800' }],
+    phone: '+91 98123 74450',
+    lat: 29.9779, lon: 76.8709,
   },
   {
     slug: 'royal-mehendi-studio', name: 'Royal Mehendi Studio', cat: 'services', sub: 'Artistry · Mehendi',
@@ -285,6 +335,8 @@ export const BUSINESSES: Business[] = [
     description: 'Arabic, Rajasthani and Indo-western mehendi for bridal and festive occasions.',
     hours: '10:00 AM – 9:00 PM', delivery: [],
     listings: [{ name: 'Bridal full (Arabic)', price: '₹3,000' }, { name: 'Festival hands', price: '₹400' }],
+    phone: '+91 93550 29211',
+    lat: 29.9682, lon: 76.8591,
   },
   {
     slug: 'kwik-handyman', name: 'Kwik Handyman Services', cat: 'services', sub: 'Other Handyman',
@@ -293,6 +345,8 @@ export const BUSINESSES: Business[] = [
     description: 'Quick fixes — CCTV setup, shelving, assembly, water purifier service.',
     hours: '9:00 AM – 7:00 PM', delivery: [],
     listings: [{ name: 'CCTV installation (2 cam)', price: '₹1,200' }, { name: 'Water purifier service', price: '₹499' }],
+    phone: '+91 92552 33108',
+    lat: 29.9729, lon: 76.8636,
   },
 
   // ── More Shopping ──
@@ -303,6 +357,8 @@ export const BUSINESSES: Business[] = [
     description: 'Seasonal fruits, dry fruits and imported varieties. Bulk orders for events.',
     hours: '7:00 AM – 9:00 PM', delivery: ['driver', 'pickup'],
     listings: [{ name: 'Apple box (10 kg)', price: '₹1,200' }, { name: 'Mango (Alphonso 1 kg)', price: '₹180' }],
+    phone: '+91 94160 29908',
+    lat: 29.9497, lon: 76.8439,
   },
   {
     slug: 'book-corner-kkr', name: 'Book Corner KKR', cat: 'shopping', sub: 'Stationery',
@@ -311,6 +367,8 @@ export const BUSINESSES: Business[] = [
     description: 'School textbooks, competitive exam guides and drawing supplies for students.',
     hours: '9:00 AM – 8:00 PM', delivery: ['pickup'],
     listings: [{ name: 'CBSE class 10 set', price: '₹850' }, { name: 'Drawing kit', price: '₹350' }],
+    phone: '+91 98120 41305',
+    lat: 29.9698, lon: 76.8769,
   },
   {
     slug: 'trend-fashion-hub', name: 'Trend Fashion Hub', cat: 'shopping', sub: 'Fashion & Clothing',
@@ -319,6 +377,8 @@ export const BUSINESSES: Business[] = [
     description: 'Latest lehengas, sarees and fusion wear. Tailoring available on-site.',
     hours: '10:30 AM – 9:00 PM', delivery: ['pickup'],
     listings: [{ name: 'Casual kurti', price: '₹699' }, { name: 'Lehenga set', price: '₹2,500' }],
+    phone: '+91 96713 55607',
+    lat: 29.9642, lon: 76.8715,
   },
 
   // ── More Food ──
@@ -329,6 +389,8 @@ export const BUSINESSES: Business[] = [
     description: 'Highway dhaba style food — dal makhani, makki roti and lassi. Takeaway available.',
     hours: '7:00 AM – 11:00 PM', delivery: ['pickup'],
     listings: [{ name: 'Dal Makhani + roti', price: '₹120' }, { name: 'Lassi (large)', price: '₹60' }],
+    phone: '+91 94160 77334',
+    lat: 29.9606, lon: 76.8601,
   },
   {
     slug: 'amrit-ice-cream', name: 'Amrit Ice Cream', cat: 'food', sub: 'Sweets & Mithai',
@@ -337,6 +399,8 @@ export const BUSINESSES: Business[] = [
     description: 'Hand-churned kulfi, natural fruit ice creams and premium scoops. No preservatives.',
     hours: '11:00 AM – 10:30 PM', delivery: ['self', 'pickup'],
     listings: [{ name: 'Matka kulfi', price: '₹50' }, { name: 'Fruit ice cream (3 scoops)', price: '₹120' }],
+    phone: '+91 97290 58112',
+    lat: 29.9743, lon: 76.8621,
   },
 
   // ── More Venues ──
@@ -347,6 +411,8 @@ export const BUSINESSES: Business[] = [
     description: 'Budget-friendly AC rooms close to the railway station and main market.',
     hours: '24 hours', delivery: [],
     listings: [{ name: 'Standard room', price: '₹800/night' }, { name: 'Deluxe AC room', price: '₹1,500/night' }],
+    phone: '+91 01744 234561',
+    lat: 29.9695, lon: 76.8779,
   },
   {
     slug: 'shakti-marriage-hall', name: 'Shakti Marriage Hall', cat: 'venues', sub: 'Marriage Hall & Lawn',
@@ -355,6 +421,8 @@ export const BUSINESSES: Business[] = [
     description: 'AC banquet hall for 400 guests with catering packages and decoration.',
     hours: 'By appointment', delivery: [],
     listings: [{ name: 'Hall only (day)', price: '₹25,000' }, { name: 'Hall + catering (200 pax)', price: '₹90,000' }],
+    phone: '+91 93540 80022',
+    lat: 29.9639, lon: 76.8713,
   },
 
   // ── Events ──
@@ -365,6 +433,8 @@ export const BUSINESSES: Business[] = [
     description: 'Professional DJ setup with 4K LED screen, smoke machine and stage lighting for weddings and events.',
     hours: 'By booking', delivery: [],
     listings: [{ name: 'DJ for wedding (6 hrs)', price: '₹40,000' }, { name: 'DJ for birthday (4 hrs)', price: '₹20,000' }],
+    phone: '+91 97292 10456',
+    lat: 29.9700, lon: 76.8775,
   },
   {
     slug: 'flash-photography', name: 'Flash Photography Studio', cat: 'events', sub: 'Photography',
@@ -373,6 +443,8 @@ export const BUSINESSES: Business[] = [
     description: 'Wedding, pre-wedding, birthday and corporate photography with drone shots.',
     hours: 'By booking', delivery: [],
     listings: [{ name: 'Wedding photography (full day)', price: '₹60,000' }, { name: 'Pre-wedding shoot', price: '₹25,000' }],
+    phone: '+91 98128 93300',
+    lat: 29.9732, lon: 76.8640,
   },
 ]
 

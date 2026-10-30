@@ -152,7 +152,7 @@ export default function DriverJobPage({ params }: { params: Promise<{ id: string
   if (pageState === 'unauth') return (
     <div className="container" style={{ maxWidth: 480, paddingTop: 80, textAlign: 'center' }}>
       <p className="muted" style={{ marginBottom: 16 }}>Sign in to view this job.</p>
-      <Link href="/auth/login" className="btn btn-primary">Sign In</Link>
+      <Link href="/register?role=driver" className="btn btn-primary">Sign In</Link>
     </div>
   )
 

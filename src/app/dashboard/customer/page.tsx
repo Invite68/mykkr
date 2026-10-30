@@ -104,7 +104,7 @@ export default function CustomerDashboard() {
   if (state === 'unauth') return (
     <div className="container" style={{ maxWidth: 480, paddingTop: 80, textAlign: 'center' }}>
       <p className="muted" style={{ marginBottom: 16 }}>Sign in to view your bookings.</p>
-      <Link href="/auth/login" className="btn btn-primary">Sign In</Link>
+      <Link href="/register?role=customer" className="btn btn-primary">Sign In</Link>
     </div>
   )
 
@@ -123,7 +123,7 @@ export default function CustomerDashboard() {
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 }}>
         <h1 style={{ fontSize: 22, fontWeight: 700, color: 'var(--night-d)' }}>My Bookings</h1>
-        <Link href="/book" className="btn btn-primary" style={{ fontSize: 14, padding: '8px 16px' }}>
+        <Link href="/find-book" className="btn btn-primary" style={{ fontSize: 14, padding: '8px 16px' }}>
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: 6 }} aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
           New Booking
         </Link>
@@ -138,7 +138,7 @@ export default function CustomerDashboard() {
             <line x1="3" y1="10" x2="21" y2="10"/>
           </svg>
           <p style={{ color: 'var(--text-3)', marginBottom: 16 }}>No bookings yet.</p>
-          <Link href="/book" className="btn btn-primary">Make your first booking</Link>
+          <Link href="/find-book" className="btn btn-primary">Make your first booking</Link>
         </div>
       )}
 

@@ -144,7 +144,7 @@ export default function CustomerJobPage({ params }: { params: Promise<{ id: stri
   if (pageState === 'unauth') return (
     <div className="container" style={{ maxWidth: 480, paddingTop: 80, textAlign: 'center' }}>
       <p className="muted" style={{ marginBottom: 16 }}>Sign in to view this booking.</p>
-      <Link href="/auth/login" className="btn btn-primary">Sign In</Link>
+      <Link href="/register?role=customer" className="btn btn-primary">Sign In</Link>
     </div>
   )
 

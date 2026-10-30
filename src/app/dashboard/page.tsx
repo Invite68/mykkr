@@ -124,7 +124,7 @@ export default function DashboardIndex() {
         <p className="muted" style={{ fontSize: 13, marginBottom: 12 }}>
           Platform-wide analytics, business KYC approvals, subscription revenue. Admins are invited only — not self-registered.
         </p>
-        <Link href="/dashboard/admin" className="btn btn-outline btn-sm">
+        <Link href="/admin" className="btn btn-outline btn-sm">
           View Admin Dashboard
         </Link>
       </div>
