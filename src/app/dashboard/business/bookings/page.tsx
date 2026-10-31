@@ -3,10 +3,18 @@
 /**
  * Business Portal — Incoming Service Bookings
  * View, accept, reject, complete service booking requests from customers.
+ *
+ * Security:
+ * - Firebase Auth required for all API calls (Bearer token)
+ * - idToken stored in state, never in localStorage
+ * - customer_phone never returned from API (excluded by SAFE_COLS server-side)
  */
 
 import { useState, useEffect, useCallback } from 'react'
+import { onAuthStateChanged, getAuth } from 'firebase/auth'
+import { firebaseApp } from '@/lib/firebase-client'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 
 const C = {
   teal: '#12343b', tealMid: '#2d545e', gold: '#e1b382',
@@ -67,6 +75,7 @@ function IcComplete() {
 }
 
 export default function BusinessBookingsPage() {
+  const router = useRouter()
   const [bookings, setBookings]   = useState<Booking[]>([])
   const [loading, setLoading]     = useState(true)
   const [filter, setFilter]       = useState('')
@@ -74,26 +83,47 @@ export default function BusinessBookingsPage() {
   const [rejectId, setRejectId]   = useState<string | null>(null)
   const [rejectReason, setRejectReason] = useState('')
   const [error, setError]         = useState('')
+  const [idToken, setIdToken]     = useState<string | null>(null)
 
-  const load = useCallback(async () => {
+  // Authenticate first — all API calls need a Bearer token
+  useEffect(() => {
+    const auth = getAuth(firebaseApp)
+    const unsub = onAuthStateChanged(auth, async (user) => {
+      if (!user) { router.replace('/register?next=/dashboard/business/bookings'); return }
+      const token = await user.getIdToken()
+      setIdToken(token)
+    })
+    return () => unsub()
+  }, [router])
+
+  const load = useCallback(async (token: string) => {
     setLoading(true)
     try {
       const url = filter ? `/api/business/bookings?status=${filter}` : '/api/business/bookings'
-      const res = await fetch(url, { headers: { 'Cache-Control': 'no-store' } })
+      const res = await fetch(url, {
+        headers: { Authorization: `Bearer ${token}` },
+        cache: 'no-store',
+      })
       if (!res.ok) { setError('Failed to load bookings'); return }
       const data = await res.json() as { bookings: Booking[] }
       setBookings(data.bookings ?? [])
     } catch { setError('Network error') } finally { setLoading(false) }
   }, [filter])
 
-  useEffect(() => { void load() }, [load])
+  useEffect(() => {
+    if (idToken) void load(idToken)
+  }, [idToken, load])
 
   async function act(id: string, action: string, extra?: Record<string, unknown>) {
+    if (!idToken) return
     setActing(id + action)
     try {
       const res = await fetch(`/api/service-bookings/${id}`, {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${idToken}`,
+        },
         body: JSON.stringify({ action, ...extra }),
       })
       if (!res.ok) {
@@ -101,7 +131,7 @@ export default function BusinessBookingsPage() {
         setError(json.error ?? 'Action failed')
         return
       }
-      await load()
+      await load(idToken)
     } catch { setError('Network error') } finally { setActing(null) }
   }
 
