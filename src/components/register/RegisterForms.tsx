@@ -33,6 +33,9 @@ import { firebaseApp } from '@/lib/firebase-client'
 type SignupRole = Exclude<UserRole, 'admin'>
 const SIGNUP_ROLES = ROLES.filter((r) => r.selfSignup)
 
+// Current T&C version — bump this string whenever Terms or Privacy text changes
+const TERMS_VERSION = 'v1.0'
+
 const MAX_PHOTOS = 5
 const MAX_PHOTO_BYTES = 5 * 1024 * 1024
 const PHOTO_TYPES = ['image/jpeg', 'image/png', 'image/webp']
@@ -52,15 +55,148 @@ function Errors({ list }: { list: string[] }) {
   )
 }
 
-function Terms({ checked, onChange, children }: { checked: boolean; onChange: (v: boolean) => void; children: ReactNode }) {
+/**
+ * ConsentStep — Legal identity + explicit consent capture
+ *
+ * Placed as the FIRST step of every profile wizard (after OTP verification).
+ * Collects:
+ *   • Full legal name
+ *   • Date of birth (client-side 18+ pre-check; server enforces definitively)
+ *   • Separate explicit T&C checkbox (required)
+ *   • Separate explicit Privacy Policy checkbox (required)
+ *
+ * Why separate checkboxes? Indian IT Act 2000 §43A, Consumer Protection Act 2019,
+ * and DPDPA 2023 s.6 require "informed consent" — a single bundled checkbox weakens
+ * the legal position. Two ticks = two distinct, unambiguous consents.
+ *
+ * The server stores terms_accepted_at = NOW() (server clock, never trusted from client)
+ * and records which version of the T&C was accepted, for audit trail purposes.
+ */
+type ConsentData = { name: string; dob: string; terms: boolean; privacy: boolean }
+
+function ConsentStep({
+  data,
+  onChange,
+  onNext,
+  onBack,
+  errors,
+  roleLabel,
+}: {
+  data: ConsentData
+  onChange: <K extends keyof ConsentData>(k: K, v: ConsentData[K]) => void
+  onNext: (e: FormEvent) => void
+  onBack?: () => void
+  errors: string[]
+  roleLabel: string
+}) {
+  // Client-side pre-check for user feedback (server re-validates definitively)
+  function isAdult(dobStr: string): boolean {
+    if (!dobStr) return false
+    const dob = new Date(dobStr)
+    if (isNaN(dob.getTime())) return false
+    const today = new Date()
+    const age = today.getFullYear() - dob.getFullYear()
+      - (today < new Date(today.getFullYear(), dob.getMonth(), dob.getDate()) ? 1 : 0)
+    return age >= 18
+  }
+
+  // Max DOB = today minus 18 years
+  const maxDob = (() => {
+    const d = new Date()
+    d.setFullYear(d.getFullYear() - 18)
+    return d.toISOString().split('T')[0]
+  })()
+
   return (
-    <label className="check">
-      <input type="checkbox" checked={checked} onChange={(e) => onChange(e.target.checked)} />
-      <span>
-        I agree to the <Link href="/terms" target="_blank">Terms of Service</Link> and{' '}
-        <Link href="/privacy" target="_blank">Privacy Policy</Link>. {children}
-      </span>
-    </label>
+    <StepCard onNext={onNext} onBack={onBack} nextLabel="Continue →" errors={errors}>
+      <div className="step-heading">Identity &amp; consent</div>
+      <p className="muted" style={{ marginBottom: 16, fontSize: 13.5 }}>
+        Required by Indian law before creating your {roleLabel} account.
+        Your details are stored securely and never shared with third parties.
+      </p>
+
+      {/* Full legal name */}
+      <div className="field">
+        <label className="label" htmlFor="cs-name">
+          Full legal name <span className="req">*</span>
+        </label>
+        <input
+          id="cs-name"
+          className="input"
+          maxLength={120}
+          value={data.name}
+          onChange={(e) => onChange('name', e.target.value)}
+          autoComplete="name"
+          autoFocus
+          placeholder="As on your Aadhaar / PAN"
+        />
+      </div>
+
+      {/* Date of birth */}
+      <div className="field">
+        <label className="label" htmlFor="cs-dob">
+          Date of birth <span className="req">*</span>
+          <span className="muted" style={{ fontWeight: 400, marginLeft: 8, fontSize: 12 }}>(must be 18 or older)</span>
+        </label>
+        <input
+          id="cs-dob"
+          className="input"
+          type="date"
+          max={maxDob}
+          value={data.dob}
+          onChange={(e) => onChange('dob', e.target.value)}
+          autoComplete="bday"
+        />
+        {data.dob && !isAdult(data.dob) && (
+          <span style={{ color: '#ef4444', fontSize: 12.5, marginTop: 4, display: 'block' }}>
+            You must be 18 or older to create an account on this platform.
+          </span>
+        )}
+      </div>
+
+      {/* Divider */}
+      <div style={{ borderTop: '1px solid var(--border)', margin: '8px 0' }} />
+      <p className="muted" style={{ fontSize: 12.5, marginBottom: 10 }}>
+        Please read and explicitly tick both boxes below before continuing.
+        We cannot create your account until both are confirmed.
+      </p>
+
+      {/* T&C checkbox — separate tick required */}
+      <label className="check" style={{ alignItems: 'flex-start', gap: 10 }}>
+        <input
+          type="checkbox"
+          checked={data.terms}
+          onChange={(e) => onChange('terms', e.target.checked)}
+          style={{ marginTop: 2, flexShrink: 0 }}
+        />
+        <span style={{ fontSize: 13.5, lineHeight: 1.5 }}>
+          I have read and I agree to the{' '}
+          <Link href="/terms" target="_blank" style={{ fontWeight: 600 }}>Terms of Service</Link>.
+          I understand the platform is a listing connector only and all disputes, payments,
+          and quality issues are between users.
+        </span>
+      </label>
+
+      {/* Privacy Policy checkbox — separate tick required */}
+      <label className="check" style={{ alignItems: 'flex-start', gap: 10, marginTop: 8 }}>
+        <input
+          type="checkbox"
+          checked={data.privacy}
+          onChange={(e) => onChange('privacy', e.target.checked)}
+          style={{ marginTop: 2, flexShrink: 0 }}
+        />
+        <span style={{ fontSize: 13.5, lineHeight: 1.5 }}>
+          I have read and I agree to the{' '}
+          <Link href="/privacy" target="_blank" style={{ fontWeight: 600 }}>Privacy Policy</Link>.
+          I consent to my personal data being processed as described therein under the DPDPA 2023.
+        </span>
+      </label>
+
+      <p style={{ fontSize: 11, color: 'var(--text-4)', marginTop: 12, lineHeight: 1.5 }}>
+        Your acceptance is recorded with a server timestamp (Indian Standard Time) and stored
+        securely for legal compliance. It cannot be undone.
+      </p>
+    </StepCard>
   )
 }
 
@@ -341,11 +477,6 @@ function OtpLoginStep({
           {verifying ? 'Verifying…' : 'Verify & Continue →'}
         </button>
 
-        <p className="muted" style={{ textAlign: 'center', fontSize: 12 }}>
-          By continuing, you agree to our{' '}
-          <Link href="/terms" target="_blank">Terms</Link> &amp;{' '}
-          <Link href="/privacy" target="_blank">Privacy Policy</Link>.
-        </p>
       </form>
     </div>
   )
@@ -354,8 +485,10 @@ function OtpLoginStep({
 /* ── Business wizard ─────────────────────────────────── */
 
 type BizData = {
+  // Step 1 — consent (collected before profile data)
+  consent: ConsentData
+  // Steps 2–6 — profile data
   name: string
-  owner: string
   catSlug: string | null
   subSlug: string | null
   otherLabel: string
@@ -367,18 +500,19 @@ type BizData = {
   delivery: DeliveryOption[]
   gstin: string
   photos: File[]
-  terms: boolean
 }
 
-const BIZ_STEPS = ['Business basics', 'Your location', 'Contact & hours', 'Delivery & photos', 'Review & submit']
+// Step 1 = Identity & consent, Steps 2–6 = profile fields
+const BIZ_STEPS = ['Identity & consent', 'Business basics', 'Your location', 'Contact & hours', 'Delivery & photos', 'Review & submit']
 const BIZ_TOTAL = BIZ_STEPS.length
 
 function BusinessWizard({ phone, idToken, onDone }: { phone: string; idToken: string; onDone: () => void }) {
   const [step, setStep] = useState(1)
   const [d, setD] = useState<BizData>({
-    name: '', owner: '', catSlug: null, subSlug: null, otherLabel: '',
+    consent: { name: '', dob: '', terms: false, privacy: false },
+    name: '', catSlug: null, subSlug: null, otherLabel: '',
     email: '', area: '', pin: '', street: '', hours: '9:00 AM – 8:00 PM',
-    delivery: ['pickup'], gstin: '', photos: [], terms: false,
+    delivery: ['pickup'], gstin: '', photos: [],
   })
   const [photoErr, setPhotoErr] = useState('')
   const [errors, setErrors] = useState<string[]>([])
@@ -386,12 +520,34 @@ function BusinessWizard({ phone, idToken, onDone }: { phone: string; idToken: st
   function up<K extends keyof BizData>(k: K, v: BizData[K]) {
     setD((s) => ({ ...s, [k]: v }))
   }
+  function upConsent<K extends keyof ConsentData>(k: K, v: ConsentData[K]) {
+    setD((s) => ({ ...s, consent: { ...s.consent, [k]: v } }))
+  }
 
   function goNext() { setErrors([]); setStep((s) => s + 1) }
   function goBack() { setErrors([]); setStep((s) => s - 1) }
 
-  /* Step 1 — Business basics */
+  /* Step 1 — Identity & consent */
   function step1(e: FormEvent) {
+    e.preventDefault()
+    const errs: string[] = []
+    if (d.consent.name.trim().length < 2) errs.push('Enter your full legal name.')
+    if (!d.consent.dob) errs.push('Enter your date of birth.')
+    else {
+      const dob = new Date(d.consent.dob)
+      const today = new Date()
+      const age = today.getFullYear() - dob.getFullYear()
+        - (today < new Date(today.getFullYear(), dob.getMonth(), dob.getDate()) ? 1 : 0)
+      if (age < 18) errs.push('You must be 18 or older to register.')
+    }
+    if (!d.consent.terms) errs.push('You must accept the Terms of Service to continue.')
+    if (!d.consent.privacy) errs.push('You must accept the Privacy Policy to continue.')
+    setErrors(errs)
+    if (!errs.length) goNext()
+  }
+
+  /* Step 2 — Business basics */
+  function step2(e: FormEvent) {
     e.preventDefault()
     const errs: string[] = []
     if (d.name.trim().length < 2) errs.push('Enter your business name.')
@@ -402,8 +558,8 @@ function BusinessWizard({ phone, idToken, onDone }: { phone: string; idToken: st
     if (!errs.length) goNext()
   }
 
-  /* Step 2 — Location */
-  function step2(e: FormEvent) {
+  /* Step 3 — Location */
+  function step3(e: FormEvent) {
     e.preventDefault()
     const errs: string[] = []
     if (!d.area) errs.push('Choose your area.')
@@ -412,19 +568,18 @@ function BusinessWizard({ phone, idToken, onDone }: { phone: string; idToken: st
     if (!errs.length) goNext()
   }
 
-  /* Step 3 — Contact & hours */
-  function step3(e: FormEvent) {
+  /* Step 4 — Contact & hours */
+  function step4(e: FormEvent) {
     e.preventDefault()
     const errs: string[] = []
-    if (d.owner.trim().length < 2) errs.push("Enter the owner's name.")
     if (d.email && !EMAIL_RE.test(d.email)) errs.push('Enter a valid email or leave it blank.')
     if (d.gstin && !GSTIN_RE.test(d.gstin.toUpperCase())) errs.push('GSTIN format looks wrong (15 characters).')
     setErrors(errs)
     if (!errs.length) goNext()
   }
 
-  /* Step 4 — Delivery & photos */
-  function step4(e: FormEvent) {
+  /* Step 5 — Delivery & photos */
+  function step5(e: FormEvent) {
     e.preventDefault()
     const errs: string[] = []
     if (photoErr) errs.push(photoErr)
@@ -432,14 +587,9 @@ function BusinessWizard({ phone, idToken, onDone }: { phone: string; idToken: st
     if (!errs.length) goNext()
   }
 
-  /* Step 5 — Review & submit */
-  function step5(e: FormEvent) {
+  /* Step 6 — Review & submit */
+  function step6(e: FormEvent) {
     e.preventDefault()
-    const errs: string[] = []
-    if (!d.terms) errs.push('Accept the terms to continue.')
-    setErrors(errs)
-    if (errs.length) return
-
     setErrors([])
     submitBusiness()
   }
@@ -447,7 +597,7 @@ function BusinessWizard({ phone, idToken, onDone }: { phone: string; idToken: st
   async function submitBusiness() {
     setErrors(['Submitting…'])
     try {
-      // 1 — Save business profile
+      // 1 — Save business profile (consent fields sent here; stored server-side)
       const res = await fetch('/api/businesses', {
         method: 'POST',
         headers: {
@@ -455,6 +605,13 @@ function BusinessWizard({ phone, idToken, onDone }: { phone: string; idToken: st
           'Authorization': `Bearer ${idToken}`,
         },
         body: JSON.stringify({
+          // Consent & identity (legal requirement)
+          ownerName:      d.consent.name.trim(),
+          dateOfBirth:    d.consent.dob,
+          termsAccepted:  true,   // guard already enforced in step1()
+          privacyAccepted: true,
+          termsVersion:   TERMS_VERSION,
+          // Profile fields
           businessName:  d.name.trim(),
           category:      activeGroup?.label ?? d.otherLabel.trim(),
           subCategory:   d.subSlug ?? undefined,
@@ -521,9 +678,20 @@ function BusinessWizard({ phone, idToken, onDone }: { phone: string; idToken: st
     <div>
       <ProgressBar current={step} total={BIZ_TOTAL} label={BIZ_STEPS[step - 1]} />
 
-      {/* Step 1 — Business basics */}
+      {/* Step 1 — Identity & consent (legal requirement) */}
       {step === 1 && (
-        <StepCard onNext={step1} errors={errors}>
+        <ConsentStep
+          data={d.consent}
+          onChange={upConsent}
+          onNext={step1}
+          errors={errors}
+          roleLabel="business"
+        />
+      )}
+
+      {/* Step 2 — Business basics */}
+      {step === 2 && (
+        <StepCard onNext={step2} onBack={goBack} errors={errors}>
           <div className="step-heading">Tell us about your business</div>
           <div className="field">
             <label className="label" htmlFor="b-name">Business name <span className="req">*</span></label>
@@ -565,9 +733,9 @@ function BusinessWizard({ phone, idToken, onDone }: { phone: string; idToken: st
         </StepCard>
       )}
 
-      {/* Step 2 — Location */}
-      {step === 2 && (
-        <StepCard onNext={step2} onBack={goBack} errors={errors}>
+      {/* Step 3 — Location */}
+      {step === 3 && (
+        <StepCard onNext={step3} onBack={goBack} errors={errors}>
           <div className="step-heading">Where is your business?</div>
           <div className="field">
             <label className="label" htmlFor="b-area">Area / tehsil <span className="req">*</span></label>
@@ -592,16 +760,13 @@ function BusinessWizard({ phone, idToken, onDone }: { phone: string; idToken: st
         </StepCard>
       )}
 
-      {/* Step 3 — Contact & hours */}
-      {step === 3 && (
-        <StepCard onNext={step3} onBack={goBack} errors={errors}>
+      {/* Step 4 — Contact & hours */}
+      {step === 4 && (
+        <StepCard onNext={step4} onBack={goBack} errors={errors}>
           <div className="step-heading">Contact & operating hours</div>
-          <p className="muted" style={{ marginBottom: 12 }}>Verified phone: <strong>+91 {phone}</strong></p>
-          <div className="field">
-            <label className="label" htmlFor="b-owner">Owner / manager name <span className="req">*</span></label>
-            <input id="b-owner" className="input" maxLength={80} value={d.owner}
-              onChange={(e) => up('owner', e.target.value)} autoComplete="name" placeholder="Your full name" />
-          </div>
+          <p className="muted" style={{ marginBottom: 12 }}>
+            Verified phone: <strong>+91 {phone}</strong> · Owner: <strong>{d.consent.name}</strong>
+          </p>
           <div className="field">
             <label className="label" htmlFor="b-email">Business email <span className="muted">(optional)</span></label>
             <input id="b-email" className="input" type="email" maxLength={100} value={d.email}
@@ -620,9 +785,9 @@ function BusinessWizard({ phone, idToken, onDone }: { phone: string; idToken: st
         </StepCard>
       )}
 
-      {/* Step 4 — Delivery & photos */}
-      {step === 4 && (
-        <StepCard onNext={step4} onBack={goBack} errors={errors}>
+      {/* Step 5 — Delivery & photos */}
+      {step === 5 && (
+        <StepCard onNext={step5} onBack={goBack} errors={errors}>
           <div className="step-heading">Delivery options & photos</div>
 
           <fieldset className="field" style={{ border: 'none' }}>
@@ -650,17 +815,17 @@ function BusinessWizard({ phone, idToken, onDone }: { phone: string; idToken: st
         </StepCard>
       )}
 
-      {/* Step 5 — Review & submit */}
-      {step === 5 && (
-        <StepCard onNext={step5} onBack={goBack} nextLabel={`List my business — ${formatInr(PLANS.business.priceInr)} + GST/month`} errors={errors}>
+      {/* Step 6 — Review & submit */}
+      {step === 6 && (
+        <StepCard onNext={step6} onBack={goBack} nextLabel={`List my business — ${formatInr(PLANS.business.priceInr)} + GST/month`} errors={errors}>
           <div className="step-heading">Review your details</div>
 
           <div className="wizard-review">
+            <ReviewRow label="Owner" value={d.consent.name} />
             <ReviewRow label="Business" value={d.name} />
             <ReviewRow label="Category" value={d.catSlug === OTHER_SLUG ? d.otherLabel : `${d.catSlug ?? ''}${d.subSlug ? ' → ' + d.subSlug : ''}`} />
             <ReviewRow label="Location" value={`${d.area}, ${d.pin}${d.street ? ' · ' + d.street : ''}`} />
             <ReviewRow label="Phone" value={`+91 ${phone}`} />
-            <ReviewRow label="Owner" value={d.owner} />
             {d.email && <ReviewRow label="Email" value={d.email} />}
             <ReviewRow label="Hours" value={d.hours} />
             <ReviewRow label="Delivery" value={d.delivery.map((o) => DELIVERY_LABELS[o]).join(', ') || '—'} />
@@ -673,9 +838,21 @@ function BusinessWizard({ phone, idToken, onDone }: { phone: string; idToken: st
             <p className="muted" style={{ fontSize: 12.5 }}>Unlimited listings · 0% commission · 0% on sales ever</p>
           </div>
 
-          <Terms checked={d.terms} onChange={(v) => up('terms', v)}>
-            All transactions are directly between buyers and sellers.
-          </Terms>
+          {/* Consent already captured in step 1 — show confirmation, no second checkbox */}
+          <div style={{
+            background: 'var(--surface-2, #f0fdf4)',
+            border: '1px solid #bbf7d0',
+            borderRadius: 8,
+            padding: '10px 14px',
+            fontSize: 12.5,
+            color: '#166534',
+            display: 'flex',
+            gap: 8,
+            alignItems: 'flex-start',
+          }}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, marginTop: 1 }} aria-hidden="true"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+            <span>Terms of Service &amp; Privacy Policy accepted · consent recorded</span>
+          </div>
         </StepCard>
       )}
     </div>
@@ -684,30 +861,62 @@ function BusinessWizard({ phone, idToken, onDone }: { phone: string; idToken: st
 
 /* ── Customer wizard ─────────────────────────────────── */
 
-type CustData = { name: string; email: string; area: string; pin: string; terms: boolean }
-const CUST_STEPS = ['Your details', 'Your location', 'Start trial']
+type CustData = {
+  consent: ConsentData
+  email: string
+  area: string
+  pin: string
+}
+// Step 1 = Identity & consent, Steps 2–4 = profile fields
+const CUST_STEPS = ['Identity & consent', 'Your details', 'Your location', 'Start trial']
 const CUST_TOTAL = CUST_STEPS.length
 
 function CustomerWizard({ phone, idToken, onDone }: { phone: string; idToken: string; onDone: () => void }) {
   const [step, setStep] = useState(1)
-  const [d, setD] = useState<CustData>({ name: '', email: '', area: '', pin: '', terms: false })
+  const [d, setD] = useState<CustData>({
+    consent: { name: '', dob: '', terms: false, privacy: false },
+    email: '', area: '', pin: '',
+  })
   const [errors, setErrors] = useState<string[]>([])
   const plan = PLANS.customer
 
   function up<K extends keyof CustData>(k: K, v: CustData[K]) { setD((s) => ({ ...s, [k]: v })) }
+  function upConsent<K extends keyof ConsentData>(k: K, v: ConsentData[K]) {
+    setD((s) => ({ ...s, consent: { ...s.consent, [k]: v } }))
+  }
   function goNext() { setErrors([]); setStep((s) => s + 1) }
   function goBack() { setErrors([]); setStep((s) => s - 1) }
 
+  /* Step 1 — Identity & consent */
   function step1(e: FormEvent) {
     e.preventDefault()
     const errs: string[] = []
-    if (d.name.trim().length < 2) errs.push('Enter your name.')
+    if (d.consent.name.trim().length < 2) errs.push('Enter your full legal name.')
+    if (!d.consent.dob) errs.push('Enter your date of birth.')
+    else {
+      const dob = new Date(d.consent.dob)
+      const today = new Date()
+      const age = today.getFullYear() - dob.getFullYear()
+        - (today < new Date(today.getFullYear(), dob.getMonth(), dob.getDate()) ? 1 : 0)
+      if (age < 18) errs.push('You must be 18 or older to register.')
+    }
+    if (!d.consent.terms) errs.push('You must accept the Terms of Service to continue.')
+    if (!d.consent.privacy) errs.push('You must accept the Privacy Policy to continue.')
+    setErrors(errs)
+    if (!errs.length) goNext()
+  }
+
+  /* Step 2 — Your details */
+  function step2(e: FormEvent) {
+    e.preventDefault()
+    const errs: string[] = []
     if (d.email && !EMAIL_RE.test(d.email)) errs.push('Enter a valid email or leave it blank.')
     setErrors(errs)
     if (!errs.length) goNext()
   }
 
-  function step2(e: FormEvent) {
+  /* Step 3 — Location */
+  function step3(e: FormEvent) {
     e.preventDefault()
     const errs: string[] = []
     if (!d.area) errs.push('Choose your area.')
@@ -716,9 +925,9 @@ function CustomerWizard({ phone, idToken, onDone }: { phone: string; idToken: st
     if (!errs.length) goNext()
   }
 
-  function step3(e: FormEvent) {
+  /* Step 4 — Review & start trial */
+  function step4(e: FormEvent) {
     e.preventDefault()
-    if (!d.terms) { setErrors(['Accept the terms to continue.']); return }
     setErrors([])
     submitCustomer()
   }
@@ -726,7 +935,7 @@ function CustomerWizard({ phone, idToken, onDone }: { phone: string; idToken: st
   async function submitCustomer() {
     setErrors(['Submitting…'])
     try {
-      // 1 — Save customer profile
+      // 1 — Save customer profile (consent fields sent here; stored server-side)
       const res = await fetch('/api/customers', {
         method: 'POST',
         headers: {
@@ -734,7 +943,13 @@ function CustomerWizard({ phone, idToken, onDone }: { phone: string; idToken: st
           'Authorization': `Bearer ${idToken}`,
         },
         body: JSON.stringify({
-          fullName: d.name.trim(),
+          // Consent & identity (legal requirement)
+          fullName:       d.consent.name.trim(),
+          dateOfBirth:    d.consent.dob,
+          termsAccepted:  true,
+          privacyAccepted: true,
+          termsVersion:   TERMS_VERSION,
+          // Profile fields
           email:    d.email.trim() || undefined,
           area:     d.area || undefined,
           city:     d.area || 'Kurukshetra',
@@ -776,25 +991,33 @@ function CustomerWizard({ phone, idToken, onDone }: { phone: string; idToken: st
     <div>
       <ProgressBar current={step} total={CUST_TOTAL} label={CUST_STEPS[step - 1]} />
 
+      {/* Step 1 — Identity & consent (legal requirement) */}
       {step === 1 && (
-        <StepCard onNext={step1} errors={errors}>
-          <div className="step-heading">Tell us your name</div>
-          <p className="muted" style={{ marginBottom: 12 }}>Verified phone: <strong>+91 {phone}</strong></p>
-          <div className="field">
-            <label className="label" htmlFor="c-name">Your full name <span className="req">*</span></label>
-            <input id="c-name" className="input" maxLength={80} value={d.name}
-              onChange={(e) => up('name', e.target.value)} autoComplete="name" autoFocus placeholder="e.g. Ankit Sharma" />
-          </div>
-          <div className="field">
-            <label className="label" htmlFor="c-email">Email <span className="muted">(optional — for order receipts)</span></label>
-            <input id="c-email" className="input" type="email" maxLength={100} value={d.email}
-              onChange={(e) => up('email', e.target.value)} autoComplete="email" placeholder="ankit@example.com" />
-          </div>
-        </StepCard>
+        <ConsentStep
+          data={d.consent}
+          onChange={upConsent}
+          onNext={step1}
+          errors={errors}
+          roleLabel="customer"
+        />
       )}
 
       {step === 2 && (
         <StepCard onNext={step2} onBack={goBack} errors={errors}>
+          <div className="step-heading">Tell us about you</div>
+          <p className="muted" style={{ marginBottom: 12 }}>
+            Verified phone: <strong>+91 {phone}</strong> · Name: <strong>{d.consent.name}</strong>
+          </p>
+          <div className="field">
+            <label className="label" htmlFor="c-email">Email <span className="muted">(optional — for order receipts)</span></label>
+            <input id="c-email" className="input" type="email" maxLength={100} value={d.email}
+              onChange={(e) => up('email', e.target.value)} autoComplete="email" placeholder="ankit@example.com" autoFocus />
+          </div>
+        </StepCard>
+      )}
+
+      {step === 3 && (
+        <StepCard onNext={step3} onBack={goBack} errors={errors}>
           <div className="step-heading">Where are you based?</div>
           <p className="muted" style={{ marginBottom: 12 }}>Helps us show businesses near you first.</p>
           <div className="field">
@@ -809,8 +1032,8 @@ function CustomerWizard({ phone, idToken, onDone }: { phone: string; idToken: st
         </StepCard>
       )}
 
-      {step === 3 && (
-        <StepCard onNext={step3} onBack={goBack} nextLabel={`Start ${plan.trialDays}-day free trial`} errors={errors}>
+      {step === 4 && (
+        <StepCard onNext={step4} onBack={goBack} nextLabel={`Start ${plan.trialDays}-day free trial`} errors={errors}>
           <div className="step-heading">Your free trial</div>
 
           <div className="wizard-plan-box">
@@ -822,15 +1045,27 @@ function CustomerWizard({ phone, idToken, onDone }: { phone: string; idToken: st
           </div>
 
           <div className="wizard-review">
-            <ReviewRow label="Name" value={d.name} />
+            <ReviewRow label="Name" value={d.consent.name} />
             <ReviewRow label="Phone" value={`+91 ${phone}`} />
             {d.email && <ReviewRow label="Email" value={d.email} />}
             <ReviewRow label="Area" value={d.area} />
           </div>
 
-          <Terms checked={d.terms} onChange={(v) => up('terms', v)}>
-            All payments are made directly to businesses.
-          </Terms>
+          {/* Consent already captured in step 1 — show confirmation */}
+          <div style={{
+            background: 'var(--surface-2, #f0fdf4)',
+            border: '1px solid #bbf7d0',
+            borderRadius: 8,
+            padding: '10px 14px',
+            fontSize: 12.5,
+            color: '#166534',
+            display: 'flex',
+            gap: 8,
+            alignItems: 'flex-start',
+          }}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, marginTop: 1 }} aria-hidden="true"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+            <span>Terms of Service &amp; Privacy Policy accepted · consent recorded</span>
+          </div>
         </StepCard>
       )}
     </div>
@@ -840,38 +1075,56 @@ function CustomerWizard({ phone, idToken, onDone }: { phone: string; idToken: st
 /* ── Driver wizard ───────────────────────────────────── */
 
 type DriverData = {
-  name: string
+  // Step 1 — consent
+  consent: ConsentData
+  // Steps 2–5 — profile data
   vehicle: string
   regNo: string
   licence: string
   idType: string
   idLast4: string
   area: string
-  terms: boolean
 }
-const DRV_STEPS = ['Personal details', 'Vehicle details', 'ID verification', 'Working area']
+// Step 1 = Identity & consent, Steps 2–5 = profile fields
+const DRV_STEPS = ['Identity & consent', 'Vehicle details', 'ID verification', 'Working area & review']
 const DRV_TOTAL = DRV_STEPS.length
 
 function DriverWizard({ phone, idToken, onDone }: { phone: string; idToken: string; onDone: () => void }) {
   const [step, setStep] = useState(1)
   const [d, setD] = useState<DriverData>({
-    name: '', vehicle: DELIVERY_VEHICLES[0].id, regNo: '', licence: '',
-    idType: 'Aadhaar', idLast4: '', area: '', terms: false,
+    consent: { name: '', dob: '', terms: false, privacy: false },
+    vehicle: DELIVERY_VEHICLES[0].id, regNo: '', licence: '',
+    idType: 'Aadhaar', idLast4: '', area: '',
   })
   const [errors, setErrors] = useState<string[]>([])
 
   function up<K extends keyof DriverData>(k: K, v: DriverData[K]) { setD((s) => ({ ...s, [k]: v })) }
+  function upConsent<K extends keyof ConsentData>(k: K, v: ConsentData[K]) {
+    setD((s) => ({ ...s, consent: { ...s.consent, [k]: v } }))
+  }
   function goNext() { setErrors([]); setStep((s) => s + 1) }
   function goBack() { setErrors([]); setStep((s) => s - 1) }
 
+  /* Step 1 — Identity & consent */
   function step1(e: FormEvent) {
     e.preventDefault()
     const errs: string[] = []
-    if (d.name.trim().length < 2) errs.push('Enter your full name (as on driving licence).')
+    if (d.consent.name.trim().length < 2) errs.push('Enter your full legal name (as on driving licence).')
+    if (!d.consent.dob) errs.push('Enter your date of birth.')
+    else {
+      const dob = new Date(d.consent.dob)
+      const today = new Date()
+      const age = today.getFullYear() - dob.getFullYear()
+        - (today < new Date(today.getFullYear(), dob.getMonth(), dob.getDate()) ? 1 : 0)
+      if (age < 18) errs.push('You must be 18 or older to register.')
+    }
+    if (!d.consent.terms) errs.push('You must accept the Terms of Service to continue.')
+    if (!d.consent.privacy) errs.push('You must accept the Privacy Policy to continue.')
     setErrors(errs)
     if (!errs.length) goNext()
   }
 
+  /* Step 2 — Vehicle details */
   function step2(e: FormEvent) {
     e.preventDefault()
     const errs: string[] = []
@@ -881,6 +1134,7 @@ function DriverWizard({ phone, idToken, onDone }: { phone: string; idToken: stri
     if (!errs.length) goNext()
   }
 
+  /* Step 3 — ID verification */
   function step3(e: FormEvent) {
     e.preventDefault()
     const errs: string[] = []
@@ -889,11 +1143,11 @@ function DriverWizard({ phone, idToken, onDone }: { phone: string; idToken: stri
     if (!errs.length) goNext()
   }
 
+  /* Step 4 — Working area & review */
   function step4(e: FormEvent) {
     e.preventDefault()
     const errs: string[] = []
     if (!d.area) errs.push('Choose the area you mostly work in.')
-    if (!d.terms) errs.push('Accept the terms to continue.')
     setErrors(errs)
     if (!errs.length) submitDriver()
   }
@@ -908,7 +1162,13 @@ function DriverWizard({ phone, idToken, onDone }: { phone: string; idToken: stri
           'Authorization': `Bearer ${idToken}`,
         },
         body: JSON.stringify({
-          fullName:      d.name.trim(),
+          // Consent & identity (legal requirement)
+          fullName:       d.consent.name.trim(),
+          dateOfBirth:    d.consent.dob,
+          termsAccepted:  true,
+          privacyAccepted: true,
+          termsVersion:   TERMS_VERSION,
+          // Profile fields
           vehicleType:   d.vehicle,
           vehicleNumber: d.regNo.trim(),
           licenseNumber: d.licence.trim() || undefined,
@@ -932,21 +1192,23 @@ function DriverWizard({ phone, idToken, onDone }: { phone: string; idToken: stri
     <div>
       <ProgressBar current={step} total={DRV_TOTAL} label={DRV_STEPS[step - 1]} />
 
+      {/* Step 1 — Identity & consent (legal requirement) */}
       {step === 1 && (
-        <StepCard onNext={step1} errors={errors}>
-          <div className="step-heading">Your personal details</div>
-          <p className="muted" style={{ marginBottom: 12 }}>Verified phone: <strong>+91 {phone}</strong></p>
-          <div className="field">
-            <label className="label" htmlFor="d-name">Full name (as on driving licence) <span className="req">*</span></label>
-            <input id="d-name" className="input" maxLength={80} value={d.name}
-              onChange={(e) => up('name', e.target.value)} autoComplete="name" autoFocus placeholder="e.g. Rajesh Kumar" />
-          </div>
-        </StepCard>
+        <ConsentStep
+          data={d.consent}
+          onChange={upConsent}
+          onNext={step1}
+          errors={errors}
+          roleLabel="driver"
+        />
       )}
 
       {step === 2 && (
         <StepCard onNext={step2} onBack={goBack} errors={errors}>
           <div className="step-heading">Your vehicle details</div>
+          <p className="muted" style={{ marginBottom: 12 }}>
+            Verified phone: <strong>+91 {phone}</strong> · Driver: <strong>{d.consent.name}</strong>
+          </p>
           <div className="field">
             <label className="label" htmlFor="d-vehicle">Vehicle type <span className="req">*</span></label>
             <select id="d-vehicle" className="select" value={d.vehicle}
@@ -961,7 +1223,7 @@ function DriverWizard({ phone, idToken, onDone }: { phone: string; idToken: stri
           <div className="field">
             <label className="label" htmlFor="d-reg">Vehicle registration number <span className="req">*</span></label>
             <input id="d-reg" className="input" maxLength={13} value={d.regNo}
-              onChange={(e) => up('regNo', e.target.value.toUpperCase())} placeholder="HR07 AB 1234" />
+              onChange={(e) => up('regNo', e.target.value.toUpperCase())} placeholder="HR07 AB 1234" autoFocus />
           </div>
           <div className="field">
             <label className="label" htmlFor="d-lic">Driving licence number <span className="req">*</span></label>
@@ -997,10 +1259,10 @@ function DriverWizard({ phone, idToken, onDone }: { phone: string; idToken: stri
 
       {step === 4 && (
         <StepCard onNext={step4} onBack={goBack} nextLabel="Apply as driver partner" errors={errors}>
-          <div className="step-heading">Your working area</div>
+          <div className="step-heading">Working area &amp; review</div>
 
           <div className="wizard-review">
-            <ReviewRow label="Name" value={d.name} />
+            <ReviewRow label="Name" value={d.consent.name} />
             <ReviewRow label="Phone" value={`+91 ${phone}`} />
             <ReviewRow label="Vehicle" value={`${d.vehicle} · ${d.regNo}`} />
             <ReviewRow label="Licence" value={d.licence} />
@@ -1012,9 +1274,22 @@ function DriverWizard({ phone, idToken, onDone }: { phone: string; idToken: stri
             <AreaSelect id="d-area" value={d.area} onChange={(v) => up('area', v)} placeholder="Select your primary area" />
           </div>
 
-          <Terms checked={d.terms} onChange={(v) => up('terms', v)}>
-            I am an independent partner, not an employee of My KKR, and I collect payment directly from customers.
-          </Terms>
+          {/* Consent already captured in step 1 — show confirmation */}
+          <div style={{
+            background: 'var(--surface-2, #f0fdf4)',
+            border: '1px solid #bbf7d0',
+            borderRadius: 8,
+            padding: '10px 14px',
+            fontSize: 12.5,
+            color: '#166534',
+            display: 'flex',
+            gap: 8,
+            alignItems: 'flex-start',
+            marginTop: 16,
+          }}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, marginTop: 1 }} aria-hidden="true"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+            <span>Terms of Service &amp; Privacy Policy accepted · consent recorded · I am an independent partner, not an employee of My KKR.</span>
+          </div>
         </StepCard>
       )}
     </div>
